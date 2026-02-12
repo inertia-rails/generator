@@ -1,0 +1,49 @@
+name: Lint JS
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  lint_js:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+<% if package_manager == "bun" %>
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+<% else %>
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+<% unless package_manager == "npm" %>
+          cache: <%= package_manager %>
+<% end %>
+<% if package_manager == "pnpm" %>
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+<% end %>
+<% end %>
+
+      - name: Install JS dependencies
+        run: <%= js_ci_install_cmd %>
+<% if use_eslint %>
+
+      - name: Lint JavaScript
+        run: <%= package_manager %> run lint
+
+      - name: Check formatting
+        run: <%= package_manager %> run format
+<% end %>
+<% if use_typescript %>
+
+      - name: Type check
+        run: <%= package_manager %> run check
+<% end %>

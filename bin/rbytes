@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH.unshift File.expand_path("../lib", __dir__)
+require "ruby_bytes_ext"
+require "ruby_bytes/cli"
+
+begin
+  cli = RubyBytes::CLI.new
+  cli.run(*ARGV)
+rescue => e
+  raise e if $DEBUG
+  warn e.message
+  warn e.backtrace.join("\n") if $DEBUG
+  exit 1
+end

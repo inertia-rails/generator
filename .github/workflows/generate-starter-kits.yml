@@ -1,0 +1,93 @@
+name: Generate Starter Kits
+
+on:
+  push:
+    tags:
+      - v*
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    env:
+      BUNDLE_JOBS: 4
+      BUNDLE_RETRY: 3
+    strategy:
+      fail-fast: false
+      matrix:
+        framework: [react, vue, svelte]
+    steps:
+    - uses: actions/checkout@v6
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: "3.4"
+        bundler-cache: true
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "22"
+
+    - name: Generate ${{ matrix.framework }} starter kit
+      run: bundle exec rake starter:${{ matrix.framework }}
+
+    - name: Add README
+      run: |
+        cat > tmp/${{ matrix.framework }}-starter-kit/README.md << 'READMEEOF'
+        # Inertia Rails Starter Kit (${{ matrix.framework }})
+
+        A full-featured Rails + Inertia.js starter application with ${{ matrix.framework }}, TypeScript, Tailwind CSS, and shadcn/ui.
+
+        > This repository is **auto-generated** from the [Inertia Rails Generator](https://github.com/inertia-rails/generator).
+        > To report issues or contribute, please use the [generator repo](https://github.com/inertia-rails/generator/issues).
+
+        ## Getting Started
+
+        ```sh
+        git clone https://github.com/inertia-rails/${{ matrix.framework }}-starter-kit.git
+        cd ${{ matrix.framework }}-starter-kit
+        bundle install
+        npm install
+        rails db:migrate
+        bin/dev
+        ```
+
+        Visit [http://localhost:3000](http://localhost:3000) to see the app.
+
+        ## What's Included
+
+        - **Authentication** — register, login, forgot/reset password, email verification
+        - **Dashboard** — with sidebar and header layout variants
+        - **Settings** — profile, password, email, appearance (dark mode), active sessions
+        - **TypeScript** — end-to-end type safety with Typelizer
+        - **Tailwind CSS v4** — utility-first styling
+        - **shadcn/ui** — accessible UI components
+        - **SSR** — server-side rendering with Vite Ruby
+        - **ESLint + Prettier** — code linting and formatting
+        - **Typelizer** — typed route helpers and serializer types
+
+        ## Generate Your Own
+
+        Prefer to customize options? Use the generator directly:
+
+        ```sh
+        rails new myapp -m https://inertia-rails.dev
+        ```
+
+        See the [generator README](https://github.com/inertia-rails/generator) for all available options.
+
+        ## License
+
+        MIT
+        READMEEOF
+
+    - name: Push to starter kit repo
+      env:
+        GH_TOKEN: ${{ secrets.STARTER_KIT_TOKEN }}
+      run: |
+        cd tmp/${{ matrix.framework }}-starter-kit
+        git init
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add -A
+        git commit -m "Generate from ${{ github.ref_name }}"
+        git remote add origin https://x-access-token:${GH_TOKEN}@github.com/inertia-rails/${{ matrix.framework }}-starter-kit.git
+        git push --force origin HEAD:main

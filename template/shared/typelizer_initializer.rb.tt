@@ -1,0 +1,16 @@
+# frozen_string_literal: true
+
+Typelizer.configure do |config|
+  config.verbatim_module_syntax = true
+<% if use_typelizer %>
+  config.routes.enabled = true
+  config.routes.output_dir = Rails.root.join("<%= js_destination_path %>/routes")
+  config.routes.exclude = [/^\/(up|rails)/]
+<% unless use_typescript %>
+  config.routes.format = :js
+<% end %>
+<% end %>
+<% if use_alba && use_typescript %>
+  config.output_dir = Rails.root.join("<%= js_destination_path %>/types/serializers")
+<% end %>
+end

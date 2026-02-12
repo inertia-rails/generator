@@ -1,0 +1,58 @@
+<% if use_typescript %>
+import { createInertiaApp } from '@inertiajs/vue3'
+import createServer from '@inertiajs/vue3/server'
+import type { DefineComponent } from 'vue'
+import { createSSRApp, h } from 'vue'
+import { renderToString } from 'vue/server-renderer'
+
+createServer(
+  (page) =>
+    createInertiaApp({
+      page,
+      render: renderToString,
+      // title: (title) => (title ? `${title} - App` : 'App'),
+
+      resolve: (name) => {
+        const pages = import.meta.glob<DefineComponent>('../pages/**/*.vue', {
+          eager: true,
+        })
+        const page = pages[`../pages/${name}.vue`]
+        if (!page) {
+          console.error(`Missing Inertia page component: '${name}.vue'`)
+        }
+        return page
+      },
+
+      setup: ({ App, props, plugin }) =>
+        createSSRApp({ render: () => h(App, props) }).use(plugin),
+    }),
+)
+<% else %>
+import { createInertiaApp } from '@inertiajs/vue3'
+import createServer from '@inertiajs/vue3/server'
+import { createSSRApp, h } from 'vue'
+import { renderToString } from 'vue/server-renderer'
+
+createServer(
+  (page) =>
+    createInertiaApp({
+      page,
+      render: renderToString,
+      // title: (title) => (title ? `${title} - App` : 'App'),
+
+      resolve: (name) => {
+        const pages = import.meta.glob('../pages/**/*.vue', {
+          eager: true,
+        })
+        const page = pages[`../pages/${name}.vue`]
+        if (!page) {
+          console.error(`Missing Inertia page component: '${name}.vue'`)
+        }
+        return page
+      },
+
+      setup: ({ App, props, plugin }) =>
+        createSSRApp({ render: () => h(App, props) }).use(plugin),
+    }),
+)
+<% end %>

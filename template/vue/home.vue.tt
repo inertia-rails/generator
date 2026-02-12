@@ -1,0 +1,71 @@
+<template>
+  <Head title="Welcome" />
+<% if use_tailwind %>
+  <div class="flex min-h-screen items-center justify-center bg-gray-50">
+    <div class="mx-auto max-w-md space-y-6 p-8 text-center">
+      <h1 class="text-4xl font-bold text-gray-900">Welcome to Inertia Rails</h1>
+      <p class="text-lg text-gray-600">
+        Your app is ready. Start building something amazing.
+      </p>
+      <div class="space-y-2 text-sm text-gray-500">
+        <p>Rails {{ rails_version }} &middot; Ruby {{ ruby_version }}</p>
+        <p>Inertia Rails {{ inertia_rails_version }}</p>
+      </div>
+      <div class="pt-4">
+        <a
+          href="https://inertia-rails.dev"
+          class="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Documentation
+        </a>
+      </div>
+    </div>
+  </div>
+<% else %>
+  <div style="display: flex; min-height: 100vh; align-items: center; justify-content: center">
+    <div style="max-width: 28rem; margin: 0 auto; padding: 2rem; text-align: center">
+      <h1 style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem">Welcome to Inertia Rails</h1>
+      <p style="color: #666; margin-bottom: 1rem">
+        Your app is ready. Start building something amazing.
+      </p>
+      <p style="font-size: 0.875rem; color: #999">
+        Rails {{ rails_version }} &middot; Ruby {{ ruby_version }} &middot; Inertia Rails {{ inertia_rails_version }}
+      </p>
+      <div style="margin-top: 1.5rem">
+        <a
+          href="https://inertia-rails.dev"
+          style="padding: 0.5rem 1rem; background-color: #111; color: #fff; border-radius: 0.375rem; text-decoration: none"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Documentation
+        </a>
+      </div>
+    </div>
+  </div>
+<% end %>
+</template>
+
+<% if use_typescript %>
+<script setup lang="ts">
+import { Head } from '@inertiajs/vue3'
+
+defineProps<{
+  rails_version: string
+  ruby_version: string
+  inertia_rails_version: string
+}>()
+</script>
+<% else %>
+<script setup>
+import { Head } from '@inertiajs/vue3'
+
+defineProps({
+  rails_version: String,
+  ruby_version: String,
+  inertia_rails_version: String,
+})
+</script>
+<% end %>

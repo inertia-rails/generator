@@ -1,0 +1,119 @@
+<% if use_typescript %>
+import js from '@eslint/js'
+import svelte from 'eslint-plugin-svelte'
+import globals from 'globals'
+import ts from 'typescript-eslint'
+// eslint-disable-next-line import/extensions
+import svelteConfig from './svelte.config.js'
+import eslintConfigPrettier from "eslint-config-prettier/flat"
+import importPlugin from "eslint-plugin-import"
+
+export default ts.config(
+  js.configs.recommended,
+  ...ts.configs.recommended,
+  ...svelte.configs.recommended,
+  { ignores: [<%= eslint_ignores.map { |i| "\"#{js_destination_path}/#{i}\"" }.join(", ") %>] },
+  {
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node
+      }
+    }
+  },
+  {
+    files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        extraFileExtensions: ['.svelte'],
+        parser: ts.parser,
+        svelteConfig
+      }
+    }
+  },
+  {
+    ...importPlugin.flatConfigs.recommended,
+    ...importPlugin.flatConfigs.typescript,
+    settings: { "import/resolver": { typescript: {} } },
+    rules: {
+      "import/order": [
+        "error",
+        {
+          pathGroups: [
+            {
+              pattern: "@/**",
+              group: "external",
+              position: "after",
+            },
+          ],
+          "newlines-between": "always",
+          "named": true,
+          alphabetize: { order: "asc" },
+        },
+      ],
+      "import/first": "error",
+      "import/extensions": [
+        "error",
+        "always",
+        {
+          js: "never",
+          jsx: "never",
+          ts: "never",
+          tsx: "never",
+        },
+      ],
+      "@typescript-eslint/consistent-type-imports": "error",
+    },
+  },
+  eslintConfigPrettier,
+)
+<% else %>
+import js from '@eslint/js'
+import svelte from 'eslint-plugin-svelte'
+import globals from 'globals'
+// eslint-disable-next-line import/extensions
+import svelteConfig from './svelte.config.js'
+import eslintConfigPrettier from "eslint-config-prettier/flat"
+import importPlugin from "eslint-plugin-import"
+
+export default [
+  js.configs.recommended,
+  ...svelte.configs.recommended,
+  { ignores: [<%= eslint_ignores.map { |i| "\"#{js_destination_path}/#{i}\"" }.join(", ") %>] },
+  {
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node
+      }
+    }
+  },
+  {
+    files: ['**/*.svelte', '**/*.svelte.js'],
+    languageOptions: {
+      parserOptions: {
+        svelteConfig
+      }
+    }
+  },
+  {
+    ...importPlugin.flatConfigs.recommended,
+    languageOptions: {
+      sourceType: "module",
+    },
+    rules: {
+      "import/order": [
+        "error",
+        {
+          "newlines-between": "always",
+          "named": true,
+          alphabetize: { order: "asc" },
+        },
+      ],
+      "import/first": "error",
+    },
+  },
+  eslintConfigPrettier,
+]
+<% end %>

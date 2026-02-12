@@ -1,0 +1,41 @@
+<% if use_typescript %>
+import { createInertiaApp, type ResolvedComponent } from '@inertiajs/react'
+import createServer from '@inertiajs/react/server'
+import { createElement } from 'react'
+import ReactDOMServer from 'react-dom/server'
+
+createServer((page) =>
+  createInertiaApp({
+    page,
+    render: ReactDOMServer.renderToString,
+    // title: (title) => (title ? `${title} - App` : 'App'),
+    resolve: (name) => {
+      const pages = import.meta.glob<ResolvedComponent>('../pages/**/*.tsx', {
+        eager: true,
+      })
+      return pages[`../pages/${name}.tsx`]
+    },
+    setup: ({ App, props }) => createElement(App, props),
+  }),
+)
+<% else %>
+import { createInertiaApp } from '@inertiajs/react'
+import createServer from '@inertiajs/react/server'
+import { createElement } from 'react'
+import ReactDOMServer from 'react-dom/server'
+
+createServer((page) =>
+  createInertiaApp({
+    page,
+    render: ReactDOMServer.renderToString,
+    // title: (title) => (title ? `${title} - App` : 'App'),
+    resolve: (name) => {
+      const pages = import.meta.glob('../pages/**/*.jsx', {
+        eager: true,
+      })
+      return pages[`../pages/${name}.jsx`]
+    },
+    setup: ({ App, props }) => createElement(App, props),
+  }),
+)
+<% end %>

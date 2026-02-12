@@ -1,0 +1,15 @@
+import { createInertiaApp } from '@inertiajs/react'
+
+void createInertiaApp({
+  strictMode: true,
+  pages: '../pages',
+  defaults: {
+    form: {
+      forceIndicesArrayFormatInFormData: false,
+      withAllErrors: true,
+    },
+    visitOptions: () => ({
+      queryStringArrayFormat: 'brackets',
+    }),
+  },
+})

@@ -1,0 +1,53 @@
+name: Test
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+  schedule:
+    - cron: "10 4 * * */2"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      BUNDLE_JOBS: 4
+      BUNDLE_RETRY: 3
+      CI: true
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ["3.2", "3.3", "3.4", "4.0"]
+    steps:
+    - uses: actions/checkout@v6
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true
+    - name: Compile and test
+      run: bundle exec rake compile test:isolated
+    - name: Lint
+      run: bundle exec standardrb
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: test
+    env:
+      BUNDLE_JOBS: 4
+      BUNDLE_RETRY: 3
+      CI: true
+    steps:
+    - uses: actions/checkout@v6
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: "3.4"
+        bundler-cache: true
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "22"
+    - name: Install Rails
+      run: gem install railties
+    - name: Run e2e tests
+      run: bundle exec rake test:e2e
+      timeout-minutes: 15

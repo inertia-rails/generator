@@ -1,0 +1,14 @@
+import { createInertiaApp } from '@inertiajs/vue3'
+
+createInertiaApp({
+  pages: '../pages',
+  defaults: {
+    form: {
+      forceIndicesArrayFormatInFormData: false,
+      withAllErrors: true,
+    },
+    visitOptions: () => ({
+      queryStringArrayFormat: 'brackets',
+    }),
+  },
+})
