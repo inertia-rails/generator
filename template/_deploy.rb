@@ -11,7 +11,8 @@ end
 # ─── Generate Dockerfile ─────────────────────────────────────────────
 
 if File.exist?("Dockerfile")
-  ruby_version = File.exist?(".ruby-version") ? File.read(".ruby-version").strip : RUBY_VERSION
+  ruby_version = File.exist?(".ruby-version") ? File.read(".ruby-version").strip.delete_prefix("ruby-") : Gem.ruby_version.to_s
+  node_version = ENV.fetch("NODE_VERSION") { `node --version`[/\d+\.\d+\.\d+/] || "22.21.1" }
 
   db_base_pkg = case db_adapter
     when "postgresql" then "postgresql-client"

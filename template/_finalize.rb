@@ -91,9 +91,7 @@ else
   end
   ssr_entry_full = "#{js_destination_path}/#{ssr_entrypoint}"
 
-  rails_opts = "ssr: '#{ssr_entrypoint}'"
-  inertia_opts = "{ ssr: '#{ssr_entry_full}' }"
-  vite_calls = ["rails({ #{rails_opts} })", "inertia(#{inertia_opts})"]
+  vite_calls = ["rails()", "inertia({ ssr: '#{ssr_entry_full}' })"]
 
   vite_plugins.each do |plugin|
     vite_imports << plugin[:import]

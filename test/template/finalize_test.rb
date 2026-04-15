@@ -78,7 +78,7 @@ class FinalizeViteConfigTest < GeneratorTestCase
       assert_file "vite.config.js"
       assert_file_contains "vite.config.js", "defineConfig(({ command })"
       assert_file_contains "vite.config.js", "noExternal"
-      assert_file_contains "vite.config.js", "ssr: 'entrypoints/inertia.jsx'"
+      assert_file_contains "vite.config.js", "ssr: 'app/javascript/entrypoints/inertia.jsx'"
     end
   end
 

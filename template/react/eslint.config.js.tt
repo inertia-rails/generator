@@ -65,6 +65,7 @@ export default [
         },
       ],
       "@typescript-eslint/consistent-type-imports": "error",
+      "react/prop-types": "off",
     },
   },
   {
@@ -113,6 +114,7 @@ export default [
         },
       ],
       "import/first": "error",
+      "react/prop-types": "off",
     },
   },
 ]
