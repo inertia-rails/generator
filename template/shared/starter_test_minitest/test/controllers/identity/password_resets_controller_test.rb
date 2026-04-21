@@ -12,7 +12,7 @@ class Identity::PasswordResetsControllerTest < ActionDispatch::IntegrationTest
 
   test "sends password reset email for verified user" do
     assert_enqueued_emails 1 do
-      post identity_password_reset_path, params: {email: users(:one).email}
+      post identity_password_reset_path, params: { email: users(:one).email }
     end
     assert_redirected_to sign_in_path
   end
@@ -20,7 +20,7 @@ class Identity::PasswordResetsControllerTest < ActionDispatch::IntegrationTest
   test "rejects password reset for unverified user" do
     users(:one).update!(verified: false)
     assert_no_enqueued_emails do
-      post identity_password_reset_path, params: {email: users(:one).email}
+      post identity_password_reset_path, params: { email: users(:one).email }
     end
     assert_redirected_to new_identity_password_reset_path
   end

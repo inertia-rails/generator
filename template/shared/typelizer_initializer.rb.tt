@@ -5,7 +5,7 @@ Typelizer.configure do |config|
 <% if use_typelizer %>
   config.routes.enabled = true
   config.routes.output_dir = Rails.root.join("<%= js_destination_path %>/routes")
-  config.routes.exclude = [/^\/(up|rails)/]
+  config.routes.exclude = [ /^\/(up|rails)/ ]
 <% unless use_typescript %>
   config.routes.format = :js
 <% end %>

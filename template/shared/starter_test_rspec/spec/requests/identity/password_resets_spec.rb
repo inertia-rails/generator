@@ -15,7 +15,7 @@ RSpec.describe "Identity::PasswordResets", type: :request do
   describe "POST /identity/password_reset" do
     it "sends password reset email for verified user" do
       expect {
-        post identity_password_reset_path, params: {email: users(:one).email}
+        post identity_password_reset_path, params: { email: users(:one).email }
       }.to have_enqueued_mail(UserMailer, :password_reset)
       expect(response).to redirect_to(sign_in_path)
     end
@@ -23,7 +23,7 @@ RSpec.describe "Identity::PasswordResets", type: :request do
     it "rejects password reset for unverified user" do
       users(:one).update!(verified: false)
       expect {
-        post identity_password_reset_path, params: {email: users(:one).email}
+        post identity_password_reset_path, params: { email: users(:one).email }
       }.not_to have_enqueued_mail(UserMailer, :password_reset)
       expect(response).to redirect_to(new_identity_password_reset_path)
     end

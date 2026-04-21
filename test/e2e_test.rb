@@ -217,6 +217,12 @@ class E2eTest < Minitest::Test
       assert st.success?, "npm run format failed for #{name}:\n#{tail("#{out}\n#{err}")}"
     end
 
+    # Ruby lint (Rails 8 ships rubocop-rails-omakase by default)
+    if File.exist?(File.join(app_path, "bin/rubocop"))
+      out, err, st = run_in_app(app_path, "bin/rubocop")
+      assert st.success?, "bin/rubocop failed for #{name}:\n#{tail("#{out}\n#{err}")}"
+    end
+
     # Run starter kit tests (minitest or rspec)
     if is_starter_kit
       test_fw = env.fetch("INERTIA_TEST_FRAMEWORK", "minitest")

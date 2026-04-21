@@ -1,6 +1,17 @@
 # frozen_string_literal: true
 
 module RubyBytes
+  # Upstream rbytes' `code(path)` interpolates file contents into a heredoc,
+  # producing `...end\n\n  TCODE` — the file's own `\n` plus the source `\n`
+  # before the terminator. That leaves every generated file with a trailing
+  # blank line, which breaks Rails 8's Layout/TrailingEmptyLines rubocop rule.
+  module CompilerTrimTrailingNewline
+    def code(path)
+      super.sub(/\n(\n  TCODE\n)/, '\1')
+    end
+  end
+  Compiler.prepend(CompilerTrimTrailingNewline)
+
   class Compiler
     # Generate `file` statements for every file under a source directory.
     #

@@ -5,12 +5,9 @@ if use_typelizer
 
   add_gem.("typelizer")
 
-  # Gitignore generated routes (regenerated on boot/deploy)
-  if File.exist?(".gitignore")
-    append_to_file ".gitignore", "\n# Generated Typelizer route helpers\n/#{js_destination_path}/routes/*\n"
-  end
-
-  # Exclude generated routes files from ESLint
+  # Generated routes are committed so frontend-only workflows (npm ci && npm run
+  # lint/check/build) work without Ruby. Typelizer still regenerates on boot.
+  # Exclude from ESLint since it's generated code.
   eslint_ignores << "routes/**"
 
   say "  Route helpers configured ✓", :green

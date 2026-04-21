@@ -20,13 +20,13 @@ RSpec.describe "Sessions", type: :request do
 
   describe "POST /sign_in" do
     it "signs in with valid credentials" do
-      post sign_in_path, params: {email: users(:one).email, password: "Secret1*3*5*"}
+      post sign_in_path, params: { email: users(:one).email, password: "Secret1*3*5*" }
       expect(response).to redirect_to(dashboard_path)
       expect(cookies[:session_token]).to be_present
     end
 
     it "rejects invalid credentials" do
-      post sign_in_path, params: {email: users(:one).email, password: "wrongpassword"}
+      post sign_in_path, params: { email: users(:one).email, password: "wrongpassword" }
       expect(response).to redirect_to(sign_in_path)
     end
   end
