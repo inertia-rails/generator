@@ -50,6 +50,14 @@ end
 
 post_install_commands.each { |cmd| run cmd }
 
+# ─── Re-apply files the shadcn CLI overwrites ────────────────────
+# `shadcn add sidebar` pulls its own use-mobile hook as a dependency and
+# clobbers ours. The upstream version triggers react-hooks/set-state-in-effect
+# (added in eslint-plugin-react-hooks 7.1); ours uses useSyncExternalStore.
+if use_starter_kit && framework == "react"
+  file "#{js_destination_path}/hooks/use-mobile.ts", <%= code("react/starter/hooks/use-mobile.ts") %>, force: true
+end
+
 # ─── Write vite.config ──────────────────────────────────────────────
 
 vite_plugins.uniq! { |p| [p[:import], p[:call]] }

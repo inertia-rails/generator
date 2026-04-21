@@ -43,7 +43,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   test "destroys current user with valid password" do
     sign_in users(:one)
     assert_difference "User.count", -1 do
-      delete users_path, params: {password_challenge: "Secret1*3*5*"}
+      delete users_path, params: { password_challenge: "Secret1*3*5*" }
     end
     assert_redirected_to root_path
   end
@@ -51,7 +51,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   test "rejects account deletion with wrong password" do
     sign_in users(:one)
     assert_no_difference "User.count" do
-      delete users_path, params: {password_challenge: "wrongpassword"}
+      delete users_path, params: { password_challenge: "wrongpassword" }
     end
     assert_redirected_to settings_profile_path
   end

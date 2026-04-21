@@ -17,13 +17,13 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "signs in with valid credentials" do
-    post sign_in_path, params: {email: users(:one).email, password: "Secret1*3*5*"}
+    post sign_in_path, params: { email: users(:one).email, password: "Secret1*3*5*" }
     assert_redirected_to dashboard_path
     assert cookies[:session_token].present?
   end
 
   test "rejects invalid credentials" do
-    post sign_in_path, params: {email: users(:one).email, password: "wrongpassword"}
+    post sign_in_path, params: { email: users(:one).email, password: "wrongpassword" }
     assert_redirected_to sign_in_path
   end
 

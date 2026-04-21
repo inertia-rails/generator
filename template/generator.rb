@@ -77,7 +77,7 @@ add_gem = ->(name, comment: nil, group: nil, github: nil, branch: nil) {
   entry += ", branch: \"#{branch}\"" if branch
   if group
     groups = Array(group).map(&:inspect).join(", ")
-    entry += ", group: [#{groups}]"
+    entry += ", group: [ #{groups} ]"
   end
   entry += " # #{comment}" if comment
   append_to_file "Gemfile", "#{entry}\n"

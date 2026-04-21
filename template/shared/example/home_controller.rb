@@ -5,7 +5,7 @@ class HomeController < InertiaController
     render inertia: {
       rails_version: Rails.version,
       ruby_version: RUBY_DESCRIPTION,
-      inertia_rails_version: InertiaRails::VERSION,
+      inertia_rails_version: InertiaRails::VERSION
     }
   end
 end
