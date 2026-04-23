@@ -15,22 +15,28 @@ RSpec.describe "Settings::Passwords", type: :request do
   end
 
   describe "PATCH /settings/password" do
-    it "updates password with valid current password" do
-      patch settings_password_path, params: {
-        password: "NewPassword1*3*",
-        password_confirmation: "NewPassword1*3*",
-        password_challenge: "Secret1*3*5*"
-      }
-      expect(response).to redirect_to(settings_password_path)
+    context "with valid password challenge" do
+      it "updates the password" do
+        patch settings_password_path, params: {
+          password: "NewPassword1*3*",
+          password_confirmation: "NewPassword1*3*",
+          password_challenge: "Secret1*3*5*"
+        }
+        expect(response).to redirect_to(settings_password_path)
+        expect(flash[:notice]).to eq("Your password has been changed")
+      end
     end
 
-    it "rejects password update with wrong current password" do
-      patch settings_password_path, params: {
-        password: "NewPassword1*3*",
-        password_confirmation: "NewPassword1*3*",
-        password_challenge: "wrongpassword"
-      }
-      expect(response).to redirect_to(settings_password_path)
+    context "with invalid password challenge" do
+      it "does not update the password and returns inertia errors" do
+        patch settings_password_path, params: {
+          password: "NewPassword1*3*",
+          password_confirmation: "NewPassword1*3*",
+          password_challenge: "wrongpassword"
+        }
+        expect(response).to redirect_to(settings_password_path)
+        expect(session[:inertia_errors]).to eq(password_challenge: ["is invalid"])
+      end
     end
   end
 end

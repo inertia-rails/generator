@@ -283,6 +283,85 @@ class DetectPackageManagerPnpmTest < GeneratorTestCase
   end
 end
 
+class DetectJsDestinationFrontendTest < GeneratorTestCase
+  template <<~CODE
+    require "json"
+    fresh_app = false
+    vite_installed = false
+    framework_detected = nil
+    typescript_detected = false
+    tailwind_detected = false
+    js_destination_detected = nil
+    package_manager = "npm"
+    db_adapter = "sqlite3"
+    file "app/frontend/entrypoints/.keep", ""
+    importmap_detected = false
+    vite_config_glob = "vite.config.{ts,js,mjs,cjs,mts,cts}"
+    #{GEM_IN_GEMFILE}
+    <%= include "detect" %>
+    say "JSDIR=\#{js_destination_detected || 'none'}"
+  CODE
+
+  def test_detects_app_frontend
+    run_generator do |output|
+      assert_line_printed output, "JSDIR=app/frontend"
+      assert_line_printed output, "Frontend dir: app/frontend"
+    end
+  end
+end
+
+class DetectJsDestinationJavascriptTest < GeneratorTestCase
+  template <<~CODE
+    require "json"
+    fresh_app = false
+    vite_installed = false
+    framework_detected = nil
+    typescript_detected = false
+    tailwind_detected = false
+    js_destination_detected = nil
+    package_manager = "npm"
+    db_adapter = "sqlite3"
+    file "app/javascript/entrypoints/.keep", ""
+    importmap_detected = false
+    vite_config_glob = "vite.config.{ts,js,mjs,cjs,mts,cts}"
+    #{GEM_IN_GEMFILE}
+    <%= include "detect" %>
+    say "JSDIR=\#{js_destination_detected || 'none'}"
+  CODE
+
+  def test_detects_app_javascript
+    run_generator do |output|
+      assert_line_printed output, "JSDIR=app/javascript"
+    end
+  end
+end
+
+class DetectJsDestinationDefaultTest < GeneratorTestCase
+  template <<~CODE
+    require "json"
+    fresh_app = false
+    vite_installed = false
+    framework_detected = nil
+    typescript_detected = false
+    tailwind_detected = false
+    js_destination_detected = nil
+    package_manager = "npm"
+    db_adapter = "sqlite3"
+    importmap_detected = false
+    vite_config_glob = "vite.config.{ts,js,mjs,cjs,mts,cts}"
+    #{GEM_IN_GEMFILE}
+    <%= include "detect" %>
+    say "JSDIR=\#{js_destination_detected || 'none'}"
+  CODE
+
+  def test_defaults_to_none_when_no_existing_dir
+    run_generator do |output|
+      assert_line_printed output, "JSDIR=none"
+      assert_line_printed output, "Frontend dir: app/javascript (default)"
+    end
+  end
+end
+
 class DetectJsbundlingBlockerTest < GeneratorTestCase
   template <<~CODE
     require "json"

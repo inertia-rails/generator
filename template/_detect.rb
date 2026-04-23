@@ -74,6 +74,12 @@ unless fresh_app
   # Detect Tailwind
   tailwind_detected = deps.key?("tailwindcss")
   say "  Tailwind CSS: #{tailwind_detected ? 'detected' : 'not detected'}"
+
+  # Detect frontend source directory (vite-ruby/rails_vite convention is `entrypoints/`)
+  js_destination_detected = %w[app/frontend app/javascript app/client].find { |p|
+    Dir.exist?("#{p}/entrypoints")
+  }
+  say "  Frontend dir: #{js_destination_detected || 'app/javascript (default)'}"
 end
 
 # Detect database adapter (for Dockerfile / CI)

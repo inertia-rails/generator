@@ -131,6 +131,13 @@ class GeneratorTestCase < RubyBytes::TestCase
     }
   RUBY
 
+  APPEND_WITH_BLANK_LINE = <<~'RUBY'
+    append_with_blank_line = ->(path, content) {
+      append_to_file path, "\n" unless File.read(path).end_with?("\n\n")
+      append_to_file path, content
+    }
+  RUBY
+
   STUB_PACKAGE_JSON = 'file "package.json", \'{"name":"test","private":true,"scripts":{}}\''
 
   PM_INSTALL = <<~RUBY
@@ -153,6 +160,7 @@ class GeneratorTestCase < RubyBytes::TestCase
     use_starter_kit = false
     use_typelizer = false
     use_alba = false
+    test_framework = "minitest"
     package_manager = "npm"
     js_destination_path = "app/javascript"
     js_ext = "js"
@@ -160,6 +168,7 @@ class GeneratorTestCase < RubyBytes::TestCase
     fresh_app = true
     #{PM_INSTALL}
     #{GEM_IN_GEMFILE}
+    #{APPEND_WITH_BLANK_LINE}
     db_adapter = "sqlite3"
   CODE
 end

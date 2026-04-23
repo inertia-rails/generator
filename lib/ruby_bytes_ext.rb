@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "rbytes"
+
 module RubyBytes
   # Upstream rbytes' `code(path)` interpolates file contents into a heredoc,
   # producing `...end\n\n  TCODE` — the file's own `\n` plus the source `\n`

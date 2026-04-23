@@ -76,8 +76,7 @@ dependabot_file = ".github/dependabot.yml"
 if File.exist?(dependabot_file)
   dependabot_config = File.read(dependabot_file)
   unless dependabot_config.include?("package-ecosystem: npm")
-    append_to_file dependabot_file, <<~YAML
-
+    append_with_blank_line.(dependabot_file, <<~YAML)
       - package-ecosystem: npm
         directory: "/"
         schedule:

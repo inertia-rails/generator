@@ -38,8 +38,7 @@ unless vite_installed
 
   # Add .gitignore entries
   if File.exist?(".gitignore")
-    append_to_file ".gitignore", <<~GITIGNORE
-
+    append_with_blank_line.(".gitignore", <<~GITIGNORE)
       # Vite
       /public/vite*
       node_modules

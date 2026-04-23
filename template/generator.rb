@@ -13,14 +13,15 @@ require "json"
 # ─── State Variables ────────────────────────────────────────────────
 
 # Detection state (set by _detect.rb)
-fresh_app           = nil
-vite_installed      = false
-framework_detected  = nil
-typescript_detected = false
-tailwind_detected   = false
-importmap_detected  = false
-package_manager     = "npm"
-db_adapter          = "sqlite3"
+fresh_app                = nil
+vite_installed           = false
+framework_detected       = nil
+typescript_detected      = false
+tailwind_detected        = false
+importmap_detected       = false
+js_destination_detected  = nil
+package_manager          = "npm"
+db_adapter               = "sqlite3"
 
 # User choices (set by _prompts.rb)
 framework       = nil
@@ -94,6 +95,11 @@ update_package_json = ->(&block) {
   update_json_file.call("package.json", &block)
 }
 
+append_with_blank_line = ->(path, content) {
+  append_to_file path, "\n" unless File.read(path).end_with?("\n\n")
+  append_to_file path, content
+}
+
 # ─── Phase 1: Detect + Prompt ──────────────────────────────────────
 
 <%= include "detect" %>
@@ -107,8 +113,7 @@ component_ext = case framework
   when "svelte" then "svelte"
 end
 
-# Source directory for frontend code
-js_destination_path = "app/javascript"
+js_destination_path = js_destination_detected || "app/javascript"
 
 # ─── Phase 2: Core Infrastructure ──────────────────────────────────
 

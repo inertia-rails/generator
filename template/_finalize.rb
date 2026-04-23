@@ -17,6 +17,10 @@ end
 # Single bundle install for all gems
 bundle_run.("bundle install")
 
+if test_framework == "rspec"
+  bundle_run.("bundle binstubs rspec-core")
+end
+
 # ─── Run migrations (starter kit) ────────────────────────────────────
 
 if use_starter_kit

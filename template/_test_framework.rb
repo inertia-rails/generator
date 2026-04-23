@@ -37,6 +37,17 @@ if use_starter_kit
     file ".rspec", "--require spec_helper\n", force: true
 <%= copy_dir("shared/starter_test_rspec", force: true) %>
 
+    # Remove Rails-scaffolded minitest structure (keep test/fixtures for rspec to read)
+    %w[
+      test/test_helper.rb
+      test/channels
+      test/controllers
+      test/helpers
+      test/integration
+      test/mailers
+      test/models
+    ].each { |path| remove_file path }
+
     say "  RSpec files created ✓", :green
   end
 end

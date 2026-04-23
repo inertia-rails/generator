@@ -14,6 +14,7 @@ class ViteAlreadyInstalledTest < GeneratorTestCase
     gem_in_gemfile = ->(name) { true }
     #{NOOP_ADD_GEM}
     #{UPDATE_PACKAGE_JSON}
+    #{APPEND_WITH_BLANK_LINE}
     <%= include "vite" %>
   CODE
 
@@ -42,6 +43,10 @@ class ViteFreshInstallTest < GeneratorTestCase
       pkg = JSON.parse(File.read("package.json"))
       block.call(pkg)
       File.write("package.json", JSON.pretty_generate(pkg) + "\n")
+    }
+    append_with_blank_line = ->(path, content) {
+      append_to_file path, "\n" unless File.read(path).end_with?("\n\n")
+      append_to_file path, content
     }
     <%= include "vite" %>
     file "tmp_dev_pkgs.txt", npm_dev_packages.join(",")

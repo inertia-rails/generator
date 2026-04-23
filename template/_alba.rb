@@ -24,7 +24,7 @@ if use_alba
     types_index = "#{js_destination_path}/types/index.ts"
     if use_starter_kit && File.exist?(types_index)
       gsub_file types_index, /^export interface (Auth|User|Session|SharedProps) \{[^}]*\}\n\n?/m, ""
-      append_to_file types_index, "\nexport * from \"./serializers\"\n"
+      append_with_blank_line.(types_index, "export * from \"./serializers\"\n")
     end
 
     eslint_ignores << "types/serializers/**"
