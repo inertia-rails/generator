@@ -59,6 +59,28 @@ class DeployDockerfilePostgresTest < GeneratorTestCase
   end
 end
 
+class DeployDockerfileTrilogyTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    db_adapter = "trilogy"
+    file "Dockerfile", "placeholder"
+    append_to_file "Gemfile", "gem \\"trilogy\\"\\n"
+    <%= include "deploy" %>
+  CODE
+
+  def test_trilogy_keeps_mysql_client_in_base_for_dbconsole
+    run_generator do
+      assert_file_contains "Dockerfile", "default-mysql-client"
+    end
+  end
+
+  def test_trilogy_skips_libmysqlclient_dev_in_build
+    run_generator do
+      refute_file_contains "Dockerfile", "default-libmysqlclient-dev"
+    end
+  end
+end
+
 class DeployDockerfileBunTest < GeneratorTestCase
   template <<~CODE
     #{GeneratorTestCase::DEPLOY_PREAMBLE}

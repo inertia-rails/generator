@@ -12,7 +12,7 @@ WORKDIR /rails
 
 # Install base packages
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libvips <%= db_base_pkg %> && \
+    apt-get install --no-install-recommends -y <%= dockerfile_base_packages.join(" ") %> && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
@@ -40,23 +40,17 @@ ENV RAILS_ENV="production" \
 FROM base AS build
 
 # Install packages needed to build gems and node modules
-<% if package_manager == "bun" %>
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git unzip<%= " #{db_build_pkg}" if db_build_pkg %> libyaml-dev pkg-config && \
+    apt-get install --no-install-recommends -y <%= dockerfile_build_packages.join(" ") %> && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
-<% else %>
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git node-gyp python-is-python3<%= " #{db_build_pkg}" if db_build_pkg %> libyaml-dev pkg-config && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
-<% end %>
 
 # Install application gems
 COPY vendor/* ./vendor/
 COPY Gemfile Gemfile.lock ./
 
 RUN bundle install && \
-    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
-    bundle exec bootsnap precompile -j 1 --gemfile
+    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git<% if depend_on_bootsnap %> && \
+    bundle exec bootsnap precompile -j 1 --gemfile<% end %>
 
 # Install node modules
 COPY package.json <%= pm_install[package_manager][:lockfile] %> ./
@@ -65,7 +59,9 @@ RUN <%= pm_install[package_manager][:ci] %>
 # Copy application code
 COPY . .
 
+<% if depend_on_bootsnap %>
 RUN bundle exec bootsnap precompile -j 1 app/ lib/
+<% end %>
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
 ARG SSR_ENABLED

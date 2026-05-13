@@ -9,18 +9,32 @@ if File.exist?("Dockerfile")
   ruby_version = File.exist?(".ruby-version") ? File.read(".ruby-version").strip.delete_prefix("ruby-") : Gem.ruby_version.to_s
   node_version = ENV.fetch("NODE_VERSION") { `node --version`[/\d+\.\d+\.\d+/] || "22.21.1" }
 
+  # Trilogy is a pure-Ruby MySQL client — no build deps. Base still keeps the
+  # CLI for dbconsole/mysqldump (matches Rails 8's database.rb).
   db_base_pkg = case db_adapter
-    when "postgresql" then "postgresql-client"
+    when "postgresql"        then "postgresql-client"
     when "mysql2", "trilogy" then "default-mysql-client"
     else "sqlite3"
   end
 
   db_build_pkg = case db_adapter
     when "postgresql" then "libpq-dev"
-    when "mysql2" then "default-libmysqlclient-dev"
+    when "mysql2"     then "default-libmysqlclient-dev"
     else nil
   end
 
+  # libvips is loaded by ruby-vips at runtime via FFI, so only the base stage needs it.
+  needs_libvips = gem_in_gemfile.("image_processing") || File.exist?("config/storage.yml")
+
+  dockerfile_base_packages = ["curl", db_base_pkg, ("libvips" if needs_libvips), "libjemalloc2"].compact.sort
+
+  dockerfile_build_packages = [
+    "build-essential", "git", "pkg-config", "libyaml-dev",
+    db_build_pkg,
+    *(package_manager == "bun" ? ["unzip"] : %w(node-gyp python-is-python3))
+  ].compact.sort
+
+  depend_on_bootsnap = gem_in_gemfile.("bootsnap")
   use_thruster = gem_in_gemfile.("thruster")
 
   file "Dockerfile", <%= code("shared/Dockerfile.tt") %>, force: fresh_app
