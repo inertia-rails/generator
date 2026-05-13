@@ -12,19 +12,6 @@ unless File.exist?("package.json")
   JSON
 end
 
-# Pin Vite 8 via overrides (some deps like @inertiajs/vite haven't updated peer deps yet)
-update_package_json.call do |pkg|
-  case package_manager
-  when "pnpm"
-    pkg["pnpm"] ||= {}
-    (pkg["pnpm"]["overrides"] ||= {})["vite"] = "$vite"
-  when "yarn"
-    (pkg["resolutions"] ||= {})["vite"] = "$vite"
-  else
-    (pkg["overrides"] ||= {})["vite"] = "$vite"
-  end
-end
-
 unless vite_installed
   say "📦 Setting up Rails Vite...", :cyan
 

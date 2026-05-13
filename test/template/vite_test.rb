@@ -86,10 +86,4 @@ class ViteFreshInstallTest < GeneratorTestCase
       assert_file_contains "Gemfile", 'gem "rails_vite"'
     end
   end
-
-  def test_adds_vite_override_to_package_json
-    run_generator do
-      assert_file_contains "package.json", "overrides"
-    end
-  end
 end
