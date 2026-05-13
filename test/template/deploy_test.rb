@@ -99,6 +99,79 @@ class DeployDockerfileBunTest < GeneratorTestCase
   end
 end
 
+class DeployDockerfileYarn1Test < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    package_manager = "yarn"
+    yarn_version = "1.22.22"
+    file "Dockerfile", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_yarn_1_installs_via_npm_global_with_frozen_lockfile
+    run_generator do
+      assert_file_contains "Dockerfile", "ARG YARN_VERSION=1.22.22"
+      assert_file_contains "Dockerfile", "npm install -g yarn@$YARN_VERSION"
+      assert_file_contains "Dockerfile", "yarn install --frozen-lockfile"
+      refute_file_contains "Dockerfile", "corepack enable && yarn set version"
+    end
+  end
+end
+
+class DeployDockerfileYarnBerryTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    package_manager = "yarn"
+    yarn_version = "4.5.0"
+    file "Dockerfile", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_yarn_berry_installs_via_corepack_with_immutable
+    run_generator do
+      assert_file_contains "Dockerfile", "ARG YARN_VERSION=4.5.0"
+      assert_file_contains "Dockerfile", "corepack enable && yarn set version $YARN_VERSION"
+      assert_file_contains "Dockerfile", "yarn install --immutable"
+      refute_file_contains "Dockerfile", "npm install -g yarn@"
+      refute_file_contains "Dockerfile", "yarn install --frozen-lockfile"
+    end
+  end
+end
+
+class DeployDockerfileYarnLatestTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    package_manager = "yarn"
+    yarn_version = "latest"
+    file "Dockerfile", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_latest_uses_corepack_path
+    run_generator do
+      assert_file_contains "Dockerfile", "corepack enable && yarn set version"
+      assert_file_contains "Dockerfile", "yarn install --immutable"
+    end
+  end
+end
+
+class DeployDockerfilePnpmVersionTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    package_manager = "pnpm"
+    pnpm_version = "10.28.2"
+    file "Dockerfile", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_pins_pnpm_version_not_latest
+    run_generator do
+      assert_file_contains "Dockerfile", "corepack prepare pnpm@10.28.2 --activate"
+      refute_file_contains "Dockerfile", "pnpm@latest"
+    end
+  end
+end
+
 class DeployDockerfileSsrTest < GeneratorTestCase
   template <<~CODE
     #{GeneratorTestCase::DEPLOY_PREAMBLE}
