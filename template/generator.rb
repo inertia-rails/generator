@@ -44,12 +44,18 @@ vite_plugins         = []
 post_install_commands = []
 eslint_ignores       = []
 
-# Lookup: package manager install commands
+# Lookup: package manager commands. Fields:
+#   install  — add a runtime dep                (e.g. `pnpm add foo`)
+#   dev_flag — dev-dep flag for `install`       (e.g. `--save-dev`)
+#   exec     — run a one-off package binary     (e.g. `pnpm dlx shadcn-vue@latest`)
+#   ci       — install from lockfile in CI      (e.g. `pnpm install --frozen-lockfile`)
+#   run      — invoke a local binary            (e.g. `pnpm vite`)
+#   lockfile — lockfile path (glob)             (e.g. `pnpm-lock.yaml`)
 pm_install = {
-  "npm"  => { install: "npm install",  dev_flag: "--save-dev", exec: "npx" },
-  "yarn" => { install: "yarn add",     dev_flag: "--dev",      exec: "npx" },
-  "pnpm" => { install: "pnpm add",     dev_flag: "--save-dev", exec: "pnpm dlx" },
-  "bun"  => { install: "bun add",      dev_flag: "--dev",      exec: "bunx" }
+  "npm"  => { install: "npm install", dev_flag: "--save-dev", exec: "npx",      ci: "npm ci",                         run: "npx",     lockfile: "package-lock.json" },
+  "yarn" => { install: "yarn add",    dev_flag: "--dev",      exec: "npx",      ci: "yarn install --immutable",       run: "yarn",    lockfile: "yarn.lock" },
+  "pnpm" => { install: "pnpm add",    dev_flag: "--save-dev", exec: "pnpm dlx", ci: "pnpm install --frozen-lockfile", run: "pnpm",    lockfile: "pnpm-lock.yaml" },
+  "bun"  => { install: "bun add",     dev_flag: "--dev",      exec: "bunx",     ci: "bun install --frozen-lockfile",  run: "bun run", lockfile: "bun.lock*" }
 }
 
 # Glob pattern for finding vite config files

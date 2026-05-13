@@ -142,14 +142,9 @@ end
 
 # ─── Create/update Procfile.dev ──────────────────────────────────────
 
-vite_dev_cmd = case package_manager
-  when "yarn" then "yarn vite"
-  when "pnpm" then "pnpm vite"
-  when "bun" then "bun run vite"
-  else "npx vite"
-end
+vite_runner = pm_install[package_manager][:run]
 
-file "Procfile.dev", "web: bin/rails s -p ${PORT:-3000}\njs: #{vite_dev_cmd}\n", force: fresh_app
+file "Procfile.dev", "web: bin/rails s -p ${PORT:-3000}\njs: #{vite_runner} vite\n", force: fresh_app
 
 # ─── Create bin/dev ──────────────────────────────────────────────────
 
@@ -183,7 +178,7 @@ after_bundle do
 
   if use_ssr
     say "  SSR is enabled. Production build:", :cyan
-    say "    #{vite_dev_cmd.split.first} vite build --ssr"
+    say "    #{vite_runner} vite build --ssr"
     say ""
   else
     say "  SSR-ready. To enable, add to config/initializers/inertia_rails.rb:", :cyan

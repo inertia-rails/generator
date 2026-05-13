@@ -58,26 +58,9 @@ RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
     bundle exec bootsnap precompile -j 1 --gemfile
 
-<% if package_manager == "bun" %>
 # Install node modules
-COPY package.json bun.lock* ./
-RUN bun install --frozen-lockfile
-<% else %>
-# Install node modules
-<%   lockfile = case package_manager
-       when "yarn" then "yarn.lock"
-       when "pnpm" then "pnpm-lock.yaml"
-       else "package-lock.json"
-     end
-     pm_ci_cmd = case package_manager
-       when "yarn" then "yarn install --immutable"
-       when "pnpm" then "pnpm install --frozen-lockfile"
-       else "npm ci"
-     end
-%>
-COPY package.json <%= lockfile %> ./
-RUN <%= pm_ci_cmd %>
-<% end %>
+COPY package.json <%= pm_install[package_manager][:lockfile] %> ./
+RUN <%= pm_install[package_manager][:ci] %>
 
 # Copy application code
 COPY . .
@@ -85,16 +68,9 @@ COPY . .
 RUN bundle exec bootsnap precompile -j 1 app/ lib/
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-<% vite_build_cmd = case package_manager
-     when "yarn" then "yarn vite build"
-     when "pnpm" then "pnpm vite build"
-     when "bun" then "bun run vite build"
-     else "npx vite build"
-   end
-%>
 ARG SSR_ENABLED
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile && \
-    if [ "$SSR_ENABLED" = "true" ]; then <%= vite_build_cmd %> --ssr; fi
+    if [ "$SSR_ENABLED" = "true" ]; then <%= pm_install[package_manager][:run] %> vite build --ssr; fi
 
 RUN rm -rf node_modules
 
