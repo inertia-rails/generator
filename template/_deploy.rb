@@ -1,12 +1,7 @@
 # ─── Deployment Infrastructure ────────────────────────────────────────
 # Dockerfile, CI workflow, Dependabot
 
-js_ci_install_cmd = case package_manager
-  when "yarn" then "yarn install --immutable"
-  when "pnpm" then "pnpm install --frozen-lockfile"
-  when "bun"  then "bun install --frozen-lockfile"
-  else "npm ci"
-end
+js_ci_install_cmd = pm_install[package_manager][:ci]
 
 # ─── Generate Dockerfile ─────────────────────────────────────────────
 

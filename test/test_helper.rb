@@ -142,10 +142,10 @@ class GeneratorTestCase < RubyBytes::TestCase
 
   PM_INSTALL = <<~RUBY
     pm_install = {
-      "npm"  => { install: "npm install",  dev_flag: "--save-dev" },
-      "yarn" => { install: "yarn add",     dev_flag: "--dev" },
-      "pnpm" => { install: "pnpm add",     dev_flag: "--save-dev" },
-      "bun"  => { install: "bun add",      dev_flag: "--dev" }
+      "npm"  => { install: "npm install", dev_flag: "--save-dev", exec: "npx",      ci: "npm ci",                         run: "npx",     lockfile: "package-lock.json" },
+      "yarn" => { install: "yarn add",    dev_flag: "--dev",      exec: "npx",      ci: "yarn install --immutable",       run: "yarn",    lockfile: "yarn.lock" },
+      "pnpm" => { install: "pnpm add",    dev_flag: "--save-dev", exec: "pnpm dlx", ci: "pnpm install --frozen-lockfile", run: "pnpm",    lockfile: "pnpm-lock.yaml" },
+      "bun"  => { install: "bun add",     dev_flag: "--dev",      exec: "bunx",     ci: "bun install --frozen-lockfile",  run: "bun run", lockfile: "bun.lock*" }
     }
   RUBY
 
