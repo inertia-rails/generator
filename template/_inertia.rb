@@ -16,7 +16,7 @@ npm_dev_packages << "@inertiajs/vite@^3.0"
 case framework
 when "react"
   npm_packages.push("@inertiajs/react@^3.0", "react", "react-dom")
-  npm_dev_packages.push("@vitejs/plugin-react", "@rolldown/plugin-babel", "babel-plugin-react-compiler")
+  npm_dev_packages.push("@vitejs/plugin-react", "@rolldown/plugin-babel", "babel-plugin-react-compiler", "@babel/core")
   vite_plugins << { import: "import react, { reactCompilerPreset } from '@vitejs/plugin-react'", call: "react()" }
   vite_plugins << { import: "import babel from '@rolldown/plugin-babel'", call: "babel({ presets: [reactCompilerPreset()] })" }
 when "vue"
