@@ -20,15 +20,25 @@ RUN apt-get update -qq && \
 # Install Bun (needed for builds; kept in runtime for SSR)
 ENV BUN_INSTALL=/usr/local/bun
 ENV PATH=/usr/local/bun/bin:$PATH
-ARG BUN_VERSION=1.2
+ARG BUN_VERSION=<%= bun_version %>
 RUN curl -fsSL https://bun.sh/install | bash -s -- "bun-v${BUN_VERSION}"
 <% else %>
 # Install Node.js (needed for builds; kept in runtime for SSR)
 ARG NODE_VERSION=<%= node_version %>
+<% if package_manager == "yarn" %>
+ARG YARN_VERSION=<%= yarn_version %>
+<% end %>
 ENV PATH=/usr/local/node/bin:$PATH
 RUN curl -sL https://github.com/nodenv/node-build/archive/master.tar.gz | tar xz -C /tmp/ && \
     /tmp/node-build-master/bin/node-build "${NODE_VERSION}" /usr/local/node && \
     rm -rf /tmp/node-build-master
+<% if package_manager == "yarn" && yarn_through_corepack %>
+RUN corepack enable && yarn set version $YARN_VERSION
+<% elsif package_manager == "yarn" %>
+RUN npm install -g yarn@$YARN_VERSION
+<% elsif package_manager == "pnpm" %>
+RUN corepack enable && corepack prepare pnpm@<%= pnpm_version %> --activate
+<% end %>
 <% end %>
 
 ENV RAILS_ENV="production" \
@@ -54,7 +64,7 @@ RUN bundle install && \
 
 # Install node modules
 COPY package.json <%= pm_install[package_manager][:lockfile] %> ./
-RUN <%= pm_install[package_manager][:ci] %>
+RUN <%= js_ci_install_cmd %>
 
 # Copy application code
 COPY . .

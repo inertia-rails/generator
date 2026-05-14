@@ -1,13 +1,33 @@
 # ─── Deployment Infrastructure ────────────────────────────────────────
 # Dockerfile, CI workflow, Dependabot
+#
+# `*_version` vars are `||=` so test fixtures can preset them.
 
-js_ci_install_cmd = pm_install[package_manager][:ci]
+detect_version = ->(cmd, default) do
+  `#{cmd} --version`[/\d+\.\d+\.\d+/] || default
+rescue SystemCallError
+  default
+end
+
+# yarn 2+ uses corepack, yarn 1.x uses `npm install -g`. "latest" → corepack (Rails' default).
+yarn_version ||= ENV.fetch("YARN_VERSION") { detect_version.("yarn", "latest") } if package_manager == "yarn"
+yarn_through_corepack = package_manager == "yarn" &&
+  (yarn_version == "latest" || Gem::Version.new(yarn_version) >= Gem::Version.new("2"))
+
+js_ci_install_cmd =
+  if package_manager == "yarn"
+    yarn_through_corepack ? "yarn install --immutable" : "yarn install --frozen-lockfile"
+  else
+    pm_install[package_manager][:ci]
+  end
 
 # ─── Generate Dockerfile ─────────────────────────────────────────────
 
 if File.exist?("Dockerfile")
   ruby_version = File.exist?(".ruby-version") ? File.read(".ruby-version").strip.delete_prefix("ruby-") : Gem.ruby_version.to_s
-  node_version = ENV.fetch("NODE_VERSION") { `node --version`[/\d+\.\d+\.\d+/] || "22.21.1" }
+  node_version ||= ENV.fetch("NODE_VERSION") { detect_version.("node", "22.22.2") } if package_manager != "bun"
+  bun_version  ||= ENV.fetch("BUN_VERSION")  { detect_version.("bun",  "1.3.0") }   if package_manager == "bun"
+  pnpm_version ||= ENV.fetch("PNPM_VERSION") { detect_version.("pnpm", "10") }      if package_manager == "pnpm"
 
   # Trilogy is a pure-Ruby MySQL client — no build deps. Base still keeps the
   # CLI for dbconsole/mysqldump (matches Rails 8's database.rb).
