@@ -158,11 +158,10 @@ class E2eTest < Minitest::Test
 
     assert Dir.glob(File.join(app_path, "app/javascript/components/ui/sidebar*")).any?, "Missing shadcn sidebar"
 
-    # Test files (fixtures shared, framework-specific tests)
-    assert File.exist?(File.join(app_path, "test/fixtures/users.yml")), "Missing users fixture"
-
+    # Test files (framework-specific tests + fixtures)
     test_fw = env.fetch("INERTIA_TEST_FRAMEWORK", "minitest")
     if test_fw == "rspec"
+      assert File.exist?(File.join(app_path, "spec/fixtures/users.yml")), "Missing users fixture"
       assert gemfile.include?("rspec-rails"), "Gemfile missing rspec-rails"
       assert File.exist?(File.join(app_path, ".rspec")), "Missing .rspec"
       assert File.exist?(File.join(app_path, "spec/rails_helper.rb")), "Missing rails_helper.rb"
@@ -170,6 +169,7 @@ class E2eTest < Minitest::Test
       assert File.exist?(File.join(app_path, "spec/requests/sessions_spec.rb")), "Missing sessions spec"
       assert File.exist?(File.join(app_path, "spec/mailers/user_mailer_spec.rb")), "Missing user mailer spec"
     else
+      assert File.exist?(File.join(app_path, "test/fixtures/users.yml")), "Missing users fixture"
       assert File.exist?(File.join(app_path, "test/test_helpers/session_test_helper.rb")), "Missing session test helper"
       assert File.exist?(File.join(app_path, "test/controllers/sessions_controller_test.rb")), "Missing sessions controller test"
       assert File.exist?(File.join(app_path, "test/mailers/user_mailer_test.rb")), "Missing user mailer test"

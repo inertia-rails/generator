@@ -11,9 +11,6 @@ end
 if use_starter_kit
   say "📦 Setting up starter kit tests (#{test_framework})...", :cyan
 
-  # ─── Fixtures (shared between minitest and rspec) ────────────────
-<%= copy_dir("shared/starter_test_fixtures", force: true) %>
-
   # ─── Minitest files ──────────────────────────────────────────────
   if test_framework == "minitest"
 <%= copy_dir("shared/starter_test_minitest", force: true) %>
@@ -37,11 +34,12 @@ if use_starter_kit
     file ".rspec", "--require spec_helper\n", force: true
 <%= copy_dir("shared/starter_test_rspec", force: true) %>
 
-    # Remove Rails-scaffolded minitest structure (keep test/fixtures for rspec to read)
+    # Remove Rails-scaffolded minitest structure
     %w[
       test/test_helper.rb
       test/channels
       test/controllers
+      test/fixtures
       test/helpers
       test/integration
       test/mailers
