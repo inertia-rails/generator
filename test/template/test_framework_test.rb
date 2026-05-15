@@ -106,7 +106,8 @@ class TestFrameworkStarterRspecTest < GeneratorTestCase
 
   def test_creates_fixtures
     run_generator do
-      assert_file "test/fixtures/users.yml"
+      assert_file "spec/fixtures/users.yml"
+      refute_file "test/fixtures/users.yml"
     end
   end
 
@@ -115,7 +116,7 @@ class TestFrameworkStarterRspecTest < GeneratorTestCase
       assert_file ".rspec"
       assert_file "spec/spec_helper.rb"
       assert_file "spec/rails_helper.rb"
-      assert_file_contains "spec/rails_helper.rb", "test/fixtures"
+      assert_file_contains "spec/rails_helper.rb", "spec/fixtures"
     end
   end
 
