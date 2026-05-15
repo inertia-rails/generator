@@ -24,6 +24,7 @@ js_ci_install_cmd =
 # ─── Generate Dockerfile ─────────────────────────────────────────────
 
 if File.exist?("Dockerfile")
+  app_name = File.basename(destination_root)
   ruby_version = File.exist?(".ruby-version") ? File.read(".ruby-version").strip.delete_prefix("ruby-") : Gem.ruby_version.to_s
   node_version ||= ENV.fetch("NODE_VERSION") { detect_version.("node", "22.22.2") } if package_manager != "bun"
   bun_version  ||= ENV.fetch("BUN_VERSION")  { detect_version.("bun",  "1.3.0") }   if package_manager == "bun"
@@ -58,7 +59,7 @@ if File.exist?("Dockerfile")
   use_thruster = gem_in_gemfile.("thruster")
 
   file "Dockerfile", <%= code("shared/Dockerfile.tt") %>, force: fresh_app
-  say "  Dockerfile: generated with Node.js support ✓", :green
+  say "  Dockerfile: generated (SSR=#{use_ssr}, toggle via --build-arg SSR_ENABLED) ✓", :green
 end
 
 # ─── Generate CI workflow ────────────────────────────────────────────

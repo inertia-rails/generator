@@ -180,24 +180,54 @@ class DeployDockerfileSsrTest < GeneratorTestCase
     <%= include "deploy" %>
   CODE
 
-  def test_ssr_enabled_default_is_true
+  def test_arg_ssr_enabled_defaults_true
     run_generator do
-      assert_file_contains "Dockerfile", "SSR_ENABLED=true"
+      assert_file_contains "Dockerfile", "ARG SSR_ENABLED=true"
     end
   end
 
-  def test_installs_node_in_base_stage
+  def test_node_runtime_installed_in_build_stage_not_base
     run_generator do
       content = File.read(File.join(destination, "Dockerfile"))
       base_section = content[0...content.index("FROM base AS build")]
-      assert base_section.include?("node-build"), "Node.js should be installed in base stage"
+      refute base_section.include?("node-build"),
+        "Node.js should not be installed in base stage anymore"
+      build_section = content[content.index("FROM base AS build")...content.index("FROM base AS branch-ssr-true")]
+      assert build_section.include?("node-build"),
+        "Node.js should be installed in build stage"
     end
   end
 
-  def test_conditional_vite_ssr_build
+  def test_branch_ssr_true_copies_node_runtime
     run_generator do
-      assert_file_contains "Dockerfile", "vite build --ssr"
-      assert_file_contains "Dockerfile", "SSR_ENABLED"
+      assert_file_contains "Dockerfile", "FROM base AS branch-ssr-true"
+      assert_file_contains "Dockerfile", "COPY --from=build /usr/local/node /usr/local/node"
+      assert_file_contains "Dockerfile", "ENV PATH=/usr/local/node/bin:$PATH"
+    end
+  end
+
+  def test_final_stage_picks_branch_via_arg
+    run_generator do
+      assert_file_contains "Dockerfile", "FROM branch-ssr-${SSR_ENABLED} AS final"
+    end
+  end
+
+  def test_precompile_and_ssr_are_separate_runs
+    run_generator do
+      content = File.read(File.join(destination, "Dockerfile"))
+      assert content.include?("RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile\n"),
+        "assets:precompile should be its own RUN (no trailing && for SSR)"
+      assert content.include?('if [ "$SSR_ENABLED" = "true" ]; then npx vite build --ssr'),
+        "SSR build should be shell-conditional on SSR_ENABLED"
+      assert content.include?("rm -rf node_modules"),
+        "node_modules cleanup should be folded into SSR RUN"
+    end
+  end
+
+  def test_final_stage_preserves_chown_on_copy
+    run_generator do
+      assert_file_contains "Dockerfile", 'COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"'
+      assert_file_contains "Dockerfile", "COPY --chown=rails:rails --from=build /rails /rails"
     end
   end
 end
@@ -211,11 +241,29 @@ class DeployDockerfileSsrBunTest < GeneratorTestCase
     <%= include "deploy" %>
   CODE
 
-  def test_installs_bun_in_base_stage
+  def test_bun_installed_in_build_stage_not_base
     run_generator do
       content = File.read(File.join(destination, "Dockerfile"))
       base_section = content[0...content.index("FROM base AS build")]
-      assert base_section.include?("bun.sh/install"), "Bun should be installed in base stage"
+      refute base_section.include?("bun.sh/install"),
+        "Bun should not be installed in base stage anymore"
+      build_section = content[content.index("FROM base AS build")...content.index("FROM base AS branch-ssr-true")]
+      assert build_section.include?("bun.sh/install"),
+        "Bun should be installed in build stage"
+    end
+  end
+
+  def test_branch_ssr_true_copies_bun_runtime
+    run_generator do
+      assert_file_contains "Dockerfile", "FROM base AS branch-ssr-true"
+      assert_file_contains "Dockerfile", "COPY --from=build /usr/local/bun /usr/local/bun"
+      assert_file_contains "Dockerfile", "ENV BUN_INSTALL=/usr/local/bun"
+    end
+  end
+
+  def test_ssr_build_uses_bun_runner
+    run_generator do
+      assert_file_contains "Dockerfile", 'if [ "$SSR_ENABLED" = "true" ]; then bun run vite build --ssr'
     end
   end
 end
@@ -227,17 +275,32 @@ class DeployDockerfileNoSsrTest < GeneratorTestCase
     <%= include "deploy" %>
   CODE
 
-  def test_ssr_disabled_default_is_false
+  def test_arg_ssr_enabled_defaults_false
     run_generator do
-      assert_file_contains "Dockerfile", "SSR_ENABLED=false"
+      assert_file_contains "Dockerfile", "ARG SSR_ENABLED=false"
     end
   end
 
-  def test_still_installs_node_in_base
+  def test_branch_stages_still_present
+    run_generator do
+      assert_file_contains "Dockerfile", "FROM base AS branch-ssr-true"
+      assert_file_contains "Dockerfile", "FROM base AS branch-ssr-false"
+      assert_file_contains "Dockerfile", "FROM branch-ssr-${SSR_ENABLED} AS final"
+    end
+  end
+
+  def test_node_runtime_copy_lives_in_branch_not_final
     run_generator do
       content = File.read(File.join(destination, "Dockerfile"))
-      base_section = content[0...content.index("FROM base AS build")]
-      assert base_section.include?("node-build"), "Node.js should be in base stage (SSR-ready)"
+      final_section = content[content.index("FROM branch-ssr-${SSR_ENABLED}")..]
+      refute final_section.include?("/usr/local/node /usr/local/node"),
+        "Node runtime copy belongs in branch-ssr-true, not in final"
+    end
+  end
+
+  def test_ssr_build_step_present_but_gated_by_arg
+    run_generator do
+      assert_file_contains "Dockerfile", 'if [ "$SSR_ENABLED" = "true" ]'
     end
   end
 end
