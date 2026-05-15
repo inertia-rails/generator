@@ -9,8 +9,7 @@ InertiaRails.configure do |config|
 <% if use_starter_kit %>
   config.parent_controller = "::InertiaController"
 <% end %>
-<% if use_ssr %>
-  # SSR configuration
-  config.ssr_enabled = true
-<% end %>
+
+  # Flip to true (and rebuild with --build-arg SSR_ENABLED=true) to enable SSR.
+  config.ssr_enabled = <%= use_ssr %>
 end

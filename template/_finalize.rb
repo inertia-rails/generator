@@ -181,8 +181,7 @@ after_bundle do
     say "    #{vite_runner} vite build --ssr"
     say ""
   else
-    say "  SSR-ready. To enable, add to config/initializers/inertia_rails.rb:", :cyan
-    say "    config.ssr_enabled = true"
+    say "  SSR-ready. Flip config.ssr_enabled in config/initializers/inertia_rails.rb to enable.", :cyan
     say ""
   end
 
