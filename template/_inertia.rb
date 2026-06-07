@@ -68,4 +68,16 @@ if File.exist?(layout_file)
   end
 end
 
+# Run the Inertia SSR Node process alongside Puma (inert until config.ssr_enabled is
+# true, so apps stay SSR-ready whether or not SSR is enabled at generation time).
+puma_file = "config/puma.rb"
+if File.exist?(puma_file)
+  unless File.read(puma_file).include?("plugin :inertia_ssr")
+    append_with_blank_line.(puma_file,
+      "# Run the Inertia SSR process alongside Puma when config.ssr_enabled is true.\nplugin :inertia_ssr\n")
+  end
+else
+  say "  ⚠ config/puma.rb not found — add `plugin :inertia_ssr` to run SSR in production.", :yellow
+end
+
 say "  Inertia core configured ✓", :green
