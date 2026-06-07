@@ -18,6 +18,5 @@
     }
   },
 
-  "include": ["<%= js_destination_path %>/**/*.ts", "<%= js_destination_path %>/**/*.js", "<%= js_destination_path %>/**/*.svelte"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["<%= js_destination_path %>/**/*.ts", "<%= js_destination_path %>/**/*.js", "<%= js_destination_path %>/**/*.svelte"]
 }
