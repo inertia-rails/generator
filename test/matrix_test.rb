@@ -118,6 +118,8 @@ ROUND_4 = {
 ROUND_5 = {
   # rspec (never tested — only affects Gemfile + test dir structure)
   "react_rspec" => foundation("react", INERTIA_TEST_FRAMEWORK: "rspec"),
+  # starter kit + rspec (the canonical react-starter-kit combo: full backend specs)
+  "react_starter_rspec" => starter("react").merge("INERTIA_TEST_FRAMEWORK" => "rspec"),
   # alba + starter kit (different controller branches: serializers vs inline render)
   "react_starter_alba" => starter("react").merge("INERTIA_ALBA" => "1"),
   "vue_starter_alba" => starter("vue").merge("INERTIA_ALBA" => "1"),
@@ -315,6 +317,9 @@ class MatrixRunner
     errors = []
     port = allocate_port
 
+    # Note: the SSR bundle is already built in Step 4 (vite build --ssr) before this
+    # runs, so the Puma `inertia_ssr` plugin can spawn the Node renderer at boot.
+
     # Start Rails server
     server_pid = nil
     server_log = File.join(app_path, "tmp/smoke_server.log")
@@ -359,6 +364,13 @@ class MatrixRunner
         end
         unless body.include?("vite")
           errors << "GET / missing vite tags in HTML"
+        end
+
+        # SSR render check: Inertia marks the mount with data-server-rendered="true"
+        # only when the Node renderer actually ran. Its absence means SSR silently fell
+        # back to CSR (e.g. no SSR process running) — the regression this guards against.
+        if is_starter && !body.include?('data-server-rendered="true"')
+          errors << "SSR did not render: missing data-server-rendered (CSR fallback — SSR process not serving)"
         end
       end
 
