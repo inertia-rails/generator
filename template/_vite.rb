@@ -28,6 +28,7 @@ unless vite_installed
     append_with_blank_line.(".gitignore", <<~GITIGNORE)
       # Vite
       /public/vite*
+      /ssr
       node_modules
       *.local
     GITIGNORE

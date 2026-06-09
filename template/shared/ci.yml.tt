@@ -177,4 +177,4 @@ jobs:
 <% when "trilogy" %>
           DATABASE_URL: trilogy://127.0.0.1:3306
 <% end %>
-        run: bin/rails db:test:prepare test
+        run: bin/rails db:test:prepare <%= test_framework == "rspec" ? "spec" : "test" %>
