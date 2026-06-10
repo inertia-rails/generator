@@ -69,8 +69,8 @@ to get you started.
 
 ### Starter Kit
 
-The Starter Kit forces TypeScript, Tailwind, shadcn/ui, ESLint, SSR, and
-Typelizer on, and adds full authentication:
+The Starter Kit forces TypeScript, Tailwind, shadcn/ui, ESLint, and Typelizer
+on, asks about SSR (default: yes), and adds full authentication:
 
 ```sh
 INERTIA_FRAMEWORK=react INERTIA_STARTER_KIT=1 \

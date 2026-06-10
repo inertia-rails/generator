@@ -45,19 +45,29 @@ prompt_bool = ->(env_key, label, prompt_text, detected: false) {
 }
 
 if use_starter_kit
-  # Starter Kit: all options forced on
+  # Starter Kit: all options forced on, except SSR (deploy runtime cost — prompted, default yes)
   use_typescript = true
   use_tailwind   = true
   use_shadcn     = true
   use_eslint     = true
-  use_ssr        = true
   use_typelizer  = true
   auth_strategy  = "authentication_zero"
 
-  ["TypeScript", "Tailwind CSS", "shadcn/ui", "ESLint", "SSR", "Route helpers"].each do |label|
+  ["TypeScript", "Tailwind CSS", "shadcn/ui", "ESLint", "Route helpers"].each do |label|
     say "  #{label.ljust(15)} yes (starter kit)"
   end
   say "  Authentication: authentication_zero (starter kit)"
+
+  if ENV.key?("INERTIA_SSR")
+    use_ssr = ENV["INERTIA_SSR"] == "1"
+    say "  SSR: #{use_ssr ? 'yes' : 'no'} (from env)"
+  elsif $stdin.tty?
+    use_ssr = ask("Enable server-side rendering (SSR)?", :green,
+      limited_to: %w[y n], default: "y") == "y"
+  else
+    use_ssr = true
+    say "  SSR: yes (default)"
+  end
 else
   # Foundation: individual option prompts
   use_typescript = prompt_bool.("INERTIA_TS", "TypeScript", "Use TypeScript?", detected: typescript_detected)
