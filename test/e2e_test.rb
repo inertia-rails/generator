@@ -23,11 +23,13 @@ class E2eTest < Minitest::Test
     "react_starter_kit" => {
       "INERTIA_FRAMEWORK" => "react",
       "INERTIA_STARTER_KIT" => "1",
+      "INERTIA_SSR" => "1",
       "INERTIA_TYPELIZER" => "1"
     },
     "svelte_starter_kit" => {
       "INERTIA_FRAMEWORK" => "svelte",
       "INERTIA_STARTER_KIT" => "1",
+      "INERTIA_SSR" => "1",
       "INERTIA_TYPELIZER" => "1"
     },
     # ─── Foundation (individual options) ─────────────────────────────

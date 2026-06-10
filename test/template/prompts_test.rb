@@ -114,6 +114,7 @@ class PromptsStarterKitForcesOptionsTest < GeneratorTestCase
 
     ENV["INERTIA_FRAMEWORK"] = "react"
     ENV["INERTIA_STARTER_KIT"] = "1"
+    ENV["INERTIA_SSR"] = "1"
     ENV["INERTIA_ALBA"] = "0"
     ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
 
@@ -136,6 +137,46 @@ class PromptsStarterKitForcesOptionsTest < GeneratorTestCase
       assert_line_printed output, "ESLINT=true"
       assert_line_printed output, "SSR=true"
       assert_line_printed output, "TYPELIZER=true"
+      assert_line_printed output, "AUTH=authentication_zero"
+    end
+  end
+end
+
+class PromptsStarterKitSsrOptOutTest < GeneratorTestCase
+  template <<~'CODE'
+    fresh_app = true
+    framework_detected = nil
+    typescript_detected = false
+    tailwind_detected = false
+    framework = nil
+    use_starter_kit = false
+    use_typescript = false
+    use_tailwind = false
+    use_shadcn = false
+    use_eslint = false
+    use_ssr = false
+    use_typelizer = false
+    use_alba = false
+    test_framework = "minitest"
+    auth_strategy = "none"
+
+    ENV["INERTIA_FRAMEWORK"] = "react"
+    ENV["INERTIA_STARTER_KIT"] = "1"
+    ENV["INERTIA_SSR"] = "0"
+    ENV["INERTIA_ALBA"] = "0"
+    ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
+
+    <%= include "prompts" %>
+
+    say "SSR=#{use_ssr}"
+    say "ESLINT=#{use_eslint}"
+    say "AUTH=#{auth_strategy}"
+  CODE
+
+  def test_starter_kit_respects_ssr_opt_out
+    run_generator do |output|
+      assert_line_printed output, "SSR=false"
+      assert_line_printed output, "ESLINT=true"
       assert_line_printed output, "AUTH=authentication_zero"
     end
   end
