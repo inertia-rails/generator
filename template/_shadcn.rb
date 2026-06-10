@@ -46,7 +46,7 @@ if use_shadcn
 
     shadcn_components = %w[
       alert avatar badge breadcrumb button card checkbox collapsible
-      dialog dropdown-menu input label navigation-menu separator
+      dialog dropdown-menu field input label navigation-menu separator
       sheet sidebar skeleton sonner toggle toggle-group tooltip
     ]
 

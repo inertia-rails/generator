@@ -2,7 +2,6 @@ import { Form } from "@inertiajs/react"
 import { useRef } from "react"
 
 import HeadingSmall from "@/components/heading-small"
-import InputError from "@/components/input-error"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -13,13 +12,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { users } from "@/routes"
 
 export default function DeleteUser() {
   const passwordInput = useRef<HTMLInputElement>(null)
-
 
   return (
     <div className="space-y-6">
@@ -59,10 +57,13 @@ export default function DeleteUser() {
             >
               {({ resetAndClearErrors, processing, errors }) => (
                 <>
-                  <div className="grid gap-2">
-                    <Label htmlFor="password_challenge" className="sr-only">
+                  <Field>
+                    <FieldLabel
+                      htmlFor="password_challenge"
+                      className="sr-only"
+                    >
                       Password
-                    </Label>
+                    </FieldLabel>
 
                     <Input
                       id="password_challenge"
@@ -73,8 +74,12 @@ export default function DeleteUser() {
                       autoComplete="current-password"
                     />
 
-                    <InputError messages={errors.password_challenge} />
-                  </div>
+                    <FieldError
+                      errors={errors.password_challenge?.map((message) => ({
+                        message,
+                      }))}
+                    />
+                  </Field>
 
                   <DialogFooter>
                     <DialogClose asChild>
