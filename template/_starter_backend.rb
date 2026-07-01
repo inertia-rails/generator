@@ -17,6 +17,16 @@ if use_starter_kit
   file "db/migrate/#{timestamp}_create_users.rb", <%= code("shared/starter/migrations/create_users.rb") %>
   file "db/migrate/#{timestamp.to_i + 1}_create_sessions.rb", <%= code("shared/starter/migrations/create_sessions.rb") %>
 
+  # ─── Preview emails in the browser in development (letter_opener) ─
+  dev_env = "config/environments/development.rb"
+  mailer_anchor = "config.action_mailer.default_url_options = { host: \"localhost\", port: 3000 }\n"
+  if File.exist?(dev_env) && File.read(dev_env).include?(mailer_anchor) &&
+      !File.read(dev_env).include?("delivery_method = :letter_opener")
+    insert_into_file dev_env,
+      "\n  config.action_mailer.delivery_method = :letter_opener\n\n  config.action_mailer.perform_deliveries = true\n",
+      after: mailer_anchor
+  end
+
   # ─── Alba Serializers (if enabled) ──────────────────────────────
   if use_alba
 <%= copy_dir("shared/starter_alba", force: true) %>
