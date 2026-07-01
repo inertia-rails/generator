@@ -13,6 +13,15 @@ class StarterFrontendReactTest < GeneratorTestCase
     component_ext = "tsx"
     npm_packages = []
     npm_dev_packages = []
+    file "app/views/layouts/application.html.erb", <<~HTML
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <link rel="apple-touch-icon" href="/icon.png">
+        </head>
+        <body></body>
+      </html>
+    HTML
     <%= include "starter_frontend" %>
     say "NPM=#{npm_packages.sort.join(",")}"
   CODE
@@ -78,6 +87,15 @@ class StarterFrontendReactTest < GeneratorTestCase
   def test_adds_npm_packages
     run_generator do |output|
       assert_line_printed output, "@headlessui/react"
+    end
+  end
+
+  def test_adds_dark_mode_fouc_script
+    run_generator do
+      layout = "app/views/layouts/application.html.erb"
+      assert_file_contains layout, "Inline to avoid FOUC"
+      assert_file_contains layout, "localStorage.appearance"
+      assert_file_contains layout, "classList.toggle("
     end
   end
 end
