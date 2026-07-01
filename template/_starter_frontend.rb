@@ -30,5 +30,22 @@ if use_starter_kit
 <%= copy_dir("svelte/starter", "js_destination_path", force: true) %>
   end
 
+  # ─── Dark-mode guard: set the theme class inline before assets load (avoids FOUC) ─
+  layout_file = "app/views/layouts/application.html.erb"
+  icon_anchor = "<link rel=\"apple-touch-icon\" href=\"/icon.png\">"
+  if File.exist?(layout_file) && File.read(layout_file).include?(icon_anchor) &&
+      !File.read(layout_file).include?("Inline to avoid FOUC")
+    insert_into_file layout_file,
+      "\n\n    <script>\n" \
+      "      <%%# Enable dark mode based on localStorage or system preference. Inline to avoid FOUC. %>\n" \
+      "      document.documentElement.classList.toggle(\n" \
+      "        \"dark\",\n" \
+      "        localStorage.appearance === \"dark\" ||\n" \
+      "          (!(\"appearance\" in localStorage) && window.matchMedia(\"(prefers-color-scheme: dark)\").matches),\n" \
+      "      );\n" \
+      "    </script>",
+      after: icon_anchor
+  end
+
   say "  Starter Kit frontend configured ✓", :green
 end
