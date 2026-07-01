@@ -5,19 +5,19 @@ if use_typescript
 
   case framework
   when "react"
-    npm_dev_packages.push("@types/react", "@types/react-dom", "typescript@~5.8")
+    npm_dev_packages.push("@types/react", "@types/react-dom", "typescript@~6.0")
     file "tsconfig.json", <%= code("shared/tsconfig.json.tt") %>
     file "tsconfig.app.json", <%= code("react/tsconfig.app.json.tt") %>
     file "tsconfig.node.json", <%= code("react/tsconfig.node.json.tt") %>
     check_script = "tsc -p tsconfig.app.json && tsc -p tsconfig.node.json"
   when "vue"
-    npm_dev_packages.push("typescript@~5.8", "vue-tsc")
+    npm_dev_packages.push("typescript@~6.0", "vue-tsc")
     file "tsconfig.json", <%= code("shared/tsconfig.json.tt") %>
     file "tsconfig.app.json", <%= code("vue/tsconfig.app.json.tt") %>
     file "tsconfig.node.json", <%= code("vue/tsconfig.node.json.tt") %>
     check_script = "vue-tsc -p tsconfig.app.json && tsc -p tsconfig.node.json"
   when "svelte"
-    npm_dev_packages.push("@tsconfig/svelte@5", "svelte-check", "typescript@~5.8", "tslib")
+    npm_dev_packages.push("@tsconfig/svelte@5", "svelte-check", "typescript@~6.0", "tslib")
     file "tsconfig.json", <%= code("svelte/tsconfig.json.tt") %>
     file "tsconfig.node.json", <%= code("svelte/tsconfig.node.json.tt") %>
     check_script = "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json"
