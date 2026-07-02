@@ -100,6 +100,15 @@ if File.exist?(ci_workflow)
   end
 end
 
+# ─── bin/ci runner (config/ci.rb) ─────────────────────────────────────
+# Rails' default runs importmap:audit (removed with Inertia+Vite) and bin/rails
+# test (wrong for rspec). Replace it with a Vite/Inertia-aware version.
+ci_runner = "config/ci.rb"
+if fresh_app && File.exist?(ci_runner)
+  file ci_runner, <%= code("shared/ci.rb.tt") %>, force: true
+  say "  CI: generated bin/ci runner ✓", :green
+end
+
 # ─── Add npm to Dependabot ────────────────────────────────────────────
 
 dependabot_file = ".github/dependabot.yml"
