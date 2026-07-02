@@ -15,7 +15,16 @@ end
 unless vite_installed
   say "📦 Setting up Rails Vite...", :cyan
 
-  add_gem.("rails_vite", comment: "Vite integration [https://github.com/skryukov/rails_vite]")
+  # Slot rails_vite after the asset-related gems; fall back to appending
+  # when the anchor is missing (existing/customized Gemfiles).
+  image_processing_anchor = "gem \"image_processing\", \"~> 1.2\"\n"
+  if !gem_in_gemfile.("rails_vite") && File.exist?("Gemfile") && File.read("Gemfile").include?(image_processing_anchor)
+    insert_into_file "Gemfile",
+      "\ngem \"rails_vite\" # Vite integration [https://github.com/skryukov/rails_vite]\n",
+      after: image_processing_anchor
+  else
+    add_gem.("rails_vite", comment: "Vite integration [https://github.com/skryukov/rails_vite]")
+  end
 
   # Create entrypoints directory
   empty_directory "#{js_destination_path}/entrypoints"

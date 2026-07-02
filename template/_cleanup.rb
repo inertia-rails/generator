@@ -1,13 +1,22 @@
 # ─── Conflict Cleanup ─────────────────────────────────────────────────
 
 if fresh_app
-  # Remove default Rails gems that Inertia+Vite replaces
+  # Remove default Rails gems that Inertia+Vite replaces (and their comments)
   %w[importmap-rails turbo-rails stimulus-rails].each do |name|
     if gem_in_gemfile.(name)
       say "  Removing #{name}...", :yellow
       remove_gem.(name)
     end
   end
+  [
+    /^# Use JavaScript with ESM import maps.*\n/,
+    /^# Hotwire's SPA-like page accelerator.*\n/,
+    /^# Hotwire's modest JavaScript framework.*\n/
+  ].each { |comment| gsub_file "Gemfile", comment, "" }
+
+  # Kamal is a development/deploy tool — keep it out of the production bundle
+  gsub_file "Gemfile", /^gem "kamal", require: false$/,
+    "gem \"kamal\", require: false, group: [ :development, :deploy ]"
 
   # Remove associated files
   remove_file "config/importmap.rb"

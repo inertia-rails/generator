@@ -3,10 +3,17 @@
 say "📦 Setting up Inertia...", :cyan
 
 # Add inertia_rails to Gemfile (installed in _finalize.rb with single bundle install)
+rails_vite_anchor = "gem \"rails_vite\" # Vite integration [https://github.com/skryukov/rails_vite]\n"
 unless gem_in_gemfile.("inertia_rails")
-  append_to_file "Gemfile", <<~GEM
-    gem "inertia_rails", "~> 3.19" # Inertia.js adapter [https://inertia-rails.dev]
-  GEM
+  if File.exist?("Gemfile") && File.read("Gemfile").include?(rails_vite_anchor)
+    insert_into_file "Gemfile",
+      "\n# The Rails adapter for Inertia.js [https://inertia-rails.dev]\ngem \"inertia_rails\", \"~> 3.21\"\n",
+      after: rails_vite_anchor
+  else
+    append_to_file "Gemfile", <<~GEM
+      gem "inertia_rails", "~> 3.21" # The Rails adapter for Inertia.js [https://inertia-rails.dev]
+    GEM
+  end
 end
 
 # Add Inertia Vite plugin (shared across all frameworks)

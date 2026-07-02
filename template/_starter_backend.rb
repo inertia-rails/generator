@@ -4,9 +4,38 @@ if use_starter_kit
   say "📦 Setting up Starter Kit backend...", :cyan
 
   # ─── Dependencies ────────────────────────────────────────────────
-  gems_to_add << "bcrypt"
-  gems_to_add << "authentication-zero"
-  gems_to_add << {name: "letter_opener", group: :development}
+  # Prefer editing the Gemfile in place (uncomment/insert at the Rails
+  # anchors); fall back to appending when an anchor is missing.
+  gemfile_body = File.exist?("Gemfile") ? File.read("Gemfile") : ""
+
+  if gemfile_body.match?(/^# gem "bcrypt"/)
+    uncomment_lines "Gemfile", /gem "bcrypt"/
+  else
+    gems_to_add << "bcrypt"
+  end
+
+  inertia_gem_anchor = "gem \"inertia_rails\", \"~> 3.21\"\n"
+  if gemfile_body.include?(inertia_gem_anchor)
+    insert_into_file "Gemfile",
+      "\n# An authentication system generator for Rails applications\n# we leave gem here to watch for security updates\ngem \"authentication-zero\"\n",
+      after: inertia_gem_anchor
+  else
+    gems_to_add << "authentication-zero"
+  end
+
+  web_console_anchor = "  # Use console on exceptions pages [https://github.com/rails/web-console]\n  gem \"web-console\"\n"
+  if gemfile_body.include?(web_console_anchor)
+    insert_into_file "Gemfile",
+      "\n  # Use letter_opener to preview emails in the browser in development [https://github.com/ryanb/letter_opener]\n  gem \"letter_opener\"\n",
+      after: web_console_anchor
+  else
+    gems_to_add << {name: "letter_opener", group: :development}
+  end
+
+  # The starter kit uses no Active Storage variants — keep image_processing
+  # commented out (Rails 8.1 generates it enabled).
+  gsub_file "Gemfile", /^gem "image_processing", "~> 1\.2"$/,
+    "# gem \"image_processing\", \"~> 1.2\""
 
   # ─── Models, Controllers, Mailers, Views, Routes ───────────────
 <%= copy_dir("shared/starter_backend", force: true) %>
