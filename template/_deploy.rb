@@ -126,16 +126,22 @@ if File.exist?(dependabot_file)
 end
 
 # ─── Kamal deploy config (Vite-aware) ─────────────────────────────────
-deploy_yml = "config/deploy.yml"
-if fresh_app && File.exist?(deploy_yml)
-  # Vite outputs to public/vite — bridge the whole public dir, not just public/assets
-  gsub_file deploy_yml, "asset_path: /rails/public/assets", "asset_path: /rails/public"
+# `rails new` generates the kamal files AFTER applying this template
+# (run_kamal follows apply_rails_template), so edit them in after_bundle.
+if fresh_app
+  after_bundle do
+    deploy_yml = "config/deploy.yml"
+    if File.exist?(deploy_yml)
+      # Vite outputs to public/vite — bridge the whole public dir, not just public/assets
+      gsub_file deploy_yml, "asset_path: /rails/public/assets", "asset_path: /rails/public"
 
-  # Registry-backed build cache
-  builder_anchor = "builder:\n  arch: amd64\n"
-  if File.read(deploy_yml).include?(builder_anchor) && !File.read(deploy_yml).include?("cache:")
-    insert_into_file deploy_yml,
-      "  cache:\n    type: registry\n    image: your-user/#{File.basename(destination_root)}-build-cache\n    options: mode=max\n",
-      after: builder_anchor
+      # Registry-backed build cache
+      builder_anchor = "builder:\n  arch: amd64\n"
+      if File.read(deploy_yml).include?(builder_anchor) && !File.read(deploy_yml).include?("cache:")
+        insert_into_file deploy_yml,
+          "  cache:\n    type: registry\n    image: your-user/#{File.basename(destination_root)}-build-cache\n    options: mode=max\n",
+          after: builder_anchor
+      end
+    end
   end
 end

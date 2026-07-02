@@ -167,6 +167,7 @@ class GeneratorTestCase < RubyBytes::TestCase
     js_ext = "js"
     component_ext = "jsx"
     fresh_app = true
+    self.class.define_method(:after_bundle) { |&block| block&.call }
     #{PM_INSTALL}
     #{GEM_IN_GEMFILE}
     #{APPEND_WITH_BLANK_LINE}
