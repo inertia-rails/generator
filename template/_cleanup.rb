@@ -20,7 +20,9 @@ if fresh_app
   if File.exist?(layout_path)
     gsub_file layout_path, /\s*<%%=\s*javascript_importmap_tags\s*%>\s*\n/, "\n"
     gsub_file layout_path, /\s*<%%=\s*javascript_include_tag\s+["']application["'].*%>\s*\n/, "\n"
-    gsub_file layout_path, /\s*<%%=\s*stylesheet_link_tag\s+["']application["'].*%>\s*\n/, "\n"
+    # Vite serves the stylesheet; drop the propshaft link (:app on Rails 8.1+, "application" earlier) and its comment.
+    gsub_file layout_path, /^[ \t]*<%%#\s*Includes all stylesheet files[^\n]*%>\n/, ""
+    gsub_file layout_path, /^[ \t]*<%%=\s*stylesheet_link_tag\s+(?::app|["']application["'])[^\n]*%>\n/, ""
   end
 
   # Clean ApplicationController (Rails 8.1+)

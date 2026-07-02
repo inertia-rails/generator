@@ -27,6 +27,13 @@ if use_starter_kit
       after: mailer_anchor
   end
 
+  # Keep generated code omakase-clean by autocorrecting after `rails generate`.
+  if File.exist?(dev_env)
+    gsub_file dev_env,
+      "# config.generators.apply_rubocop_autocorrect_after_generate!",
+      "config.generators.apply_rubocop_autocorrect_after_generate!"
+  end
+
   # ─── Alba Serializers (if enabled) ──────────────────────────────
   if use_alba
 <%= copy_dir("shared/starter_alba", force: true) %>
