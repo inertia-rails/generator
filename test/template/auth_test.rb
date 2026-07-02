@@ -7,6 +7,7 @@ class AuthStarterKitTest < GeneratorTestCase
     require "json"
     framework = "react"
     use_starter_kit = true
+    test_framework = "minitest"
     use_alba = false
     use_typescript = true
     js_destination_path = "app/javascript"
@@ -77,6 +78,7 @@ class AuthStarterKitWithAlbaTest < GeneratorTestCase
     require "json"
     framework = "react"
     use_starter_kit = true
+    test_framework = "minitest"
     use_alba = true
     use_typescript = true
     js_destination_path = "app/javascript"
@@ -104,6 +106,7 @@ class AuthDisabledTest < GeneratorTestCase
     require "json"
     framework = "react"
     use_starter_kit = false
+    test_framework = "minitest"
     use_alba = false
     use_typescript = true
     js_destination_path = "app/javascript"

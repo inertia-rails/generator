@@ -114,18 +114,20 @@ else
   end
   ssr_entry_full = "#{js_destination_path}/#{ssr_entrypoint}"
 
-  vite_calls = ["rails()", "inertia({ ssr: '#{ssr_entry_full}' })"]
-
-  vite_plugins.each do |plugin|
+  # Framework plugins first, then tailwind, rails + inertia last
+  tailwind_plugins, framework_plugins = vite_plugins.partition { |p| p[:import].include?("tailwindcss") }
+  vite_calls = []
+  (framework_plugins + tailwind_plugins).each do |plugin|
     vite_imports << plugin[:import]
     vite_calls << plugin[:call]
   end
+  vite_calls << "rails()"
+  vite_calls << "inertia({ ssr: '#{ssr_entry_full}' })"
 
   # SSR config: noExternal for production builds (containerization without node_modules)
-  ssr_config = "noExternal: command === 'build' ? true : undefined,"
+  ssr_config = "// Prebuild ssr.js so we can drop node_modules from the container.\n      noExternal: command === 'build' ? true : undefined,"
   if framework == "react"
-    # React 19 ships CJS-only — externalize in dev so Node handles require natively
-    ssr_config += "\n      external: command === 'serve' ? ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'] : undefined,"
+    ssr_config += "\n      // React 19 ships CJS-only — externalize in dev so Node handles require natively.\n      external: command === 'serve' ? ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'] : undefined,"
   end
 
   file "vite.config.#{js_ext}", <<~JS

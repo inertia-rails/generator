@@ -62,6 +62,50 @@ if use_starter_kit
       "config.generators.apply_rubocop_autocorrect_after_generate!"
   end
 
+  # ─── Explicit framework requires (instead of rails/all) ──────────
+  app_rb = "config/application.rb"
+  if File.exist?(app_rb) && File.read(app_rb).include?("require \"rails/all\"\n")
+    test_unit_require = (test_framework == "rspec") ?
+      "# require \"rails/test_unit/railtie\"" : "require \"rails/test_unit/railtie\""
+    gsub_file app_rb, "require \"rails/all\"\n", <<~RUBY
+      require "rails"
+      # Pick the frameworks you want:
+      require "active_model/railtie"
+      require "active_job/railtie"
+      require "active_record/railtie"
+      require "active_storage/engine"
+      require "action_controller/railtie"
+      require "action_mailer/railtie"
+      require "action_mailbox/engine"
+      require "action_text/engine"
+      require "action_view/railtie"
+      require "action_cable/engine"
+      #{test_unit_require}
+    RUBY
+  end
+
+  # RSpec owns test generation — stop Rails generators from emitting
+  # minitest system-test files.
+  if test_framework == "rspec" && File.exist?(app_rb) &&
+      !File.read(app_rb).include?("config.generators.system_tests")
+    insert_into_file app_rb,
+      "\n    # Don't generate system test files.\n    config.generators.system_tests = nil\n",
+      before: /^  end\nend\n/
+  end
+
+  # ─── Rakefile: run RuboCop autocorrect as the default task ────────
+  if File.exist?("Rakefile") && !File.read("Rakefile").include?("RuboCop::RakeTask")
+    append_to_file "Rakefile", <<~RUBY
+
+      if Rails.env.local?
+        require "rubocop/rake_task"
+        RuboCop::RakeTask.new
+
+        task default: %i[rubocop:autocorrect]
+      end
+    RUBY
+  end
+
   # ─── Alba Serializers (if enabled) ──────────────────────────────
   if use_alba
 <%= copy_dir("shared/starter_alba", force: true) %>
