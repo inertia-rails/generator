@@ -176,6 +176,29 @@ class E2eTest < Minitest::Test
       assert File.exist?(File.join(app_path, "test/controllers/sessions_controller_test.rb")), "Missing sessions controller test"
       assert File.exist?(File.join(app_path, "test/mailers/user_mailer_test.rb")), "Missing user mailer test"
     end
+
+    # System-test harness (starter default: on). Generate-and-boot only —
+    # the browser test itself runs in the generated app's CI, never here.
+    if env.fetch("INERTIA_SYSTEM_TESTS", "1") == "1"
+      assert gemfile.include?("capybara-lockstep"), "Gemfile missing capybara-lockstep"
+
+      app_layout = File.read(File.join(app_path, "app/views/layouts/application.html.erb"))
+      assert app_layout.include?("capybara_lockstep"), "Layout missing capybara_lockstep tag"
+
+      ci_yml = File.read(File.join(app_path, ".github/workflows/ci.yml"))
+      assert ci_yml.include?("google-chrome-stable"), "ci.yml missing chrome install"
+      assert ci_yml.include?("Keep screenshots"), "ci.yml missing screenshots artifact step"
+
+      if test_fw == "rspec"
+        assert File.exist?(File.join(app_path, "spec/system/sessions_spec.rb")), "Missing system spec"
+        rails_helper = File.read(File.join(app_path, "spec/rails_helper.rb"))
+        assert rails_helper.include?("driven_by :selenium, using: :headless_chrome"), "rails_helper missing driven_by"
+        refute File.exist?(File.join(app_path, "test/application_system_test_case.rb")), "Orphaned minitest system test case on rspec path"
+      else
+        assert File.exist?(File.join(app_path, "test/system/sessions_test.rb")), "Missing system test"
+        assert File.exist?(File.join(app_path, "test/application_system_test_case.rb")), "Missing ApplicationSystemTestCase"
+      end
+    end
   end
 
   def assert_foundation_files(app_path)
@@ -225,10 +248,12 @@ class E2eTest < Minitest::Test
       assert st.success?, "bin/rubocop failed for #{name}:\n#{tail("#{out}\n#{err}")}"
     end
 
-    # Run starter kit tests (minitest or rspec)
+    # Run starter kit tests (minitest or rspec). Browser system tests are
+    # excluded — they run in the generated app's own CI, not the generator's
+    # (`bin/rails test` already skips test/system).
     if is_starter_kit
       test_fw = env.fetch("INERTIA_TEST_FRAMEWORK", "minitest")
-      test_cmd = (test_fw == "rspec") ? "bundle exec rspec" : "bin/rails test"
+      test_cmd = (test_fw == "rspec") ? "bundle exec rspec --exclude-pattern 'spec/system/**/*'" : "bin/rails test"
       out, err, st = run_in_app(app_path, test_cmd)
       assert st.success?, "#{test_cmd} failed for #{name}:\n#{tail("#{out}\n#{err}")}"
     end

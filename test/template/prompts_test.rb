@@ -29,6 +29,7 @@ class PromptsEnvFrameworkTest < GeneratorTestCase
     ENV["INERTIA_TYPELIZER"] = "0"
     ENV["INERTIA_ALBA"] = "0"
     ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
+    ENV["INERTIA_SYSTEM_TESTS"] = "0"
 
     <%= include "prompts" %>
 
@@ -117,6 +118,7 @@ class PromptsStarterKitForcesOptionsTest < GeneratorTestCase
     ENV["INERTIA_SSR"] = "1"
     ENV["INERTIA_ALBA"] = "0"
     ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
+    ENV["INERTIA_SYSTEM_TESTS"] = "0"
 
     <%= include "prompts" %>
 
@@ -165,6 +167,7 @@ class PromptsStarterKitSsrOptOutTest < GeneratorTestCase
     ENV["INERTIA_SSR"] = "0"
     ENV["INERTIA_ALBA"] = "0"
     ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
+    ENV["INERTIA_SYSTEM_TESTS"] = "0"
 
     <%= include "prompts" %>
 
@@ -209,6 +212,7 @@ class PromptsAutoDetectFrameworkTest < GeneratorTestCase
     ENV["INERTIA_TYPELIZER"] = "0"
     ENV["INERTIA_ALBA"] = "0"
     ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
+    ENV["INERTIA_SYSTEM_TESTS"] = "0"
 
     <%= include "prompts" %>
 
@@ -257,6 +261,7 @@ class PromptsShadcnRequiresTailwindTest < GeneratorTestCase
     ENV["INERTIA_TYPELIZER"] = "0"
     ENV["INERTIA_ALBA"] = "0"
     ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
+    ENV["INERTIA_SYSTEM_TESTS"] = "0"
 
     <%= include "prompts" %>
 
@@ -266,6 +271,45 @@ class PromptsShadcnRequiresTailwindTest < GeneratorTestCase
   def test_shadcn_disabled_without_tailwind
     run_generator do |output|
       assert_line_printed output, "SHADCN=false"
+    end
+  end
+end
+
+class PromptsStarterKitSystemTestsEnvTest < GeneratorTestCase
+  template <<~'CODE'
+    fresh_app = true
+    framework_detected = nil
+    typescript_detected = false
+    tailwind_detected = false
+    framework = nil
+    use_starter_kit = false
+    use_typescript = false
+    use_tailwind = false
+    use_shadcn = false
+    use_eslint = false
+    use_ssr = false
+    use_typelizer = false
+    use_alba = false
+    use_system_tests = false
+    test_framework = "minitest"
+    auth_strategy = "none"
+
+    ENV["INERTIA_FRAMEWORK"] = "react"
+    ENV["INERTIA_STARTER_KIT"] = "1"
+    ENV["INERTIA_SSR"] = "1"
+    ENV["INERTIA_ALBA"] = "0"
+    ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
+    ENV["INERTIA_SYSTEM_TESTS"] = "1"
+
+    <%= include "prompts" %>
+
+    say "SYSTEM_TESTS=#{use_system_tests}"
+  CODE
+
+  def test_starter_kit_reads_system_tests_from_env
+    run_generator do |output|
+      assert_line_printed output, "System tests: yes (from env)"
+      assert_line_printed output, "SYSTEM_TESTS=true"
     end
   end
 end

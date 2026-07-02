@@ -63,6 +63,7 @@ Pick individual features for your project. The following options are available:
 | Typelizer         | `INERTIA_TYPELIZER`      | `1` / `0`                       | prompted    |
 | Alba serializers  | `INERTIA_ALBA`           | `1` / `0`                       | prompted    |
 | Test framework    | `INERTIA_TEST_FRAMEWORK` | `minitest`, `rspec`             | `minitest`  |
+| System tests      | `INERTIA_SYSTEM_TESTS`   | `1` / `0`                       | prompted    |
 
 Foundation generates a welcome page with a `HomeController` and a root route
 to get you started.
@@ -70,7 +71,8 @@ to get you started.
 ### Starter Kit
 
 The Starter Kit forces TypeScript, Tailwind, shadcn/ui, ESLint, and Typelizer
-on, asks about SSR (default: yes), and adds full authentication:
+on, asks about SSR and browser system tests (default: yes for both), and adds
+full authentication:
 
 ```sh
 INERTIA_FRAMEWORK=react INERTIA_STARTER_KIT=1 \
@@ -84,6 +86,7 @@ The Starter Kit includes:
 - Settings pages (profile, password, email, appearance, sessions)
 - Dark mode with system/light/dark preferences
 - Controller and mailer test suites (Minitest or RSpec)
+- Flake-free browser system tests with capybara-lockstep (optional)
 - Alba + Typelizer for typed serializers (optional)
 
 Pre-built starter kit apps are also available as standalone repos:

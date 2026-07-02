@@ -36,6 +36,7 @@ if use_starter_kit
 
     # Remove Rails-scaffolded minitest structure
     %w[
+      test/application_system_test_case.rb
       test/test_helper.rb
       test/channels
       test/controllers
@@ -44,7 +45,10 @@ if use_starter_kit
       test/integration
       test/mailers
       test/models
+      test/system
     ].each { |path| remove_file path }
+
+    remove_file "test" if Dir.exist?("test") && Dir.empty?("test")
 
     say "  RSpec files created ✓", :green
   end

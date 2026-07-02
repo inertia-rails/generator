@@ -68,6 +68,17 @@ if use_starter_kit
     use_ssr = true
     say "  SSR: yes (default)"
   end
+
+  if ENV.key?("INERTIA_SYSTEM_TESTS")
+    use_system_tests = ENV["INERTIA_SYSTEM_TESTS"] == "1"
+    say "  System tests: #{use_system_tests ? 'yes' : 'no'} (from env)"
+  elsif $stdin.tty?
+    use_system_tests = ask("Set up browser system tests (Capybara + capybara-lockstep)?", :green,
+      limited_to: %w[y n], default: "y") == "y"
+  else
+    use_system_tests = true
+    say "  System tests: yes (default)"
+  end
 else
   # Foundation: individual option prompts
   use_typescript = prompt_bool.("INERTIA_TS", "TypeScript", "Use TypeScript?", detected: typescript_detected)
@@ -83,6 +94,7 @@ else
   use_eslint    = prompt_bool.("INERTIA_ESLINT", "ESLint + Prettier", "Use ESLint + Prettier?")
   use_ssr       = prompt_bool.("INERTIA_SSR", "SSR", "Enable server-side rendering (SSR)?")
   use_typelizer = prompt_bool.("INERTIA_TYPELIZER", "Route helpers", "Route helpers? (Typelizer)")
+  use_system_tests = prompt_bool.("INERTIA_SYSTEM_TESTS", "System tests", "Browser system tests? (Capybara + capybara-lockstep)")
 
   # No auth on Foundation path
   auth_strategy = "none"
@@ -118,6 +130,7 @@ say "  SSR:            #{use_ssr ? 'yes' : 'no'}"
 say "  Route helpers:  #{use_typelizer ? 'yes' : 'no'}"
 say "  Serializers:    #{use_alba ? 'yes' : 'no'}"
 say "  Test framework: #{test_framework}"
+say "  System tests:   #{use_system_tests ? 'yes' : 'no'}"
 say "  Authentication: #{auth_strategy}"
 say "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", :cyan
 say ""

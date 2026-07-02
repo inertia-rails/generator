@@ -41,7 +41,8 @@ def foundation(framework, **overrides)
     "INERTIA_ESLINT" => "0",
     "INERTIA_SSR" => "0",
     "INERTIA_TYPELIZER" => "0",
-    "INERTIA_ALBA" => "0"
+    "INERTIA_ALBA" => "0",
+    "INERTIA_SYSTEM_TESTS" => "0"
   }
   overrides.each { |k, v| base[k.to_s] = v.to_s }
   base
@@ -51,7 +52,8 @@ def starter(framework)
   {
     "INERTIA_FRAMEWORK" => framework,
     "INERTIA_STARTER_KIT" => "1",
-    "INERTIA_TYPELIZER" => "1"
+    "INERTIA_TYPELIZER" => "1",
+    "INERTIA_SYSTEM_TESTS" => "1"
   }
 end
 

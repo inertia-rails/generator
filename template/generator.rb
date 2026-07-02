@@ -33,6 +33,7 @@ use_eslint      = false
 use_ssr         = false
 use_typelizer   = false
 use_alba        = false
+use_system_tests = false
 test_framework  = "minitest"
 auth_strategy   = "none"
 
@@ -147,6 +148,7 @@ js_destination_path = js_destination_detected || "app/javascript"
 
 <%= include "alba" %>
 <%= include "test_framework" %>
+<%= include "system_tests" %>
 <%= include "eslint" %>
 
 # ─── Phase 7: Deploy + Finalize ───────────────────────────────────────

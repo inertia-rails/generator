@@ -160,6 +160,7 @@ class GeneratorTestCase < RubyBytes::TestCase
     use_starter_kit = false
     use_typelizer = false
     use_alba = false
+    use_system_tests = false
     test_framework = "minitest"
     package_manager = "npm"
     js_destination_path = "app/javascript"
