@@ -88,7 +88,8 @@ class CleanupConflictStylesheetTest < GeneratorTestCase
     file "app/views/layouts/application.html.erb", <<~HTML
       <html>
         <head>
-          <%%= stylesheet_link_tag "application" %>
+          <%%# Includes all stylesheet files in app/assets/stylesheets %>
+          <%%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
         </head>
       </html>
     HTML
@@ -101,6 +102,7 @@ class CleanupConflictStylesheetTest < GeneratorTestCase
     run_generator do
       layout = File.read(File.join(destination, "app/views/layouts/application.html.erb"))
       refute layout.include?("stylesheet_link_tag"), "stylesheet_link_tag should be removed"
+      refute layout.include?("Includes all stylesheet files"), "stylesheet comment should be removed"
     end
   end
 end
