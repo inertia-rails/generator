@@ -23,6 +23,7 @@ if fresh_app
   remove_file "bin/importmap"
   remove_file "app/javascript/controllers"
   remove_file "app/assets/stylesheets/application.css"
+  remove_file "app/assets/stylesheets" if Dir.exist?("app/assets/stylesheets") && Dir.empty?("app/assets/stylesheets")
 
   # Clean layout tags
   layout_path = "app/views/layouts/application.html.erb"
