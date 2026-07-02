@@ -129,11 +129,15 @@ jobs:
     steps:
 <% if db_adapter == "postgresql" %>
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev<%= use_system_tests ? " google-chrome-stable" : "" %>
 
 <% elsif db_adapter == "mysql2" %>
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y default-libmysqlclient-dev
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y default-libmysqlclient-dev<%= use_system_tests ? " google-chrome-stable" : "" %>
+
+<% elsif use_system_tests %>
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential git node-gyp pkg-config python-is-python3 google-chrome-stable
 
 <% end %>
       - name: Checkout code
@@ -177,4 +181,14 @@ jobs:
 <% when "trilogy" %>
           DATABASE_URL: trilogy://127.0.0.1:3306
 <% end %>
-        run: bin/rails db:test:prepare <%= test_framework == "rspec" ? "spec" : "test" %>
+        run: bin/rails db:test:prepare <%= test_framework == "rspec" ? "spec" : (use_system_tests ? "test test:system" : "test") %>
+<% if use_system_tests %>
+
+      - name: Keep screenshots from failed system tests
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: screenshots
+          path: ${{ github.workspace }}/tmp/<%= test_framework == "rspec" ? "capybara" : "screenshots" %>
+          if-no-files-found: ignore
+<% end %>

@@ -519,3 +519,59 @@ class DeployDependabotMissingTest < GeneratorTestCase
     end
   end
 end
+
+class DeployCiWorkflowSystemTestsMinitestTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    use_system_tests = true
+    file ".github/workflows/ci.yml", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_installs_chrome_and_runs_system_tests
+    run_generator do
+      ci = File.read(File.join(destination, ".github/workflows/ci.yml"))
+      assert ci.include?("google-chrome-stable"), "Should install chrome"
+      assert ci.include?("bin/rails db:test:prepare test test:system"), "Should run test:system"
+      assert ci.include?("Keep screenshots from failed system tests"), "Should upload screenshots"
+      assert ci.include?("tmp/screenshots"), "Minitest screenshots live in tmp/screenshots"
+    end
+  end
+end
+
+class DeployCiWorkflowSystemTestsRspecTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    use_system_tests = true
+    test_framework = "rspec"
+    file ".github/workflows/ci.yml", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_runs_spec_and_uploads_capybara_screenshots
+    run_generator do
+      ci = File.read(File.join(destination, ".github/workflows/ci.yml"))
+      assert ci.include?("google-chrome-stable"), "Should install chrome"
+      assert ci.include?("bin/rails db:test:prepare spec"), "Should run the spec task"
+      refute ci.include?("test:system"), "rspec runs system specs via the spec task"
+      assert ci.include?("tmp/capybara"), "rspec screenshots live in tmp/capybara"
+    end
+  end
+end
+
+class DeployCiWorkflowNoSystemTestsTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    file ".github/workflows/ci.yml", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_omits_chrome_and_screenshots
+    run_generator do
+      ci = File.read(File.join(destination, ".github/workflows/ci.yml"))
+      refute ci.include?("google-chrome-stable"), "No chrome without system tests"
+      refute ci.include?("Keep screenshots"), "No screenshots step without system tests"
+      assert ci.include?("bin/rails db:test:prepare test"), "Still runs unit tests"
+    end
+  end
+end

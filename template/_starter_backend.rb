@@ -7,7 +7,6 @@ if use_starter_kit
   gems_to_add << "bcrypt"
   gems_to_add << "authentication-zero"
   gems_to_add << {name: "letter_opener", group: :development}
-  gems_to_add << {name: "capybara-lockstep", group: :test}
 
   # ─── Models, Controllers, Mailers, Views, Routes ───────────────
 <%= copy_dir("shared/starter_backend", force: true) %>
