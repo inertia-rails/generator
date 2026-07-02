@@ -386,6 +386,47 @@ class DeployCiWorkflowPostgresTest < GeneratorTestCase
   end
 end
 
+class DeployCiRunnerStarterTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    use_eslint = true
+    use_typescript = true
+    use_starter_kit = true
+    test_framework = "rspec"
+    file "config/ci.rb", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_replaces_rails_default_with_vite_aware_runner
+    run_generator do
+      ci = File.read(File.join(destination, "config/ci.rb"))
+      assert ci.include?('step "Tests: Rails", "bin/rspec"'), "rspec starter should run bin/rspec"
+      assert ci.include?('step "Security: NPM vulnerability audit", "npm audit"'), "should audit npm"
+      assert ci.include?('step "JavaScript: lint", "npm run lint"'), "should lint JS"
+      assert ci.include?('step "JavaScript: types check", "npm run check"'), "should type-check"
+      refute ci.include?("importmap"), "should drop the broken importmap audit step"
+    end
+  end
+end
+
+class DeployCiRunnerFoundationTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    file "config/ci.rb", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_omits_js_and_test_steps_without_features
+    run_generator do
+      ci = File.read(File.join(destination, "config/ci.rb"))
+      refute ci.include?("JavaScript:"), "no JS steps without eslint/typescript"
+      refute ci.include?("Tests: Rails"), "no test steps without a starter kit"
+      refute ci.include?("importmap"), "should drop the broken importmap audit step"
+      assert ci.include?('step "Security: NPM vulnerability audit", "npm audit"'), "still audits npm"
+    end
+  end
+end
+
 class DeployCiWorkflowExistingAppTest < GeneratorTestCase
   template <<~CODE
     #{GeneratorTestCase::DEPLOY_PREAMBLE}

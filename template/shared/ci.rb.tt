@@ -1,0 +1,38 @@
+# Run using bin/ci
+
+CI.run do
+  step "Setup", "bin/setup --skip-server"
+
+  step "Style: Ruby", "bin/rubocop"
+<% if use_eslint || use_typescript %>
+
+<% if use_eslint %>
+  step "JavaScript: lint", "npm run lint"
+  step "JavaScript: format", "npm run format"
+<% end %>
+<% if use_typescript %>
+  step "JavaScript: types check", "npm run check"
+<% end %>
+<% end %>
+
+  step "Security: Gem audit", "bin/bundler-audit"
+  step "Security: NPM vulnerability audit", "npm audit"
+  step "Security: Brakeman code analysis", "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"
+<% if use_starter_kit %>
+
+<% if test_framework == "rspec" %>
+  step "Tests: Rails", "bin/rspec"
+<% else %>
+  step "Tests: Rails", "bin/rails test"
+<% end %>
+  step "Tests: Seeds", "env RAILS_ENV=test bin/rails db:seed:replant"
+<% end %>
+
+  # Optional: set a green GitHub commit status to unblock PR merge.
+  # Requires the `gh` CLI and `gh extension install basecamp/gh-signoff`.
+  # if success?
+  #   step "Signoff: All systems go. Ready for merge and deploy.", "gh signoff"
+  # else
+  #   failure "Signoff: CI failed. Do not merge or deploy.", "Fix the issues and try again."
+  # end
+end
