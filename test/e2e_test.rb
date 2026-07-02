@@ -16,7 +16,7 @@ class E2eTest < Minitest::Test
   COMPILED_TEMPLATE = E2eHelpers.compiled_template_path
 
   # Test configurations: [name, env_vars]
-  # 4 configs covering the key code paths (~2 min total).
+  # 5 configs covering the key code paths (~3 min total).
   # Extended configs for pre-release matrix runs are in matrix_test.rb.
   CONFIGS = {
     # ─── Starter Kit (all options forced on) ─────────────────────────
@@ -28,6 +28,12 @@ class E2eTest < Minitest::Test
     },
     "svelte_starter_kit" => {
       "INERTIA_FRAMEWORK" => "svelte",
+      "INERTIA_STARTER_KIT" => "1",
+      "INERTIA_SSR" => "1",
+      "INERTIA_TYPELIZER" => "1"
+    },
+    "vue_starter_kit" => {
+      "INERTIA_FRAMEWORK" => "vue",
       "INERTIA_STARTER_KIT" => "1",
       "INERTIA_SSR" => "1",
       "INERTIA_TYPELIZER" => "1"
