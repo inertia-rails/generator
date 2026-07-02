@@ -13,6 +13,7 @@ class TypelizerEnabledTest < GeneratorTestCase
     eslint_ignores = []
     #{UPDATE_JSON_FILE}
     #{ADD_GEM}
+    #{GEM_IN_GEMFILE}
     file "Gemfile", "# frozen_string_literal: true\\n"
     <%= include "typelizer" %>
   CODE

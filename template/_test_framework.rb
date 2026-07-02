@@ -3,7 +3,14 @@
 if test_framework == "rspec"
   say "📦 Setting up RSpec...", :cyan
 
-  gems_to_add << {name: "rspec-rails", group: %i[development test]}
+  omakase_anchor = "  # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]\n  gem \"rubocop-rails-omakase\", require: false\n"
+  if File.exist?("Gemfile") && File.read("Gemfile").include?(omakase_anchor)
+    insert_into_file "Gemfile",
+      "\n  # RSpec for Rails 7+\n  gem \"rspec-rails\", \"~> 8.0\"\n",
+      after: omakase_anchor
+  else
+    gems_to_add << {name: "rspec-rails", group: %i[development test]}
+  end
 
   say "  RSpec will be installed ✓", :green
 end
