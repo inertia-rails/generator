@@ -26,6 +26,9 @@ jobs:
       with:
         node-version: "22"
 
+    - name: Install Rails
+      run: gem install railties
+
     - name: Generate ${{ matrix.framework }} starter kit
       run: bundle exec rake starter:${{ matrix.framework }}
 
