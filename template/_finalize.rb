@@ -62,6 +62,17 @@ if use_starter_kit && framework == "react"
   file "#{js_destination_path}/hooks/use-mobile.ts", <%= code("react/starter/hooks/use-mobile.ts") %>, force: true
 end
 
+# shadcn-vue's DropdownMenuSubTrigger ships [class*=\'text-\'] escaped
+# inside a single-quoted :class string; prettier later drops the escapes,
+# leaving nested quotes that break the Vue compiler. Drop the inner quotes
+# entirely — attribute selectors accept unquoted idents.
+if framework == "vue" && use_shadcn
+  sub_trigger = "#{js_destination_path}/components/ui/dropdown-menu/DropdownMenuSubTrigger.vue"
+  if File.exist?(sub_trigger)
+    gsub_file sub_trigger, /\[class\*=\\?'(text-|size-)\\?'\]/, '[class*=\1]'
+  end
+end
+
 # ─── Write vite.config ──────────────────────────────────────────────
 
 vite_plugins.uniq! { |p| [p[:import], p[:call]] }
