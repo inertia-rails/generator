@@ -40,6 +40,7 @@ RSpec.describe "Identity::PasswordResets", type: :request do
           post identity_password_reset_path, params: { email: "missing@example.com" }
         }.not_to have_enqueued_mail(UserMailer, :password_reset)
         expect(response).to redirect_to(new_identity_password_reset_path)
+        expect(flash[:alert]).to eq("You can't reset your password until you verify your email")
       end
     end
   end
