@@ -1,0 +1,186 @@
+name: Sync starter kits
+
+# Regenerates each published starter kit from the current generator and opens a PR
+# on the kit repo. Runs on a version tag (deliberate, versioned) or on demand.
+#
+# Auth: a GitHub App (inertia-rails-generator-sync) installed on the three kit repos.
+# Its installation token is short-lived AND its PRs trigger the kit's CI — unlike the
+# default GITHUB_TOKEN, whose PRs do not. App id + private key live in this repo's
+# secrets (SYNC_APP_ID, SYNC_APP_PRIVATE_KEY).
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      kits:
+        description: 'Kits to sync (comma-separated, or "all")'
+        default: "all"
+        type: string
+
+# The job authenticates with an App token, not GITHUB_TOKEN.
+permissions: {}
+
+jobs:
+  select:
+    runs-on: ubuntu-latest
+    outputs:
+      kits: ${{ steps.pick.outputs.kits }}
+    steps:
+      - id: pick
+        env:
+          REQUESTED: ${{ github.event.inputs.kits || 'all' }}
+        run: |
+          if [ "$REQUESTED" = "all" ]; then
+            echo 'kits=["react","vue","svelte"]' >> "$GITHUB_OUTPUT"
+          else
+            json=$(echo "$REQUESTED" | tr ',' '\n' | sed '/^$/d;s/[[:space:]]//g' | jq -R . | jq -s -c .)
+            echo "kits=$json" >> "$GITHUB_OUTPUT"
+          fi
+
+  sync:
+    needs: select
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        kit: ${{ fromJSON(needs.select.outputs.kits) }}
+    env:
+      VERSION: ${{ github.ref_type == 'tag' && github.ref_name || format('manual-{0}', github.run_id) }}
+    steps:
+      - name: Checkout generator
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby (generation)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Mint App token for ${{ matrix.kit }}-starter-kit
+        id: token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.SYNC_APP_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+          owner: inertia-rails
+          repositories: ${{ matrix.kit }}-starter-kit
+
+      - name: Generate ${{ matrix.kit }} starter kit (rspec)
+        env:
+          INERTIA_TEST_FRAMEWORK: rspec
+        run: bundle exec rake starter:${{ matrix.kit }}
+
+      - name: Clone ${{ matrix.kit }}-starter-kit
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+        run: git clone "https://x-access-token:${GH_TOKEN}@github.com/inertia-rails/${{ matrix.kit }}-starter-kit.git" kit
+
+      - name: Apply generator output over the kit
+        run: bin/sync_apply.sh "tmp/${{ matrix.kit }}-starter-kit" kit "${{ matrix.kit }}"
+
+      - name: Detect changes
+        id: diff
+        working-directory: kit
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No changes to sync for ${{ matrix.kit }}-starter-kit."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Ruby (validation, kit target version)
+        if: steps.diff.outputs.changed == 'true'
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version-file: kit/.ruby-version
+          bundler-cache: false
+
+      - name: Install kit dependencies (regenerates lockfiles)
+        if: steps.diff.outputs.changed == 'true'
+        working-directory: kit
+        run: |
+          bundle install
+          npm install
+
+      # The unique reason this workflow validates at all: the kit's own CI is blind to
+      # runtime SSR (Capybara's Puma never loads config/puma.rb, so the inertia_ssr
+      # plugin never spawns). We build, boot a real server, and assert the page was
+      # server-rendered. continue-on-error: a failure downgrades the PR to a draft
+      # with logs rather than silently dropping the sync.
+      - name: Validate (build + SSR build + boot-and-curl + suite)
+        id: validate
+        if: steps.diff.outputs.changed == 'true'
+        continue-on-error: true
+        working-directory: kit
+        run: |
+          set -e
+          npx vite build
+          npx vite build --ssr
+          bin/rails db:prepare
+          RAILS_ENV=development bin/rails server -p 3000 -b 127.0.0.1 > tmp/sync_server.log 2>&1 &
+          server_pid=$!
+          trap 'kill $server_pid 2>/dev/null || true' EXIT
+          ready=0
+          for _ in $(seq 1 40); do
+            sleep 0.5
+            if curl -sf http://127.0.0.1:3000/up >/dev/null 2>&1; then ready=1; break; fi
+          done
+          if [ "$ready" != 1 ]; then echo "::error::server failed to boot"; tail -40 tmp/sync_server.log; exit 1; fi
+          body=$(curl -s http://127.0.0.1:3000/)
+          if ! echo "$body" | grep -q 'data-server-rendered="true"'; then
+            echo "::error::runtime SSR did not render (CSR fallback — SSR process not serving)"
+            exit 1
+          fi
+          bundle exec rspec
+
+      - name: Commit + push sync branch
+        id: push
+        if: steps.diff.outputs.changed == 'true'
+        working-directory: kit
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+        run: |
+          git config user.name "inertia-rails-generator-sync[bot]"
+          git config user.email "inertia-rails-generator-sync[bot]@users.noreply.github.com"
+          branch="generator-sync/${VERSION}"
+          git checkout -b "$branch"
+          # regenerated lockfiles are part of the sync
+          git add -A
+          git commit -m "Sync with generator ${VERSION}"
+          git push -u origin "$branch"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+
+      - name: Open PR
+        if: steps.diff.outputs.changed == 'true'
+        working-directory: kit
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          DRAFT: ${{ steps.validate.outcome == 'failure' && '--draft' || '' }}
+        run: |
+          verdict="✅ built, server-rendered, and the RSpec suite passed"
+          if [ "${{ steps.validate.outcome }}" = "failure" ]; then
+            verdict="⚠️ **validation failed — opened as draft.** See the workflow run logs. Do not merge until green."
+          fi
+          body=$(cat <<EOF
+          Automated sync of \`${{ matrix.kit }}-starter-kit\` with generator \`${VERSION}\`.
+
+          Regenerated from [inertia-rails/generator](https://github.com/inertia-rails/generator) and applied over this repo (\`bin/sync_apply.sh\`). shadcn \`ui/*\` is included, so this may carry upstream component updates. The keep-list (README, deploy.yml, per-app secrets, \`db/\`, lockfiles) is preserved.
+
+          Validation (runtime SSR is checked here because the kit's own CI cannot): $verdict
+
+          > ⚠️ \`db/\` is not synced — if the generator added a migration, it will not appear here and must be handled manually.
+          EOF
+          )
+          gh pr create \
+            --title "Sync with generator ${VERSION}" \
+            --body "$body" \
+            --base main \
+            --head "${{ steps.push.outputs.branch }}" \
+            $DRAFT
