@@ -69,10 +69,18 @@ jobs:
       # .ruby-version and the Dockerfile's ARG RUBY_VERSION from the running ruby,
       # so generating on any other version would rewrite them in the sync PR.
       # Consequence: the sync never bumps a kit's ruby — that stays maintainer-driven.
+      #
+      # setup-ruby has no ruby-version-file input, and pointing its
+      # working-directory at kit/ would aim bundler-cache at the kit's Gemfile —
+      # the generator's bundle is the one needed here. Read the pin explicitly.
+      - name: Read kit ruby version
+        id: kit_ruby
+        run: echo "version=$(sed 's/^ruby-//' kit/.ruby-version)" >> "$GITHUB_OUTPUT"
+
       - name: Set up Ruby (kit target version)
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version-file: kit/.ruby-version
+          ruby-version: ${{ steps.kit_ruby.outputs.version }}
           bundler-cache: true
 
       - name: Set up Node
