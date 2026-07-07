@@ -40,8 +40,10 @@ if use_starter_kit
   # ─── Models, Controllers, Mailers, Views, Routes ───────────────
 <%= copy_dir("shared/starter_backend", force: true) %>
 
-  # ─── Migrations (need dynamic timestamps) ───────────────────────
-  timestamp = Time.now.utc.strftime("%Y%m%d%H%M%S")
+  # ─── Migrations (fixed timestamps: output must be deterministic) ─
+  # A Time.now stamp made every generation differ, which forced the starter-kit
+  # sync to skip db/ entirely. New starter migrations get the next stamp in order.
+  timestamp = "20250801153827"
   file "db/migrate/#{timestamp}_create_users.rb", <%= code("shared/starter/migrations/create_users.rb") %>
   file "db/migrate/#{timestamp.to_i + 1}_create_sessions.rb", <%= code("shared/starter/migrations/create_sessions.rb") %>
 

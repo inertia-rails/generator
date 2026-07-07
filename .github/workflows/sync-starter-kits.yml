@@ -93,24 +93,47 @@ jobs:
       - name: Apply generator output over the kit
         run: bin/sync_apply.sh "tmp/${{ matrix.kit }}-starter-kit" kit "${{ matrix.kit }}"
 
-      - name: Detect changes
-        id: diff
+      # Two commits per PR: the sync (source changes) and the dependency refresh
+      # (lockfile-only) — separable in review: "what the generator changed" vs
+      # "what bundler/npm moved".
+      - name: Commit sync changes
+        id: sync
+        working-directory: kit
+        run: |
+          git config user.name "inertia-rails-generator-sync[bot]"
+          git config user.email "inertia-rails-generator-sync[bot]@users.noreply.github.com"
+          git checkout -b "generator-sync/${VERSION}"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No source changes for ${{ matrix.kit }}-starter-kit."
+          else
+            git commit -m "Sync with generator ${VERSION}"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # bundle update / npm update (not install): refresh everything the kit's
+      # manifests allow, in the kit's own context — the lockfiles keep the kit's
+      # platforms, which is why the generated app's lockfiles are never copied.
+      # Range changes still come from the generator via the synced manifests.
+      - name: Refresh dependencies
+        working-directory: kit
+        run: |
+          bundle update --all
+          npm update
+
+      - name: Commit dependency updates
+        id: deps
         working-directory: kit
         run: |
           git add -A
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No changes to sync for ${{ matrix.kit }}-starter-kit."
+            echo "No dependency updates for ${{ matrix.kit }}-starter-kit."
           else
+            git commit -m "Update dependencies"
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Install kit dependencies (regenerates lockfiles)
-        if: steps.diff.outputs.changed == 'true'
-        working-directory: kit
-        run: |
-          bundle install
-          npm install
 
       # The unique reason this workflow validates at all: the kit's own CI is blind to
       # runtime SSR (Capybara's Puma never loads config/puma.rb, so the inertia_ssr
@@ -119,7 +142,7 @@ jobs:
       # with logs rather than silently dropping the sync.
       - name: Validate (build + SSR build + boot-and-curl + suite)
         id: validate
-        if: steps.diff.outputs.changed == 'true'
+        if: steps.sync.outputs.changed == 'true' || steps.deps.outputs.changed == 'true'
         continue-on-error: true
         working-directory: kit
         run: |
@@ -143,25 +166,15 @@ jobs:
           fi
           bundle exec rspec
 
-      - name: Commit + push sync branch
-        id: push
-        if: steps.diff.outputs.changed == 'true'
+      - name: Push sync branch
+        if: steps.sync.outputs.changed == 'true' || steps.deps.outputs.changed == 'true'
         working-directory: kit
         env:
           GH_TOKEN: ${{ steps.token.outputs.token }}
-        run: |
-          git config user.name "inertia-rails-generator-sync[bot]"
-          git config user.email "inertia-rails-generator-sync[bot]@users.noreply.github.com"
-          branch="generator-sync/${VERSION}"
-          git checkout -b "$branch"
-          # regenerated lockfiles are part of the sync
-          git add -A
-          git commit -m "Sync with generator ${VERSION}"
-          git push -u origin "$branch"
-          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+        run: git push -u origin "generator-sync/${VERSION}"
 
       - name: Open PR
-        if: steps.diff.outputs.changed == 'true'
+        if: steps.sync.outputs.changed == 'true' || steps.deps.outputs.changed == 'true'
         working-directory: kit
         env:
           GH_TOKEN: ${{ steps.token.outputs.token }}
@@ -174,16 +187,14 @@ jobs:
           body=$(cat <<EOF
           Automated sync of \`${{ matrix.kit }}-starter-kit\` with generator \`${VERSION}\`.
 
-          Regenerated from [inertia-rails/generator](https://github.com/inertia-rails/generator) and applied over this repo (\`bin/sync_apply.sh\`). shadcn \`ui/*\` is included, so this may carry upstream component updates. The keep-list (README, deploy.yml, per-app secrets, \`db/\`, lockfiles) is preserved.
+          Up to two commits: **Sync with generator** — regenerated from [inertia-rails/generator](https://github.com/inertia-rails/generator) and applied over this repo (\`bin/sync_apply.sh\`; includes shadcn \`ui/*\` and \`db/\`) — and **Update dependencies** (\`bundle update --all\` + \`npm update\`, run in this repo's own context so lockfile platforms are preserved). The keep-list (README, deploy.yml, per-repo credentials, repo meta) is untouched.
 
           Validation (runtime SSR is checked here because the kit's own CI cannot): $verdict
-
-          > ⚠️ \`db/\` is not synced — if the generator added a migration, it will not appear here and must be handled manually.
           EOF
           )
           gh pr create \
             --title "Sync with generator ${VERSION}" \
             --body "$body" \
             --base main \
-            --head "${{ steps.push.outputs.branch }}" \
+            --head "generator-sync/${VERSION}" \
             $DRAFT
