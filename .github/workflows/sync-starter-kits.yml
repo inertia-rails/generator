@@ -17,8 +17,9 @@ on:
         default: "all"
         type: string
 
-# The job authenticates with an App token, not GITHUB_TOKEN.
-permissions: {}
+# Kit access uses the App token; the default GITHUB_TOKEN only checks out this repo.
+permissions:
+  contents: read
 
 jobs:
   select:
@@ -33,7 +34,7 @@ jobs:
           if [ "$REQUESTED" = "all" ]; then
             echo 'kits=["react","vue","svelte"]' >> "$GITHUB_OUTPUT"
           else
-            json=$(echo "$REQUESTED" | tr ',' '\n' | sed '/^$/d;s/[[:space:]]//g' | jq -R . | jq -s -c .)
+            json=$(echo "$REQUESTED" | tr ',' '\n' | sed 's/[[:space:]]//g;/^$/d' | jq -R . | jq -s -c .)
             echo "kits=$json" >> "$GITHUB_OUTPUT"
           fi
 
@@ -50,17 +51,6 @@ jobs:
       - name: Checkout generator
         uses: actions/checkout@v4
 
-      - name: Set up Ruby (generation)
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.4"
-          bundler-cache: true
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
       - name: Mint App token for ${{ matrix.kit }}-starter-kit
         id: token
         uses: actions/create-github-app-token@v1
@@ -70,15 +60,35 @@ jobs:
           owner: inertia-rails
           repositories: ${{ matrix.kit }}-starter-kit
 
-      - name: Generate ${{ matrix.kit }} starter kit (rspec)
-        env:
-          INERTIA_TEST_FRAMEWORK: rspec
-        run: bundle exec rake starter:${{ matrix.kit }}
-
       - name: Clone ${{ matrix.kit }}-starter-kit
         env:
           GH_TOKEN: ${{ steps.token.outputs.token }}
         run: git clone "https://x-access-token:${GH_TOKEN}@github.com/inertia-rails/${{ matrix.kit }}-starter-kit.git" kit
+
+      # Generation and validation both run on the KIT's ruby: rails new stamps
+      # .ruby-version and the Dockerfile's ARG RUBY_VERSION from the running ruby,
+      # so generating on any other version would rewrite them in the sync PR.
+      # Consequence: the sync never bumps a kit's ruby — that stays maintainer-driven.
+      - name: Set up Ruby (kit target version)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version-file: kit/.ruby-version
+          bundler-cache: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # rails new runs outside the generator's bundle (Bundler.with_original_env),
+      # so railties must be installed globally — same as the e2e job.
+      - name: Install Rails
+        run: gem install railties
+
+      - name: Generate ${{ matrix.kit }} starter kit (rspec)
+        env:
+          INERTIA_TEST_FRAMEWORK: rspec
+        run: bundle exec rake starter:${{ matrix.kit }}
 
       - name: Apply generator output over the kit
         run: bin/sync_apply.sh "tmp/${{ matrix.kit }}-starter-kit" kit "${{ matrix.kit }}"
@@ -94,13 +104,6 @@ jobs:
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Set up Ruby (validation, kit target version)
-        if: steps.diff.outputs.changed == 'true'
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version-file: kit/.ruby-version
-          bundler-cache: false
 
       - name: Install kit dependencies (regenerates lockfiles)
         if: steps.diff.outputs.changed == 'true'

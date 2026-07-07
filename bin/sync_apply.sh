@@ -15,50 +15,53 @@ SRC="${1:?usage: sync_apply.sh <generated-app-dir> <kit-clone-dir> <kit-name>}"
 DEST="${2:?usage: sync_apply.sh <generated-app-dir> <kit-clone-dir> <kit-name>}"
 KIT="${3:?usage: sync_apply.sh <generated-app-dir> <kit-clone-dir> <kit-name>}"
 
+# All patterns are anchored to the app root (leading /): an unanchored pattern
+# matches at ANY depth in rsync, which would silently drop generator-owned files
+# from the sync (e.g. `ssr/` would swallow a future app/javascript/ssr/ source dir).
 EXCLUDES=(
   # VCS / dependencies / build artifacts / logs — not generator-owned
-  --exclude='.git/'
-  --exclude='node_modules/'
-  --exclude='tmp/'
-  --exclude='log/'
-  --exclude='storage/'
-  --exclude='public/'
-  --exclude='vendor/'
-  --exclude='ssr/'
-  --exclude='.bundle/'
+  --exclude='/.git/'
+  --exclude='/node_modules/'
+  --exclude='/tmp/'
+  --exclude='/log/'
+  --exclude='/storage/'
+  --exclude='/public/'
+  --exclude='/vendor/'
+  --exclude='/ssr/'
+  --exclude='/.bundle/'
 
   # Lockfiles — regenerated in the kit context (never copied: the frozen-mismatch rule)
-  --exclude='Gemfile.lock'
-  --exclude='package-lock.json'
+  --exclude='/Gemfile.lock'
+  --exclude='/package-lock.json'
 
   # Per-app secrets — unique per repo, never sync
-  --exclude='config/master.key'
-  --exclude='config/credentials.yml.enc'
+  --exclude='/config/master.key'
+  --exclude='/config/credentials.yml.enc'
 
   # Stable schema. The generator re-timestamps migrations on every run, so syncing
   # db/ would duplicate the users/sessions migrations. Genuinely-new migrations are
   # surfaced in the PR body (see the workflow) rather than applied automatically.
-  --exclude='db/'
+  --exclude='/db/'
 
   # Deliberate kit keeps
-  --exclude='README.md'
-  --exclude='.github/workflows/deploy.yml'
+  --exclude='/README.md'
+  --exclude='/.github/workflows/deploy.yml'
 
   # Repo-meta the generator never emits — protect from --delete
-  --exclude='LICENSE'
-  --exclude='LICENSE.md'
-  --exclude='CODE_OF_CONDUCT.md'
-  --exclude='CONTRIBUTING.md'
-  --exclude='.github/FUNDING.yml'
-  --exclude='.github/ISSUE_TEMPLATE/'
-  --exclude='.github/PULL_REQUEST_TEMPLATE.md'
-  --exclude='.env'
-  --exclude='.env.*'
+  --exclude='/LICENSE'
+  --exclude='/LICENSE.md'
+  --exclude='/CODE_OF_CONDUCT.md'
+  --exclude='/CONTRIBUTING.md'
+  --exclude='/.github/FUNDING.yml'
+  --exclude='/.github/ISSUE_TEMPLATE/'
+  --exclude='/.github/PULL_REQUEST_TEMPLATE.md'
+  --exclude='/.env'
+  --exclude='/.env.*'
 )
 
 # react-starter-kit keeps its own Inertia entrypoint (the .catch root-element guard).
 if [ "$KIT" = "react" ]; then
-  EXCLUDES+=(--exclude='app/javascript/entrypoints/inertia.tsx')
+  EXCLUDES+=(--exclude='/app/javascript/entrypoints/inertia.tsx')
 fi
 
 rsync -a --delete "${EXCLUDES[@]}" "$SRC/" "$DEST/"
