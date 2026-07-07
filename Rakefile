@@ -36,8 +36,11 @@ task :compile do
   RubyBytes::CLI.new.run("compile", E2eHelpers::TEMPLATE_ROOT)
 end
 
+# INERTIA_TEST_FRAMEWORK defaults to minitest (what the e2e suite exercises) but is
+# env-overridable so the starter-kit sync workflow can generate rspec output to match
+# the published kits (react/vue/svelte-starter-kit all use rspec).
 STARTER_COMMON_ENV = {
-  "INERTIA_TEST_FRAMEWORK" => "minitest",
+  "INERTIA_TEST_FRAMEWORK" => ENV.fetch("INERTIA_TEST_FRAMEWORK", "minitest"),
   "INERTIA_ALBA" => "0",
   "BUNDLE_IGNORE_MESSAGES" => "1"
 }.freeze
