@@ -46,7 +46,7 @@ jobs:
       matrix:
         kit: ${{ fromJSON(needs.select.outputs.kits) }}
     env:
-      VERSION: ${{ github.ref_type == 'tag' && github.ref_name || format('manual-{0}', github.run_id) }}
+      SYNC_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || format('manual-{0}', github.run_id) }}
     steps:
       - name: Checkout generator
         uses: actions/checkout@v4
@@ -110,13 +110,13 @@ jobs:
         run: |
           git config user.name "inertia-rails-generator-sync[bot]"
           git config user.email "inertia-rails-generator-sync[bot]@users.noreply.github.com"
-          git checkout -b "generator-sync/${VERSION}"
+          git checkout -b "generator-sync/${SYNC_VERSION}"
           git add -A
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No source changes for ${{ matrix.kit }}-starter-kit."
           else
-            git commit -m "Sync with generator ${VERSION}"
+            git commit -m "Sync with generator ${SYNC_VERSION}"
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
@@ -179,7 +179,7 @@ jobs:
         working-directory: kit
         env:
           GH_TOKEN: ${{ steps.token.outputs.token }}
-        run: git push -u origin "generator-sync/${VERSION}"
+        run: git push -u origin "generator-sync/${SYNC_VERSION}"
 
       - name: Open PR
         if: steps.sync.outputs.changed == 'true' || steps.deps.outputs.changed == 'true'
@@ -193,7 +193,7 @@ jobs:
             verdict="⚠️ **validation failed — opened as draft.** See the workflow run logs. Do not merge until green."
           fi
           body=$(cat <<EOF
-          Automated sync of \`${{ matrix.kit }}-starter-kit\` with generator \`${VERSION}\`.
+          Automated sync of \`${{ matrix.kit }}-starter-kit\` with generator \`${SYNC_VERSION}\`.
 
           Up to two commits: **Sync with generator** — regenerated from [inertia-rails/generator](https://github.com/inertia-rails/generator) and applied over this repo (\`bin/sync_apply.sh\`; includes shadcn \`ui/*\` and \`db/\`) — and **Update dependencies** (\`bundle update --all\` + \`npm update\`, run in this repo's own context so lockfile platforms are preserved). The keep-list (README, deploy.yml, per-repo credentials, repo meta) is untouched.
 
@@ -201,8 +201,8 @@ jobs:
           EOF
           )
           gh pr create \
-            --title "Sync with generator ${VERSION}" \
+            --title "Sync with generator ${SYNC_VERSION}" \
             --body "$body" \
             --base main \
-            --head "generator-sync/${VERSION}" \
+            --head "generator-sync/${SYNC_VERSION}" \
             $DRAFT
