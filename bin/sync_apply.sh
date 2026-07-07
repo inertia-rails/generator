@@ -59,11 +59,6 @@ EXCLUDES=(
   --exclude='/.env.*'
 )
 
-# react-starter-kit keeps its own Inertia entrypoint (the .catch root-element guard).
-if [ "$KIT" = "react" ]; then
-  EXCLUDES+=(--exclude='/app/javascript/entrypoints/inertia.tsx')
-fi
-
 rsync -a --delete "${EXCLUDES[@]}" "$SRC/" "$DEST/"
 
 echo "Applied generator output: $SRC -> $DEST (kit: $KIT)"
