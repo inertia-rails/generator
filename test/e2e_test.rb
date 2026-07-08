@@ -100,7 +100,7 @@ class E2eTest < Minitest::Test
       assert status.success?, "rails new failed for #{name} (exit #{status.exitstatus}):\n#{tail(output)}"
 
       assert_core_files(app_path)
-      assert_framework_deps(app_path, env["INERTIA_FRAMEWORK"])
+      assert_framework_deps(app_path, env)
 
       if is_starter_kit
         assert_starter_kit_files(app_path, env)
@@ -134,12 +134,17 @@ class E2eTest < Minitest::Test
     assert app_layout.include?("vite_tags"), "Layout missing vite_tags"
   end
 
-  def assert_framework_deps(app_path, framework)
+  def assert_framework_deps(app_path, env)
     pkg_raw = File.read(File.join(app_path, "package.json"))
-    case framework
+    case env["INERTIA_FRAMEWORK"]
     when "react" then assert pkg_raw.include?("@inertiajs/react"), "package.json missing @inertiajs/react"
     when "vue" then assert pkg_raw.include?("@inertiajs/vue3"), "package.json missing @inertiajs/vue3"
     when "svelte" then assert pkg_raw.include?("@inertiajs/svelte"), "package.json missing @inertiajs/svelte"
+    end
+
+    # Starter kits force TypeScript on, so only INERTIA_TS=0 skips this
+    if env["INERTIA_TS"] != "0"
+      assert pkg_raw.include?("@inertiajs/core"), "package.json missing @inertiajs/core (required for TypeScript)"
     end
   end
 
