@@ -92,7 +92,7 @@ class ExistingAppTest < Minitest::Test
       File.write(File.join(app, "tsconfig.json"), "{}\n")
       commit(app)
 
-      env = FULL_ENV.reject { |k, _| %w[INERTIA_FRAMEWORK INERTIA_TS INERTIA_TAILWIND].include?(k) }
+      env = FULL_ENV.except("INERTIA_FRAMEWORK", "INERTIA_TS", "INERTIA_TAILWIND")
       out, status = apply_template(app, env)
 
       assert status.success?, "app:template failed:\n#{tail(out)}"
@@ -108,7 +108,7 @@ class ExistingAppTest < Minitest::Test
 
   def test_refuses_jsbundling_app
     with_base_app do |app|
-      File.write(File.join(app, "Gemfile"), "gem \"jsbundling-rails\"\n", mode: "a")
+      add_fake_gem(app, "jsbundling-rails")
       commit(app)
 
       out, status = apply_template(app, FULL_ENV)
@@ -120,7 +120,7 @@ class ExistingAppTest < Minitest::Test
 
   def test_refuses_vite_rails_app
     with_base_app do |app|
-      File.write(File.join(app, "Gemfile"), "gem \"vite_rails\"\n", mode: "a")
+      add_fake_gem(app, "vite_rails")
       commit(app)
 
       out, status = apply_template(app, FULL_ENV)
@@ -157,10 +157,27 @@ class ExistingAppTest < Minitest::Test
 
   private
 
+  # Pin the Rails that generates base apps (exact gem version, e.g. "7.2.3.1").
+  # CI lanes install a single railties instead; this is for local runs where
+  # several versions coexist.
+  RAILS_PIN = ENV["EXISTING_APP_RAILS"]
+
+  def rails_cmd
+    RAILS_PIN ? ["rails", "_#{RAILS_PIN}_"] : ["rails"]
+  end
+
+  # --skip-kamal only exists on Rails >= 8.0; older rails new dies on unknown switches
+  def base_flags
+    @base_flags ||= begin
+      help, = ::Bundler.with_original_env { Open3.capture2e(*rails_cmd, "new", "--help") }
+      help.include?("--skip-kamal") ? ["--skip-kamal"] : []
+    end
+  end
+
   def with_base_app(flags: [])
     Dir.mktmpdir("inertia_existing_") do |tmpdir|
       app = File.join(tmpdir, "base_app")
-      cmd = ["rails", "new", "base_app", "--skip-kamal", *flags]
+      cmd = [*rails_cmd, "new", "base_app", *base_flags, *flags]
 
       _out, err, status = ::Bundler.with_original_env do
         Open3.capture3(*cmd, chdir: tmpdir)
@@ -170,6 +187,22 @@ class ExistingAppTest < Minitest::Test
       commit(app)
       yield app
     end
+  end
+
+  # Add a gem to the app's Gemfile backed by a local fake so the app still
+  # boots without the real gem installed (bundler resolves path gems offline)
+  def add_fake_gem(app, name)
+    fake = File.join(app, "vendor", name)
+    FileUtils.mkdir_p(fake)
+    File.write(File.join(fake, "#{name}.gemspec"), <<~SPEC)
+      Gem::Specification.new do |s|
+        s.name = #{name.inspect}
+        s.version = "1.0.0"
+        s.summary = "test double"
+        s.authors = ["test"]
+      end
+    SPEC
+    File.write(File.join(app, "Gemfile"), "gem #{name.inspect}, path: #{File.join("vendor", name).inspect}, require: false\n", mode: "a")
   end
 
   def commit(app)
