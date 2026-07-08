@@ -6,7 +6,7 @@ $LOAD_PATH.unshift File.expand_path("lib", __dir__)
 
 require_relative "test/support/e2e_helpers"
 
-EXCLUDED_TESTS = %w[test/e2e_test.rb test/matrix_test.rb].freeze
+EXCLUDED_TESTS = %w[test/e2e_test.rb test/existing_app_test.rb test/matrix_test.rb].freeze
 
 Rake::TestTask.new do |t|
   t.libs << "test"
@@ -26,6 +26,11 @@ namespace :test do
   desc "Run end-to-end tests (slow — runs rails new with compiled template)"
   task :e2e do
     sh(Gem.ruby, "-Ilib:test", "test/e2e_test.rb")
+  end
+
+  desc "Run existing-app install tests (slow — applies template via app:template)"
+  task :existing do
+    sh(Gem.ruby, "-Ilib:test", "test/existing_app_test.rb")
   end
 end
 

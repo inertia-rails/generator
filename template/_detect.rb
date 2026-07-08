@@ -16,8 +16,13 @@ end
 
 say fresh_app ? "  Detected: fresh Rails app" : "  Detected: existing Rails app"
 
-# Detect API-only mode
-if options[:api]
+# Detect API-only mode. options[:api] only covers `rails new --api -m`;
+# existing apps expose it via the booted application's config.
+api_only = options[:api]
+if !api_only && !fresh_app && defined?(Rails.application) && Rails.application.respond_to?(:config)
+  api_only = Rails.application.config.api_only
+end
+if api_only
   say "❌ Inertia requires a full Rails app (not API-only).", :red
   say "   Please re-run without --api or set config.api_only = false.", :red
   exit(1)
