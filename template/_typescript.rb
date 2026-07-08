@@ -3,6 +3,10 @@
 if use_typescript
   say "📦 Setting up TypeScript...", :cyan
 
+  # globals.d.ts augments @inertiajs/core; pnpm won't expose the adapters'
+  # transitive dep to app code, so it must be declared directly
+  npm_dev_packages << "@inertiajs/core@^3.0"
+
   case framework
   when "react"
     npm_dev_packages.push("@types/react", "@types/react-dom", "typescript@~6.0")
