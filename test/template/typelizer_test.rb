@@ -14,7 +14,7 @@ class TypelizerEnabledTest < GeneratorTestCase
     #{UPDATE_JSON_FILE}
     #{ADD_GEM}
     #{GEM_IN_GEMFILE}
-    file "Gemfile", "# frozen_string_literal: true\\n"
+    file "Gemfile", "# frozen_string_literal: true\\n", force: true
     <%= include "typelizer" %>
   CODE
 

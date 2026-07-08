@@ -46,6 +46,17 @@ INERTIA_STARTER_KIT=1 \
 rails new myapp -m https://raw.githubusercontent.com/inertia-rails/generator/dist/template.rb
 ```
 
+When there is no TTY, the generator never waits for input: any option that is
+neither set via env nor auto-detected fails fast with a message naming the
+missing variable.
+
+Two extra switches exist for existing-app runs:
+
+- `INERTIA_ALLOW_DIRTY=1` — proceed despite uncommitted git changes (by
+  default the generator refuses, so a failed install can be rolled back with git).
+- `INERTIA_FRESH_APP=0|1` — override fresh-vs-existing app detection (rarely
+  needed; detection is based on whether a booted Rails app is present).
+
 ## Setup paths
 
 ### Foundation

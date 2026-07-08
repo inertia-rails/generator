@@ -14,6 +14,7 @@ require "json"
 
 # Detection state (set by _detect.rb)
 fresh_app                = nil
+interactive              = nil
 vite_installed           = false
 framework_detected       = nil
 typescript_detected      = false

@@ -46,7 +46,8 @@ class E2eTest < Minitest::Test
       "INERTIA_TAILWIND" => "0",
       "INERTIA_SHADCN" => "0",
       "INERTIA_ESLINT" => "0",
-      "INERTIA_SSR" => "0"
+      "INERTIA_SSR" => "0",
+      "INERTIA_SYSTEM_TESTS" => "0"
     },
     "react_ts_tailwind_shadcn" => {
       "INERTIA_FRAMEWORK" => "react",
@@ -55,7 +56,8 @@ class E2eTest < Minitest::Test
       "INERTIA_TAILWIND" => "1",
       "INERTIA_SHADCN" => "1",
       "INERTIA_ESLINT" => "0",
-      "INERTIA_SSR" => "0"
+      "INERTIA_SSR" => "0",
+      "INERTIA_SYSTEM_TESTS" => "0"
     }
   }.freeze
 

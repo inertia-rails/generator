@@ -1,5 +1,8 @@
 # ─── Interactive Prompts ─────────────────────────────────────────────
 
+# Allow pre-set value (e.g. from tests) to take precedence
+interactive = $stdin.tty? if interactive.nil?
+
 say ""
 say "⚡ Inertia Rails Setup", :cyan
 say ""
@@ -15,6 +18,9 @@ if ENV.key?("INERTIA_FRAMEWORK")
 elsif framework_detected
   framework = framework_detected
   say "  Framework: #{framework} (auto-detected)"
+elsif !interactive
+  say "Non-interactive run: set INERTIA_FRAMEWORK=react|vue|svelte.", :red
+  exit(1)
 else
   framework = ask("Which framework?", :green, limited_to: %w[react vue svelte], default: "react")
 end
@@ -24,6 +30,9 @@ if fresh_app
   if ENV.key?("INERTIA_STARTER_KIT")
     use_starter_kit = ENV["INERTIA_STARTER_KIT"] == "1"
     say "  Setup: #{use_starter_kit ? 'Starter Kit' : 'Foundation'} (from env)"
+  elsif !interactive
+    say "Non-interactive run: set INERTIA_STARTER_KIT=0|1.", :red
+    exit(1)
   else
     use_starter_kit = ask("Setup path?", :green,
       limited_to: %w[foundation starter_kit], default: "foundation") == "starter_kit"
@@ -38,6 +47,9 @@ prompt_bool = ->(env_key, label, prompt_text, detected: false) {
   elsif detected
     value = true
     say "  #{label}: yes (auto-detected)"
+  elsif !interactive
+    say "Non-interactive run: set #{env_key}=0|1.", :red
+    exit(1)
   else
     value = yes?("#{prompt_text} (y/n)", :green)
   end
@@ -61,7 +73,7 @@ if use_starter_kit
   if ENV.key?("INERTIA_SSR")
     use_ssr = ENV["INERTIA_SSR"] == "1"
     say "  SSR: #{use_ssr ? 'yes' : 'no'} (from env)"
-  elsif $stdin.tty?
+  elsif interactive
     use_ssr = ask("Enable server-side rendering (SSR)?", :green,
       limited_to: %w[y n], default: "y") == "y"
   else
@@ -72,7 +84,7 @@ if use_starter_kit
   if ENV.key?("INERTIA_SYSTEM_TESTS")
     use_system_tests = ENV["INERTIA_SYSTEM_TESTS"] == "1"
     say "  System tests: #{use_system_tests ? 'yes' : 'no'} (from env)"
-  elsif $stdin.tty?
+  elsif interactive
     use_system_tests = ask("Set up browser system tests (Capybara + capybara-lockstep)?", :green,
       limited_to: %w[y n], default: "y") == "y"
   else
@@ -112,6 +124,9 @@ if ENV.key?("INERTIA_TEST_FRAMEWORK")
     exit(1)
   end
   say "  Test framework: #{test_framework} (from env)"
+elsif !interactive
+  say "Non-interactive run: set INERTIA_TEST_FRAMEWORK=minitest|rspec.", :red
+  exit(1)
 else
   test_framework = ask("Test framework?", :green,
     limited_to: %w[minitest rspec], default: "minitest")

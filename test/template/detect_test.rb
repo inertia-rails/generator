@@ -15,7 +15,9 @@ class DetectFreshAppTest < GeneratorTestCase
     db_adapter = "sqlite3"
     vite_config_glob = "vite.config.{ts,js,mjs,cjs,mts,cts}"
     #{GEM_IN_GEMFILE}
+    ENV["INERTIA_FRESH_APP"] = "1"
     <%= include "detect" %>
+    ENV.delete("INERTIA_FRESH_APP")
     say "PM=\#{package_manager}"
     say "FW=\#{framework_detected || "none"}"
     say "TS=\#{typescript_detected}"
@@ -381,6 +383,61 @@ class DetectJsbundlingBlockerTest < GeneratorTestCase
   def test_exits_when_jsbundling_detected
     prepare_dummy do
       File.write("Gemfile", "gem 'jsbundling-rails'\n", mode: "a")
+    end
+
+    assert_raises(SystemExit) do
+      run_generator {}
+    end
+  end
+end
+
+class DetectViteRailsBlockerTest < GeneratorTestCase
+  template <<~CODE
+    require "json"
+    fresh_app = nil
+    vite_installed = false
+    framework_detected = nil
+    typescript_detected = false
+    tailwind_detected = false
+    package_manager = "npm"
+    db_adapter = "sqlite3"
+    importmap_detected = false
+    vite_config_glob = "vite.config.{ts,js,mjs,cjs,mts,cts}"
+    #{GEM_IN_GEMFILE}
+    <%= include "detect" %>
+  CODE
+
+  def test_exits_when_vite_rails_detected
+    prepare_dummy do
+      File.write("Gemfile", "gem 'vite_rails'\n", mode: "a")
+    end
+
+    assert_raises(SystemExit) do
+      run_generator {}
+    end
+  end
+end
+
+class DetectDirtyTreeBlockerTest < GeneratorTestCase
+  template <<~CODE
+    require "json"
+    fresh_app = false
+    vite_installed = false
+    framework_detected = nil
+    typescript_detected = false
+    tailwind_detected = false
+    package_manager = "npm"
+    db_adapter = "sqlite3"
+    importmap_detected = false
+    vite_config_glob = "vite.config.{ts,js,mjs,cjs,mts,cts}"
+    #{GEM_IN_GEMFILE}
+    <%= include "detect" %>
+  CODE
+
+  def test_exits_when_git_tree_dirty
+    prepare_dummy do
+      system("git", "init", "-q", ".")
+      File.write("junk.txt", "dirty")
     end
 
     assert_raises(SystemExit) do

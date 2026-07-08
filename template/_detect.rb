@@ -2,9 +2,17 @@
 
 say "🔍 Detecting existing setup...", :cyan
 
-# Detect fresh app vs existing app (rails new -m ... vs rails app:template)
-# Allow pre-set value (e.g. from tests) to take precedence
-fresh_app = !ARGV.any? { |a| a.include?("app:template") } if fresh_app.nil?
+# Detect fresh app vs existing app. `rails new -m` evaluates the template before
+# an application exists; `rails app:template` (and any `rails generate` shim) runs
+# inside a booted app, so Rails.application is present. Allow pre-set value
+# (e.g. from tests) and INERTIA_FRESH_APP to take precedence.
+if fresh_app.nil?
+  fresh_app = if ENV.key?("INERTIA_FRESH_APP")
+    ENV["INERTIA_FRESH_APP"] == "1"
+  else
+    !(defined?(Rails.application) && Rails.application)
+  end
+end
 
 say fresh_app ? "  Detected: fresh Rails app" : "  Detected: existing Rails app"
 
@@ -40,6 +48,21 @@ if gem_in_gemfile.("jsbundling-rails") || gem_in_gemfile.("cssbundling-rails")
   say "     1. Migrate to Vite: https://vite-ruby.netlify.app/guide/migration", :yellow
   say "     2. Remove the conflicting gems and re-run this generator", :yellow
   say "     3. Set up Inertia manually: https://inertia-rails.dev/guide/server-side-setup", :yellow
+  say ""
+  exit(1)
+end
+
+# Blocker: vite_rails (vite-ruby) apps — this generator sets up rails_vite, which
+# conflicts (duplicate Vite integrations, different digest/config conventions)
+if gem_in_gemfile.("vite_rails") || gem_in_gemfile.("vite_ruby")
+  say ""
+  say "❌ vite_rails/vite_ruby detected.", :red
+  say "   This generator sets up rails_vite, which conflicts with vite_rails.", :red
+  say ""
+  say "   Options:", :yellow
+  say "     1. Migrate to rails_vite: https://github.com/skryukov/rails_vite#migrating-from-vite_rails", :yellow
+  say "        then re-run this generator", :yellow
+  say "     2. Set up Inertia manually: https://inertia-rails.dev/guide/server-side-setup", :yellow
   say ""
   exit(1)
 end
@@ -80,6 +103,24 @@ unless fresh_app
     Dir.exist?("#{p}/entrypoints")
   }
   say "  Frontend dir: #{js_destination_detected || 'app/javascript (default)'}"
+end
+
+# Existing apps: refuse to run on a dirty git tree — the installer overwrites
+# files, and git is the rollback story (INERTIA_ALLOW_DIRTY=1 to override)
+if !fresh_app && ENV["INERTIA_ALLOW_DIRTY"] != "1" && File.directory?(".git")
+  dirty = begin
+    !`git status --porcelain`.empty?
+  rescue SystemCallError
+    false
+  end
+  if dirty
+    say ""
+    say "❌ Uncommitted changes detected.", :red
+    say "   This installer overwrites files. Commit or stash first so you can", :red
+    say "   review everything with git diff. (INERTIA_ALLOW_DIRTY=1 to override)", :red
+    say ""
+    exit(1)
+  end
 end
 
 # Detect database adapter (for Dockerfile / CI)

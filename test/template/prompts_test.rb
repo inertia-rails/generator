@@ -188,6 +188,7 @@ end
 class PromptsAutoDetectFrameworkTest < GeneratorTestCase
   template <<~'CODE'
     fresh_app = true
+    interactive = false
     framework_detected = "svelte"
     typescript_detected = true
     tailwind_detected = true
@@ -207,6 +208,7 @@ class PromptsAutoDetectFrameworkTest < GeneratorTestCase
     ENV.delete("INERTIA_TS")
     ENV.delete("INERTIA_TAILWIND")
     ENV["INERTIA_STARTER_KIT"] = "0"
+    ENV["INERTIA_SHADCN"] = "0"
     ENV["INERTIA_ESLINT"] = "0"
     ENV["INERTIA_SSR"] = "0"
     ENV["INERTIA_TYPELIZER"] = "0"
@@ -310,6 +312,51 @@ class PromptsStarterKitSystemTestsEnvTest < GeneratorTestCase
     run_generator do |output|
       assert_line_printed output, "System tests: yes (from env)"
       assert_line_printed output, "SYSTEM_TESTS=true"
+    end
+  end
+end
+
+class PromptsNonInteractiveFailFastTest < GeneratorTestCase
+  template <<~CODE
+    fresh_app = true
+    interactive = false
+    framework_detected = nil
+    typescript_detected = false
+    tailwind_detected = false
+    framework = nil
+    use_starter_kit = false
+    use_typescript = false
+    use_tailwind = false
+    use_shadcn = false
+    use_eslint = false
+    use_ssr = false
+    use_typelizer = false
+    use_alba = false
+    test_framework = "minitest"
+    auth_strategy = "none"
+
+    ENV["INERTIA_FRAMEWORK"] = "react"
+    ENV["INERTIA_STARTER_KIT"] = "0"
+    ENV.delete("INERTIA_TS")
+    ENV["INERTIA_TAILWIND"] = "0"
+    ENV["INERTIA_ESLINT"] = "0"
+    ENV["INERTIA_SSR"] = "0"
+    ENV["INERTIA_TYPELIZER"] = "0"
+    ENV["INERTIA_ALBA"] = "0"
+    ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
+    ENV["INERTIA_SYSTEM_TESTS"] = "0"
+
+    begin
+      <%= include "prompts" %>
+    rescue SystemExit
+      say "EXITED"
+    end
+  CODE
+
+  def test_fails_fast_when_env_missing_and_not_interactive
+    run_generator do |output|
+      assert_line_printed output, "Non-interactive run: set INERTIA_TS=0|1."
+      assert_line_printed output, "EXITED"
     end
   end
 end
