@@ -5,7 +5,7 @@ require_relative "../test_helper"
 class CleanupConflictImportmapTest < GeneratorTestCase
   template <<~CODE
     require "json"
-    fresh_app = nil
+    fresh_app = true
     vite_installed = false
     framework_detected = nil
     typescript_detected = false
@@ -39,7 +39,7 @@ end
 class CleanupConflictTurboTest < GeneratorTestCase
   template <<~CODE
     require "json"
-    fresh_app = nil
+    fresh_app = true
     vite_installed = false
     framework_detected = nil
     typescript_detected = false
@@ -73,7 +73,7 @@ end
 class CleanupConflictStylesheetTest < GeneratorTestCase
   template <<~CODE
     require "json"
-    fresh_app = nil
+    fresh_app = true
     vite_installed = false
     framework_detected = nil
     typescript_detected = false
