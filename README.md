@@ -128,6 +128,9 @@ Both setup paths share the following features:
   and test jobs. Adds a separate `lint_js` workflow for existing apps
 - **Dependabot** — adds the `npm` ecosystem to your existing
   `.github/dependabot.yml`
+- **Node version** — writes a `.node-version` file (stamped from your local
+  Node unless one already exists); CI workflows and the Dockerfile read the
+  same value, so there is a single place to bump it
 - **`Procfile.dev` and `bin/dev`** — starts Vite dev server alongside Rails
 
 ## Tips
@@ -151,6 +154,15 @@ For existing apps, the Foundation path is recommended. If you need
 authentication, add
 [authentication-zero](https://github.com/lazaronixon/authentication-zero)
 separately after running the generator.
+
+### TypeScript version
+
+Generated apps pin `typescript@~6.0` rather than TypeScript 7. On React this
+is a hard requirement: `typescript-eslint` currently declares a peer range of
+`>=4.8.4 <6.1.0`, so bumping TypeScript past 6.0.x breaks `npm install`. Vue
+and Svelte have no upper cap (`vue-tsc` and `svelte-check` accept `>=5.0.0`),
+but share the pin for a consistent, tested toolchain. Feel free to loosen the
+pin once your linting stack supports newer TypeScript.
 
 ## Development
 

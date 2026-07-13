@@ -21,7 +21,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version-file: <%= node_version_file %>
 <% unless package_manager == "npm" %>
           cache: <%= package_manager %>
 <% end %>

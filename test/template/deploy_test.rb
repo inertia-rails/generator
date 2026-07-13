@@ -340,7 +340,14 @@ class DeployCiWorkflowFreshAppTest < GeneratorTestCase
   def test_lint_js_has_node_setup
     run_generator do
       assert_file_contains ".github/workflows/ci.yml", "setup-node"
-      assert_file_contains ".github/workflows/ci.yml", "node-version: 22"
+      assert_file_contains ".github/workflows/ci.yml", "node-version-file: .node-version"
+    end
+  end
+
+  def test_writes_node_version_file
+    run_generator do
+      content = File.read(File.join(destination, ".node-version"))
+      assert_match(/\A\d+\.\d+\.\d+\n\z/, content)
     end
   end
 
@@ -416,13 +423,85 @@ class DeployCiRunnerFoundationTest < GeneratorTestCase
     <%= include "deploy" %>
   CODE
 
-  def test_omits_js_and_test_steps_without_features
+  def test_omits_js_steps_but_keeps_rails_tests
     run_generator do
       ci = File.read(File.join(destination, "config/ci.rb"))
       refute ci.include?("JavaScript:"), "no JS steps without eslint/typescript"
-      refute ci.include?("Tests: Rails"), "no test steps without a starter kit"
+      assert ci.include?('step "Tests: Rails", "bin/rails test"'), "foundation apps still run tests"
+      refute ci.include?("Tests: Seeds"), "no seeds step without db/seeds.rb"
       refute ci.include?("importmap"), "should drop the broken importmap audit step"
       assert ci.include?('step "Security: NPM vulnerability audit", "npm audit"'), "still audits npm"
+    end
+  end
+end
+
+class DeployCiRunnerFoundationRspecTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    test_framework = "rspec"
+    file "config/ci.rb", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_runs_rspec_without_binstub
+    run_generator do
+      ci = File.read(File.join(destination, "config/ci.rb"))
+      assert ci.include?('step "Tests: Rails", "bundle exec rspec"'),
+        "foundation rspec apps have no bin/rspec binstub"
+    end
+  end
+end
+
+class DeployCiRunnerSeedsTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    file "db/seeds.rb", "# seeds"
+    file "config/ci.rb", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_includes_seed_replant_step
+    run_generator do
+      ci = File.read(File.join(destination, "config/ci.rb"))
+      assert ci.include?('step "Tests: Seeds", "env RAILS_ENV=test bin/rails db:seed:replant"')
+    end
+  end
+end
+
+class DeployCiRunnerTypelizerTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    use_typelizer = true
+    use_alba = true
+    use_typescript = true
+    file "config/ci.rb", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_checks_generated_types_freshness
+    run_generator do
+      ci = File.read(File.join(destination, "config/ci.rb"))
+      assert ci.include?('step "JavaScript: generated types are fresh", ' \
+        '"bin/rails typelizer:generate:refresh && git diff --exit-code ' \
+        "app/javascript/routes app/javascript/types/serializers && " \
+        'test -z \"$(git ls-files --others --exclude-standard ' \
+        'app/javascript/routes app/javascript/types/serializers)\""')
+    end
+  end
+end
+
+class DeployNodeVersionExistingNvmrcTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    file ".nvmrc", "22.14.0\\n"
+    file ".github/workflows/ci.yml", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_respects_existing_nvmrc
+    run_generator do
+      refute_file ".node-version"
+      assert_file_contains ".github/workflows/ci.yml", "node-version-file: .nvmrc"
     end
   end
 end
