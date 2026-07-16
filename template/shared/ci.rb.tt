@@ -14,7 +14,7 @@ CI.run do
   step "JavaScript: types check", "npm run check"
 <% end %>
 <% if typelizer_ci_paths.any? %>
-  step "JavaScript: generated types are fresh", "bin/rails typelizer:generate:refresh && git diff --exit-code <%= typelizer_ci_paths.join(" ") %> && test -z \"$(git ls-files --others --exclude-standard <%= typelizer_ci_paths.join(" ") %>)\""
+  step "JavaScript: generated types are fresh", "bin/rails typelizer:generate:refresh && git diff --exit-code -- <%= typelizer_ci_paths.join(" ") %> && test -z \"$(git ls-files --others --exclude-standard -- <%= typelizer_ci_paths.join(" ") %>)\""
 <% end %>
 <% end %>
 
@@ -23,7 +23,7 @@ CI.run do
   step "Security: Brakeman code analysis", "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"
 
 <% if test_framework == "rspec" %>
-  step "Tests: Rails", "<%= use_starter_kit ? "bin/rspec" : "bundle exec rspec" %>"
+  step "Tests: Rails", "bin/rspec"
 <% else %>
   step "Tests: Rails", "bin/rails test"
 <% end %>

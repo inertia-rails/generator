@@ -443,11 +443,11 @@ class DeployCiRunnerFoundationRspecTest < GeneratorTestCase
     <%= include "deploy" %>
   CODE
 
-  def test_runs_rspec_without_binstub
+  def test_runs_rspec_via_binstub
     run_generator do
       ci = File.read(File.join(destination, "config/ci.rb"))
-      assert ci.include?('step "Tests: Rails", "bundle exec rspec"'),
-        "foundation rspec apps have no bin/rspec binstub"
+      # finalize runs `bundle binstubs rspec-core` for every rspec app
+      assert ci.include?('step "Tests: Rails", "bin/rspec"')
     end
   end
 end
@@ -481,10 +481,12 @@ class DeployCiRunnerTypelizerTest < GeneratorTestCase
   def test_checks_generated_types_freshness
     run_generator do
       ci = File.read(File.join(destination, "config/ci.rb"))
+      # `--` keeps git from fataling when a generated dir doesn't exist yet
+      # (foundation + alba emits no serializer types until the first real serializer)
       assert ci.include?('step "JavaScript: generated types are fresh", ' \
-        '"bin/rails typelizer:generate:refresh && git diff --exit-code ' \
+        '"bin/rails typelizer:generate:refresh && git diff --exit-code -- ' \
         "app/javascript/routes app/javascript/types/serializers && " \
-        'test -z \"$(git ls-files --others --exclude-standard ' \
+        'test -z \"$(git ls-files --others --exclude-standard -- ' \
         'app/javascript/routes app/javascript/types/serializers)\""')
     end
   end
