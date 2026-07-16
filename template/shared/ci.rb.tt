@@ -4,7 +4,7 @@ CI.run do
   step "Setup", "bin/setup --skip-server"
 
   step "Style: Ruby", "bin/rubocop"
-<% if use_eslint || use_typescript %>
+<% if use_eslint || use_typescript || typelizer_ci_paths.any? %>
 
 <% if use_eslint %>
   step "JavaScript: lint", "npm run lint"
@@ -13,18 +13,21 @@ CI.run do
 <% if use_typescript %>
   step "JavaScript: types check", "npm run check"
 <% end %>
+<% if typelizer_ci_paths.any? %>
+  step "JavaScript: generated types are fresh", "bin/rails typelizer:generate:refresh && git diff --exit-code -- <%= typelizer_ci_paths.join(" ") %> && test -z \"$(git ls-files --others --exclude-standard -- <%= typelizer_ci_paths.join(" ") %>)\""
+<% end %>
 <% end %>
 
   step "Security: Gem audit", "bin/bundler-audit"
   step "Security: NPM vulnerability audit", "npm audit"
   step "Security: Brakeman code analysis", "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"
-<% if use_starter_kit %>
 
 <% if test_framework == "rspec" %>
   step "Tests: Rails", "bin/rspec"
 <% else %>
   step "Tests: Rails", "bin/rails test"
 <% end %>
+<% if File.exist?("db/seeds.rb") %>
   step "Tests: Seeds", "env RAILS_ENV=test bin/rails db:seed:replant"
 <% end %>
 

@@ -21,12 +21,29 @@ js_ci_install_cmd =
     pm_install[package_manager][:ci]
   end
 
+# ─── Node version (single source: .node-version) ────────────────────
+# CI workflows (setup-node) and the Dockerfile both derive from node_version;
+# the .node-version file keeps them and local version managers converged.
+if package_manager != "bun"
+  node_version_file = %w[.node-version .nvmrc].find { |f| File.exist?(f) }
+  file_node_version = node_version_file && File.read(node_version_file)[/\d+\.\d+\.\d+/]
+  node_version ||= ENV.fetch("NODE_VERSION") { file_node_version || detect_version.("node", "22.22.2") }
+  unless node_version_file
+    node_version_file = ".node-version"
+    file node_version_file, "#{node_version}\n"
+  end
+end
+
+# Generated-type dirs checked for freshness by bin/ci (see ci.rb.tt)
+typelizer_ci_paths = []
+typelizer_ci_paths << "#{js_destination_path}/routes" if use_typelizer
+typelizer_ci_paths << "#{js_destination_path}/types/serializers" if use_alba && use_typescript
+
 # ─── Generate Dockerfile ─────────────────────────────────────────────
 
 if File.exist?("Dockerfile")
   app_name = File.basename(destination_root)
   ruby_version = File.exist?(".ruby-version") ? File.read(".ruby-version").strip.delete_prefix("ruby-") : Gem.ruby_version.to_s
-  node_version ||= ENV.fetch("NODE_VERSION") { detect_version.("node", "22.22.2") } if package_manager != "bun"
   bun_version  ||= ENV.fetch("BUN_VERSION")  { detect_version.("bun",  "1.3.0") }   if package_manager == "bun"
   pnpm_version ||= ENV.fetch("PNPM_VERSION") { detect_version.("pnpm", "10") }      if package_manager == "pnpm"
 

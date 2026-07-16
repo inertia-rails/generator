@@ -44,9 +44,33 @@ class EslintReactTest < GeneratorTestCase
 
   def test_creates_prettierignore
     run_generator do
-      assert_file ".prettierignore"
-      assert_file_contains ".prettierignore", "build"
-      assert_file_contains ".prettierignore", "coverage"
+      # exact match: no trailing blank line when eslint_ignores is empty
+      assert_equal "build\ncoverage\n", File.read(File.join(destination, ".prettierignore"))
+    end
+  end
+end
+
+class EslintPrettierIgnoreTest < GeneratorTestCase
+  template <<~CODE
+    require "json"
+    framework = "react"
+    use_eslint = true
+    use_typescript = true
+    use_tailwind = false
+    js_destination_path = "app/javascript"
+    npm_dev_packages = []
+    eslint_ignores = ["components/ui/**", "routes/**", "types/serializers/**"]
+    #{UPDATE_PACKAGE_JSON}
+    #{STUB_PACKAGE_JSON}
+    <%= include "eslint" %>
+  CODE
+
+  def test_prettierignore_covers_generated_dirs
+    run_generator do
+      assert_file_contains ".prettierignore", "app/javascript/components/ui"
+      assert_file_contains ".prettierignore", "app/javascript/routes"
+      assert_file_contains ".prettierignore", "app/javascript/types/serializers"
+      refute_file_contains ".prettierignore", "/**"
     end
   end
 end

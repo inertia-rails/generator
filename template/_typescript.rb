@@ -7,6 +7,9 @@ if use_typescript
   # transitive dep to app code, so it must be declared directly
   npm_dev_packages << "@inertiajs/core@^3.0"
 
+  # typescript is pinned to ~6.0 (not TS 7): typescript-eslint's peer range
+  # caps at <6.1. vue/svelte have no cap but share the pin for a consistent,
+  # tested toolchain — see "TypeScript version" in the README.
   case framework
   when "react"
     npm_dev_packages.push("@types/react", "@types/react-dom", "typescript@~6.0")

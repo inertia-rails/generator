@@ -34,12 +34,10 @@ if use_eslint
     file ".prettierrc", <%= code("shared/prettierrc.json") %>
   end
 
-  # .prettierignore
-  file ".prettierignore", <<~TXT
-    build
-    coverage
-    #{js_destination_path}/routes
-  TXT
+  # .prettierignore — same generated dirs as eslint_ignores (shadcn output,
+  # typelizer routes, alba serializer types are all machine-written)
+  prettier_ignores = eslint_ignores.map { |i| "#{js_destination_path}/#{i.delete_suffix("/**")}" }
+  file ".prettierignore", ["build", "coverage", *prettier_ignores].join("\n") + "\n"
 
   # Add lint scripts to package.json
   root_files = "'*.{js,mjs,cjs,ts}'"
