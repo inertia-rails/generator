@@ -24,7 +24,7 @@ You can choose between two setup paths:
 Create a new Rails app with Inertia pre-configured:
 
 ```sh
-rails new myapp -m https://raw.githubusercontent.com/inertia-rails/generator/dist/template.rb
+rails new myapp -m https://inertia-rails.dev
 ```
 
 ### Existing app
@@ -33,7 +33,7 @@ Run the generator against an existing Rails app. It auto-detects your
 framework, TypeScript, Tailwind, Vite, and package manager:
 
 ```sh
-rails app:template LOCATION=https://raw.githubusercontent.com/inertia-rails/generator/dist/template.rb
+rails app:template LOCATION=https://inertia-rails.dev
 ```
 
 ### Non-interactive mode
@@ -43,7 +43,7 @@ Set environment variables to skip prompts. This is useful for CI and scripting:
 ```sh
 INERTIA_FRAMEWORK=react \
 INERTIA_STARTER_KIT=1 \
-rails new myapp -m https://raw.githubusercontent.com/inertia-rails/generator/dist/template.rb
+rails new myapp -m https://inertia-rails.dev
 ```
 
 When there is no TTY, the generator never waits for input: any option that is
@@ -87,7 +87,7 @@ full authentication:
 
 ```sh
 INERTIA_FRAMEWORK=react INERTIA_STARTER_KIT=1 \
-rails new myapp -m https://raw.githubusercontent.com/inertia-rails/generator/dist/template.rb
+rails new myapp -m https://inertia-rails.dev
 ```
 
 The Starter Kit includes:
@@ -114,10 +114,12 @@ Both setup paths share the following features:
   and package manager in existing apps
 - **Package managers** — npm, yarn, pnpm, and bun
 - **Conflict cleanup** — removes `importmap-rails`, `turbo-rails`, and
-  `stimulus-rails` in fresh apps. Blocks if `jsbundling-rails` or
-  `cssbundling-rails` are present (they conflict with Vite)
-- **Vite Ruby** — configured with HMR, SSR support, and framework-specific
-  plugins (`@vitejs/plugin-react`, `@vitejs/plugin-vue`, `@sveltejs/vite-plugin-svelte`)
+  `stimulus-rails` in fresh apps. Blocks if `jsbundling-rails`,
+  `cssbundling-rails`, or `vite_rails` are present (they conflict with the
+  Vite setup this generator installs)
+- **Rails Vite** — sets up [rails_vite](https://github.com/skryukov/rails_vite)
+  with HMR, SSR support, and framework-specific plugins
+  (`@vitejs/plugin-react`, `@vitejs/plugin-vue`, `@sveltejs/vite-plugin-svelte`)
 - **shadcn/ui** — React
   ([shadcn](https://ui.shadcn.com)), Vue
   ([shadcn-vue](https://www.shadcn-vue.com)), Svelte
@@ -140,14 +142,14 @@ You can combine the generator with standard `rails new` flags:
 ```sh
 # PostgreSQL + Docker
 rails new myapp --database=postgresql --docker \
-  -m https://raw.githubusercontent.com/inertia-rails/generator/dist/template.rb
+  -m https://inertia-rails.dev
 
 # With devcontainer
-rails new myapp --devcontainer -m https://raw.githubusercontent.com/inertia-rails/generator/dist/template.rb
+rails new myapp --devcontainer -m https://inertia-rails.dev
 
 # Skip default Rails extras
 rails new myapp --skip-action-mailbox --skip-action-text \
-  --skip-active-storage -m https://raw.githubusercontent.com/inertia-rails/generator/dist/template.rb
+  --skip-active-storage -m https://inertia-rails.dev
 ```
 
 For existing apps, the Foundation path is recommended. If you need
