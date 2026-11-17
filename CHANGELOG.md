@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - `bin/ci` freshness check for Typelizer-generated routes and serializer types
 - README note on the `typescript@~6.0` pin (typescript-eslint peer range caps at `<6.1`)
 - Starter kit rate-limits sign-in, sign-up, password reset, and password update (10 attempts per 3 minutes per IP)
+- Stamp the compiled template with the commit SHA it was built from and print it at startup, so bug reports can name the build
 
 ### Fixed
 
