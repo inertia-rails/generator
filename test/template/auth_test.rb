@@ -43,6 +43,19 @@ class AuthStarterKitTest < GeneratorTestCase
     end
   end
 
+  def test_rate_limits_authentication_endpoints
+    run_generator do
+      {
+        "sessions_controller.rb" => "only: :create",
+        "users_controller.rb" => "only: :create",
+        "identity/password_resets_controller.rb" => "only: %i[create update]",
+        "settings/passwords_controller.rb" => "only: :update"
+      }.each do |controller, actions|
+        assert_file_contains "app/controllers/#{controller}", "rate_limit to: 10, within: 3.minutes, #{actions}"
+      end
+    end
+  end
+
   def test_creates_migrations
     run_generator do
       migrations = Dir.glob("#{destination}/db/migrate/*")

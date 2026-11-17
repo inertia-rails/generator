@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Emit `.node-version` as the single source for CI workflows (`node-version-file`) and the Dockerfile `NODE_VERSION` arg, instead of a hardcoded Node 22 in workflows
 - `bin/ci` freshness check for Typelizer-generated routes and serializer types
 - README note on the `typescript@~6.0` pin (typescript-eslint peer range caps at `<6.1`)
+- Starter kit rate-limits sign-in, sign-up, password reset, and password update (10 attempts per 3 minutes per IP)
 
 ### Fixed
 
