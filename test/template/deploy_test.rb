@@ -734,7 +734,7 @@ class DeployCiRunnerYarnBerryTest < GeneratorTestCase
 
   def test_yarn_berry_audits_with_yarn_npm_audit
     run_generator do
-      assert_file_contains "config/ci.rb", '"yarn npm audit"'
+      assert_file_contains "config/ci.rb", '"yarn npm audit --recursive"'
     end
   end
 end

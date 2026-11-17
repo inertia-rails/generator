@@ -21,10 +21,11 @@ js_ci_install_cmd =
     pm_install[package_manager][:ci]
   end
 
-# Vulnerability audit for bin/ci. Yarn 2+ moved it under `yarn npm`.
+# Vulnerability audit for bin/ci. Yarn 2+ moved it under `yarn npm` and
+# only checks direct dependencies unless asked to recurse.
 js_audit_cmd =
   case package_manager
-  when "yarn" then yarn_through_corepack ? "yarn npm audit" : "yarn audit"
+  when "yarn" then yarn_through_corepack ? "yarn npm audit --recursive" : "yarn audit"
   when "pnpm" then "pnpm audit"
   when "bun"  then "bun audit"
   else "npm audit"
