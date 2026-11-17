@@ -114,10 +114,12 @@ Both setup paths share the following features:
   and package manager in existing apps
 - **Package managers** — npm, yarn, pnpm, and bun
 - **Conflict cleanup** — removes `importmap-rails`, `turbo-rails`, and
-  `stimulus-rails` in fresh apps. Blocks if `jsbundling-rails` or
-  `cssbundling-rails` are present (they conflict with Vite)
-- **Vite Ruby** — configured with HMR, SSR support, and framework-specific
-  plugins (`@vitejs/plugin-react`, `@vitejs/plugin-vue`, `@sveltejs/vite-plugin-svelte`)
+  `stimulus-rails` in fresh apps. Blocks if `jsbundling-rails`,
+  `cssbundling-rails`, or `vite_rails` are present (they conflict with the
+  Vite setup this generator installs)
+- **Rails Vite** — sets up [rails_vite](https://github.com/skryukov/rails_vite)
+  with HMR, SSR support, and framework-specific plugins
+  (`@vitejs/plugin-react`, `@vitejs/plugin-vue`, `@sveltejs/vite-plugin-svelte`)
 - **shadcn/ui** — React
   ([shadcn](https://ui.shadcn.com)), Vue
   ([shadcn-vue](https://www.shadcn-vue.com)), Svelte
