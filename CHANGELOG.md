@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
 - Emit `.node-version` as the single source for CI workflows (`node-version-file`) and the Dockerfile `NODE_VERSION` arg, instead of a hardcoded Node 22 in workflows
 - `bin/ci` freshness check for Typelizer-generated routes and serializer types
 - README note on the `typescript@~6.0` pin (typescript-eslint peer range caps at `<6.1`)
+- Server-managed meta tags out of the box: `config.server_head`, `serverHead: true` in every entrypoint, and `inertia_meta_tags(default_title: ...)` in the layout instead of a plain `<title>` (requires inertia_rails 3.23 and Inertia.js 3.5)
+- `config.convert_fragment_redirects = true` in the generated initializer
 
 ### Fixed
 

@@ -123,6 +123,9 @@ end
 
 js_destination_path = js_destination_detected || "app/javascript"
 
+# Fallback page title, e.g. "my_app" → "My App"
+app_title = app_name.tr("_-", "  ").split.map(&:capitalize).join(" ")
+
 # ─── Phase 2: Core Infrastructure ──────────────────────────────────
 
 <%= include "cleanup" %>
