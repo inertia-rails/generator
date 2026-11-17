@@ -249,6 +249,57 @@ class FinalizeExistingViteConfigRerunTest < GeneratorTestCase
   end
 end
 
+class FinalizeExistingViteConfigWithFrameworkTest < GeneratorTestCase
+  template <<~CODE
+    #{FINALIZE_PREAMBLE}
+    #{EXISTING_VITE_PLUGINS}
+    #{NOOP_ADD_GEM}
+    self.class.define_method(:after_bundle) { |&block| block&.call }
+    file "vite.config.ts", <<~JS
+      import { defineConfig } from 'vite'
+      import react from '@vitejs/plugin-react'
+      import rails from 'rails-vite-plugin'
+      import { viteStaticCopy } from 'vite-plugin-static-copy'
+
+      export default defineConfig({
+        plugins: [
+          react({ jsxImportSource: '@emotion/react' }),
+          viteStaticCopy({
+            targets: [
+              { src: 'a', dest: 'b' },
+            ],
+          }),
+          rails(),
+        ],
+      })
+    JS
+    <%= include "finalize" %>
+  CODE
+
+  def test_keeps_a_framework_plugin_that_has_options
+    run_generator do
+      config = File.read(File.join(destination, "vite.config.ts"))
+      assert_equal 1, config.scan("react(").size, "react() should not be added next to react({ ... })"
+      assert_equal 1, config.scan("import react").size, "react should not be imported twice"
+    end
+  end
+
+  def test_imports_the_compiler_preset_on_its_own
+    run_generator do
+      assert_file_contains "vite.config.ts", "import { reactCompilerPreset } from '@vitejs/plugin-react'"
+    end
+  end
+
+  def test_appends_to_the_plugins_array_not_a_nested_one
+    run_generator do
+      config = File.read(File.join(destination, "vite.config.ts"))
+      assert_includes config, "        { src: 'a', dest: 'b' },\n      ],\n    }),\n    rails(),\n", "nested array should be untouched"
+      assert_includes config, "    rails(),\n    babel({ presets: [reactCompilerPreset()] }),\n    tailwindcss(),\n" \
+        "    inertia({ ssr: 'app/javascript/entrypoints/inertia.jsx' }),\n  ],\n})"
+    end
+  end
+end
+
 class FinalizeExistingViteConfigSingleLineTest < GeneratorTestCase
   template <<~CODE
     #{FINALIZE_PREAMBLE}

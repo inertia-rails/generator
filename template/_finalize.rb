@@ -92,29 +92,39 @@ vite_plugins = framework_plugins + tailwind_plugins
 
 if existing_vite_config
   # Existing app: add what is missing to the existing config. Plugins go at
-  # the end of the array, in order, so they run after the ones already there.
+  # the end of the array, in order: inertia() placed before the Rails plugin
+  # makes SSR builds emit a duplicate bundle.
   vite_config = File.read(existing_vite_config)
 
-  missing_plugins = vite_plugins.reject { |plugin| vite_config.include?(plugin[:call]) }
+  # A plugin is present when its function is called at all, so an existing
+  # `react({ ... })` is not doubled by a bare `react()`
+  missing_plugins = vite_plugins.reject { |plugin| vite_config.match?(/\b#{plugin[:call][/\A\w+/]}\(/) }
   unless vite_config.include?("@inertiajs/vite")
     missing_plugins << { import: "import inertia from '@inertiajs/vite'", call: "inertia({ ssr: '#{ssr_entry_full}' })" }
   end
 
   missing_imports = missing_plugins.map { |plugin| plugin[:import] }.reject { |import| vite_config.include?(import) }
+  # babel()'s preset is exported by the React plugin, whose import we leave
+  # alone when react() is already set up
+  if missing_plugins.any? { |plugin| plugin[:call].include?("reactCompilerPreset") } &&
+      !"#{vite_config}#{missing_imports.join}".include?("reactCompilerPreset")
+    missing_imports << "import { reactCompilerPreset } from '@vitejs/plugin-react'"
+  end
   prepend_file existing_vite_config, "#{missing_imports.join("\n")}\n" if missing_imports.any?
 
-  missing_plugins.each do |plugin|
+  if missing_plugins.any?
     vite_config = File.read(existing_vite_config)
-    # Match up to the array's closing bracket on its own line, so brackets
-    # inside plugin options (e.g. `presets: [...]`) are skipped
-    updated = vite_config.sub(/(plugins:\s*\[.*?),?(\n\s*\])/m) do
-      head, tail = $1, $2
-      "#{head}#{"," unless head.end_with?("[")}\n    #{plugin[:call]},#{tail}"
+    # The array closes at the indentation of the line that opens it; deeper
+    # brackets belong to plugin options
+    updated = vite_config.sub(/^([ \t]*+)([^\n]*plugins:\s*\[.*?),?(\n\1\])/m) do
+      indent, head, tail = $1, $2, $3
+      calls = missing_plugins.map { |plugin| "\n#{indent}  #{plugin[:call]}," }.join
+      "#{indent}#{head}#{"," unless head.end_with?("[")}#{calls}#{tail}"
     end
 
     if updated == vite_config
       say "  ⚠ Could not find a multi-line `plugins: [` array in #{existing_vite_config}.", :yellow
-      say "    Add this plugin manually: #{plugin[:call]}", :yellow
+      missing_plugins.each { |plugin| say "    Add this plugin manually: #{plugin[:call]}", :yellow }
     else
       File.write(File.join(destination_root, existing_vite_config), updated)
     end

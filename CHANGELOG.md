@@ -22,5 +22,6 @@ All notable changes to this project will be documented in this file.
 - `.prettierignore` now covers all generated dirs (shadcn `components/ui`, alba `types/serializers`), matching the ESLint ignores
 - `bin/ci` keeps Rails test and seed steps on the Foundation path (previously dropped when replacing the stock `config/ci.rb`)
 - Apps with an existing `vite.config` now get the `inertia()` plugin, and plugins are appended after the existing ones in order (previously prepended in reverse, with `inertia()` missing)
+- An existing `vite.config` that already sets up the framework plugin (including with options, e.g. `react({ ... })`) no longer gets a second copy or a duplicate import, and `reactCompilerPreset` is imported for the added `babel()` plugin
 - `bin/ci` runs lint, format, type check, and audit through the app's package manager instead of always `npm`
 - Dependabot uses the `bun` ecosystem for Bun apps instead of `npm`
