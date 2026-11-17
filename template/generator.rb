@@ -2,11 +2,11 @@
 # https://github.com/inertia-rails/generator
 #
 # Usage:
-#   rails new myapp -m https://raw.githubusercontent.com/inertia-rails/generator/dist/template.rb
-#   rails app:template LOCATION=https://raw.githubusercontent.com/inertia-rails/generator/dist/template.rb
+#   rails new myapp -m https://inertia-rails.dev
+#   rails app:template LOCATION=https://inertia-rails.dev
 #
 # Non-interactive mode via env vars:
-#   INERTIA_FRAMEWORK=react INERTIA_STARTER_KIT=1 rails new myapp -m https://raw.githubusercontent.com/inertia-rails/generator/dist/template.rb
+#   INERTIA_FRAMEWORK=react INERTIA_STARTER_KIT=1 rails new myapp -m https://inertia-rails.dev
 
 require "json"
 
