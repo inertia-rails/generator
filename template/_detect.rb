@@ -50,7 +50,7 @@ if gem_in_gemfile.("jsbundling-rails") || gem_in_gemfile.("cssbundling-rails")
   say "   This generator sets up Vite, which conflicts with these gems.", :red
   say ""
   say "   Options:", :yellow
-  say "     1. Migrate to Vite: https://vite-ruby.netlify.app/guide/migration", :yellow
+  say "     1. Migrate to rails_vite: https://github.com/skryukov/rails_vite#jsbundling-mode", :yellow
   say "     2. Remove the conflicting gems and re-run this generator", :yellow
   say "     3. Set up Inertia manually: https://inertia-rails.dev/guide/server-side-setup", :yellow
   say ""
