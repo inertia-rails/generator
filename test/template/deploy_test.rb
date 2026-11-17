@@ -576,7 +576,13 @@ class DeployDependabotTest < GeneratorTestCase
 
   def test_adds_npm_to_dependabot
     run_generator do
-      assert_file_contains ".github/dependabot.yml", "npm"
+      assert_file_contains ".github/dependabot.yml", "package-ecosystem: npm"
+    end
+  end
+
+  def test_delays_fresh_releases_with_a_cooldown
+    run_generator do
+      assert_file_contains ".github/dependabot.yml", "cooldown:\n    default-days: 5"
     end
   end
 
@@ -653,6 +659,133 @@ class DeployCiWorkflowNoSystemTestsTest < GeneratorTestCase
       refute ci.include?("google-chrome-stable"), "No chrome without system tests"
       refute ci.include?("Keep screenshots"), "No screenshots step without system tests"
       assert ci.include?("bin/rails db:test:prepare test"), "Still runs unit tests"
+    end
+  end
+end
+
+class DeployCiRunnerPnpmTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    package_manager = "pnpm"
+    use_eslint = true
+    use_typescript = true
+    file "config/ci.rb", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_runs_scripts_and_audit_through_pnpm
+    run_generator do
+      ci = File.read(File.join(destination, "config/ci.rb"))
+      assert ci.include?('step "JavaScript: lint", "pnpm run lint"'), "should lint with pnpm"
+      assert ci.include?('step "JavaScript: format", "pnpm run format"'), "should check formatting with pnpm"
+      assert ci.include?('step "JavaScript: types check", "pnpm run check"'), "should type-check with pnpm"
+      assert ci.include?('"pnpm audit"'), "should audit with pnpm"
+    end
+  end
+end
+
+class DeployCiRunnerBunTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    package_manager = "bun"
+    use_eslint = true
+    use_typescript = true
+    file "config/ci.rb", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_runs_scripts_and_audit_through_bun
+    run_generator do
+      ci = File.read(File.join(destination, "config/ci.rb"))
+      assert ci.include?('step "JavaScript: lint", "bun run lint"'), "should lint with bun"
+      assert ci.include?('"bun audit"'), "should audit with bun"
+    end
+  end
+end
+
+class DeployCiRunnerYarn1Test < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    package_manager = "yarn"
+    yarn_version = "1.22.22"
+    use_eslint = true
+    use_typescript = true
+    file "config/ci.rb", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_yarn_1_audits_with_yarn_audit
+    run_generator do
+      assert_file_contains "config/ci.rb", '"yarn audit"'
+    end
+  end
+end
+
+class DeployCiRunnerYarnBerryTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    package_manager = "yarn"
+    yarn_version = "4.5.0"
+    use_eslint = true
+    use_typescript = true
+    file "config/ci.rb", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_yarn_berry_audits_with_yarn_npm_audit
+    run_generator do
+      assert_file_contains "config/ci.rb", '"yarn npm audit --recursive"'
+    end
+  end
+end
+
+class DeployCiWorkflowHardeningTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    file ".github/workflows/ci.yml", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_restricts_token_and_drops_checkout_credentials
+    run_generator do
+      ci = File.read(File.join(destination, ".github/workflows/ci.yml"))
+      assert ci.include?("permissions:\n  contents: read\n"), "token should be read-only"
+      assert_equal ci.scan("uses: actions/checkout@").size, ci.scan("persist-credentials: false").size,
+        "every checkout should drop its credentials"
+    end
+  end
+end
+
+class DeployLintJsWorkflowHardeningTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    fresh_app = false
+    file ".github/workflows/ci.yml", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_restricts_token_and_drops_checkout_credentials
+    run_generator do
+      lint = File.read(File.join(destination, ".github/workflows/lint_js.yml"))
+      assert lint.include?("permissions:\n  contents: read\n"), "token should be read-only"
+      assert lint.include?("persist-credentials: false"), "checkout should drop its credentials"
+    end
+  end
+end
+
+class DeployDependabotBunTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    #{ADD_GEM}
+    package_manager = "bun"
+    file ".github/dependabot.yml", "version: 2\\nupdates:\\n"
+    <%= include "deploy" %>
+  CODE
+
+  def test_uses_the_bun_ecosystem
+    run_generator do
+      assert_file_contains ".github/dependabot.yml", "package-ecosystem: bun"
+      refute_file_contains ".github/dependabot.yml", "package-ecosystem: npm"
     end
   end
 end
