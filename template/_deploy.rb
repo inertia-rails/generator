@@ -21,6 +21,16 @@ js_ci_install_cmd =
     pm_install[package_manager][:ci]
   end
 
+# Vulnerability audit for bin/ci. Yarn 2+ moved it under `yarn npm` and
+# only checks direct dependencies unless asked to recurse.
+js_audit_cmd =
+  case package_manager
+  when "yarn" then yarn_through_corepack ? "yarn npm audit --recursive" : "yarn audit"
+  when "pnpm" then "pnpm audit"
+  when "bun"  then "bun audit"
+  else "npm audit"
+  end
+
 # ─── Node version (single source: .node-version) ────────────────────
 # CI workflows (setup-node) and the Dockerfile both derive from node_version;
 # the .node-version file keeps them and local version managers converged.
@@ -126,19 +136,26 @@ if fresh_app && File.exist?(ci_runner)
   say "  CI: generated bin/ci runner ✓", :green
 end
 
-# ─── Add npm to Dependabot ────────────────────────────────────────────
+# ─── Add JS packages to Dependabot ────────────────────────────────────
+# Bun lockfiles are their own ecosystem; npm, yarn and pnpm share `npm`.
+# The cooldown holds back versions published in the last few days, when a
+# compromised release is most likely to still be live (security updates
+# are not delayed).
 
 dependabot_file = ".github/dependabot.yml"
 if File.exist?(dependabot_file)
+  dependabot_ecosystem = (package_manager == "bun") ? "bun" : "npm"
   dependabot_config = File.read(dependabot_file)
-  unless dependabot_config.include?("package-ecosystem: npm")
+  unless dependabot_config.include?("package-ecosystem: #{dependabot_ecosystem}")
     append_with_blank_line.(dependabot_file, <<~YAML)
-      - package-ecosystem: npm
+      - package-ecosystem: #{dependabot_ecosystem}
         directory: "/"
         schedule:
           interval: weekly
+        cooldown:
+          default-days: 5
     YAML
-    say "  Dependabot: added npm ecosystem ✓", :green
+    say "  Dependabot: added #{dependabot_ecosystem} ecosystem ✓", :green
   end
 end
 

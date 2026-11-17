@@ -2,13 +2,16 @@
 # https://github.com/inertia-rails/generator
 #
 # Usage:
-#   rails new myapp -m https://raw.githubusercontent.com/inertia-rails/generator/dist/template.rb
-#   rails app:template LOCATION=https://raw.githubusercontent.com/inertia-rails/generator/dist/template.rb
+#   rails new myapp -m https://inertia-rails.dev
+#   rails app:template LOCATION=https://inertia-rails.dev
 #
 # Non-interactive mode via env vars:
-#   INERTIA_FRAMEWORK=react INERTIA_STARTER_KIT=1 rails new myapp -m https://raw.githubusercontent.com/inertia-rails/generator/dist/template.rb
+#   INERTIA_FRAMEWORK=react INERTIA_STARTER_KIT=1 rails new myapp -m https://inertia-rails.dev
 
 require "json"
+
+# Build this template was compiled from — quote it in bug reports.
+generator_version = "<%= template_version %>"
 
 # ─── State Variables ────────────────────────────────────────────────
 
@@ -109,6 +112,8 @@ append_with_blank_line = ->(path, content) {
 }
 
 # ─── Phase 1: Detect + Prompt ──────────────────────────────────────
+
+say "Inertia Rails generator (build #{generator_version})"
 
 <%= include "detect" %>
 <%= include "prompts" %>
