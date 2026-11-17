@@ -10,6 +10,9 @@
 
 require "json"
 
+# Build this template was compiled from — quote it in bug reports.
+generator_version = "<%= template_version %>"
+
 # ─── State Variables ────────────────────────────────────────────────
 
 # Detection state (set by _detect.rb)
@@ -109,6 +112,8 @@ append_with_blank_line = ->(path, content) {
 }
 
 # ─── Phase 1: Detect + Prompt ──────────────────────────────────────
+
+say "Inertia Rails generator (build #{generator_version})"
 
 <%= include "detect" %>
 <%= include "prompts" %>
