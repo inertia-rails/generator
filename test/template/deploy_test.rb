@@ -576,7 +576,13 @@ class DeployDependabotTest < GeneratorTestCase
 
   def test_adds_npm_to_dependabot
     run_generator do
-      assert_file_contains ".github/dependabot.yml", "npm"
+      assert_file_contains ".github/dependabot.yml", "package-ecosystem: npm"
+    end
+  end
+
+  def test_delays_fresh_releases_with_a_cooldown
+    run_generator do
+      assert_file_contains ".github/dependabot.yml", "cooldown:\n    default-days: 5"
     end
   end
 
@@ -729,6 +735,57 @@ class DeployCiRunnerYarnBerryTest < GeneratorTestCase
   def test_yarn_berry_audits_with_yarn_npm_audit
     run_generator do
       assert_file_contains "config/ci.rb", '"yarn npm audit"'
+    end
+  end
+end
+
+class DeployCiWorkflowHardeningTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    file ".github/workflows/ci.yml", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_restricts_token_and_drops_checkout_credentials
+    run_generator do
+      ci = File.read(File.join(destination, ".github/workflows/ci.yml"))
+      assert ci.include?("permissions:\n  contents: read\n"), "token should be read-only"
+      assert_equal ci.scan("uses: actions/checkout@").size, ci.scan("persist-credentials: false").size,
+        "every checkout should drop its credentials"
+    end
+  end
+end
+
+class DeployLintJsWorkflowHardeningTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    fresh_app = false
+    file ".github/workflows/ci.yml", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_restricts_token_and_drops_checkout_credentials
+    run_generator do
+      lint = File.read(File.join(destination, ".github/workflows/lint_js.yml"))
+      assert lint.include?("permissions:\n  contents: read\n"), "token should be read-only"
+      assert lint.include?("persist-credentials: false"), "checkout should drop its credentials"
+    end
+  end
+end
+
+class DeployDependabotBunTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    #{ADD_GEM}
+    package_manager = "bun"
+    file ".github/dependabot.yml", "version: 2\\nupdates:\\n"
+    <%= include "deploy" %>
+  CODE
+
+  def test_uses_the_bun_ecosystem
+    run_generator do
+      assert_file_contains ".github/dependabot.yml", "package-ecosystem: bun"
+      refute_file_contains ".github/dependabot.yml", "package-ecosystem: npm"
     end
   end
 end
