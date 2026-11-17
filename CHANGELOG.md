@@ -15,3 +15,4 @@ All notable changes to this project will be documented in this file.
 
 - `.prettierignore` now covers all generated dirs (shadcn `components/ui`, alba `types/serializers`), matching the ESLint ignores
 - `bin/ci` keeps Rails test and seed steps on the Foundation path (previously dropped when replacing the stock `config/ci.rb`)
+- Apps with an existing `vite.config` now get the `inertia()` plugin, and plugins are appended after the existing ones in order (previously prepended in reverse, with `inertia()` missing)

@@ -79,22 +79,44 @@ vite_plugins.uniq! { |p| [p[:import], p[:call]] }
 
 existing_vite_config = Dir.glob(vite_config_glob).first
 
-if existing_vite_config && vite_plugins.any?
-  # Existing app: inject plugins into existing config
+# Always configure SSR entrypoint so apps are SSR-ready
+ssr_entrypoint = case framework
+  when "react" then "entrypoints/inertia.#{component_ext}"
+  else "entrypoints/inertia.#{js_ext}"
+end
+ssr_entry_full = "#{js_destination_path}/#{ssr_entrypoint}"
+
+# Framework plugins first, then tailwind
+tailwind_plugins, framework_plugins = vite_plugins.partition { |p| p[:import].include?("tailwindcss") }
+vite_plugins = framework_plugins + tailwind_plugins
+
+if existing_vite_config
+  # Existing app: add what is missing to the existing config. Plugins go at
+  # the end of the array, in order, so they run after the ones already there.
   vite_config = File.read(existing_vite_config)
 
-  vite_plugins.each do |plugin|
-    unless vite_config.include?(plugin[:import])
-      prepend_file existing_vite_config, "#{plugin[:import]}\n"
-    end
+  missing_plugins = vite_plugins.reject { |plugin| vite_config.include?(plugin[:call]) }
+  unless vite_config.include?("@inertiajs/vite")
+    missing_plugins << { import: "import inertia from '@inertiajs/vite'", call: "inertia({ ssr: '#{ssr_entry_full}' })" }
   end
 
-  # Re-read after prepends so call-detection sees current file
-  vite_config = File.read(existing_vite_config)
+  missing_imports = missing_plugins.map { |plugin| plugin[:import] }.reject { |import| vite_config.include?(import) }
+  prepend_file existing_vite_config, "#{missing_imports.join("\n")}\n" if missing_imports.any?
 
-  vite_plugins.each do |plugin|
-    unless vite_config.include?(plugin[:call])
-      insert_into_file existing_vite_config, "\n    #{plugin[:call]},", after: "plugins: ["
+  missing_plugins.each do |plugin|
+    vite_config = File.read(existing_vite_config)
+    # Match up to the array's closing bracket on its own line, so brackets
+    # inside plugin options (e.g. `presets: [...]`) are skipped
+    updated = vite_config.sub(/(plugins:\s*\[.*?),?(\n\s*\])/m) do
+      head, tail = $1, $2
+      "#{head}#{"," unless head.end_with?("[")}\n    #{plugin[:call]},#{tail}"
+    end
+
+    if updated == vite_config
+      say "  ⚠ Could not find a multi-line `plugins: [` array in #{existing_vite_config}.", :yellow
+      say "    Add this plugin manually: #{plugin[:call]}", :yellow
+    else
+      File.write(File.join(destination_root, existing_vite_config), updated)
     end
   end
 
@@ -107,17 +129,9 @@ else
   # Fresh app: write complete vite.config from scratch
   vite_imports = ["import { defineConfig } from 'vite'", "import rails from 'rails-vite-plugin'", "import inertia from '@inertiajs/vite'"]
 
-  # Always configure SSR entrypoint so apps are SSR-ready
-  ssr_entrypoint = case framework
-    when "react" then "entrypoints/inertia.#{component_ext}"
-    else "entrypoints/inertia.#{js_ext}"
-  end
-  ssr_entry_full = "#{js_destination_path}/#{ssr_entrypoint}"
-
-  # Framework plugins first, then tailwind, rails + inertia last
-  tailwind_plugins, framework_plugins = vite_plugins.partition { |p| p[:import].include?("tailwindcss") }
+  # rails + inertia go last
   vite_calls = []
-  (framework_plugins + tailwind_plugins).each do |plugin|
+  vite_plugins.each do |plugin|
     vite_imports << plugin[:import]
     vite_calls << plugin[:call]
   end
