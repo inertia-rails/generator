@@ -21,6 +21,15 @@ js_ci_install_cmd =
     pm_install[package_manager][:ci]
   end
 
+# Vulnerability audit for bin/ci. Yarn 2+ moved it under `yarn npm`.
+js_audit_cmd =
+  case package_manager
+  when "yarn" then yarn_through_corepack ? "yarn npm audit" : "yarn audit"
+  when "pnpm" then "pnpm audit"
+  when "bun"  then "bun audit"
+  else "npm audit"
+  end
+
 # ─── Node version (single source: .node-version) ────────────────────
 # CI workflows (setup-node) and the Dockerfile both derive from node_version;
 # the .node-version file keeps them and local version managers converged.

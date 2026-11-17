@@ -15,3 +15,4 @@ All notable changes to this project will be documented in this file.
 
 - `.prettierignore` now covers all generated dirs (shadcn `components/ui`, alba `types/serializers`), matching the ESLint ignores
 - `bin/ci` keeps Rails test and seed steps on the Foundation path (previously dropped when replacing the stock `config/ci.rb`)
+- `bin/ci` runs lint, format, type check, and audit through the app's package manager instead of always `npm`

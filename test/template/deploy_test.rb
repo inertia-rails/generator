@@ -656,3 +656,79 @@ class DeployCiWorkflowNoSystemTestsTest < GeneratorTestCase
     end
   end
 end
+
+class DeployCiRunnerPnpmTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    package_manager = "pnpm"
+    use_eslint = true
+    use_typescript = true
+    file "config/ci.rb", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_runs_scripts_and_audit_through_pnpm
+    run_generator do
+      ci = File.read(File.join(destination, "config/ci.rb"))
+      assert ci.include?('step "JavaScript: lint", "pnpm run lint"'), "should lint with pnpm"
+      assert ci.include?('step "JavaScript: format", "pnpm run format"'), "should check formatting with pnpm"
+      assert ci.include?('step "JavaScript: types check", "pnpm run check"'), "should type-check with pnpm"
+      assert ci.include?('"pnpm audit"'), "should audit with pnpm"
+    end
+  end
+end
+
+class DeployCiRunnerBunTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    package_manager = "bun"
+    use_eslint = true
+    use_typescript = true
+    file "config/ci.rb", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_runs_scripts_and_audit_through_bun
+    run_generator do
+      ci = File.read(File.join(destination, "config/ci.rb"))
+      assert ci.include?('step "JavaScript: lint", "bun run lint"'), "should lint with bun"
+      assert ci.include?('"bun audit"'), "should audit with bun"
+    end
+  end
+end
+
+class DeployCiRunnerYarn1Test < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    package_manager = "yarn"
+    yarn_version = "1.22.22"
+    use_eslint = true
+    use_typescript = true
+    file "config/ci.rb", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_yarn_1_audits_with_yarn_audit
+    run_generator do
+      assert_file_contains "config/ci.rb", '"yarn audit"'
+    end
+  end
+end
+
+class DeployCiRunnerYarnBerryTest < GeneratorTestCase
+  template <<~CODE
+    #{GeneratorTestCase::DEPLOY_PREAMBLE}
+    package_manager = "yarn"
+    yarn_version = "4.5.0"
+    use_eslint = true
+    use_typescript = true
+    file "config/ci.rb", "placeholder"
+    <%= include "deploy" %>
+  CODE
+
+  def test_yarn_berry_audits_with_yarn_npm_audit
+    run_generator do
+      assert_file_contains "config/ci.rb", '"yarn npm audit"'
+    end
+  end
+end
