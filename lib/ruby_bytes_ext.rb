@@ -15,6 +15,14 @@ module RubyBytes
   Compiler.prepend(CompilerTrimTrailingNewline)
 
   class Compiler
+    # Short commit SHA of the build being compiled, stamped into the template
+    # so bug reports can say which build ran. CI provides it via GITHUB_SHA;
+    # local builds are "dev" because the working tree may not match any commit.
+    def template_version
+      sha = ENV["GITHUB_SHA"].to_s
+      sha.empty? ? "dev" : sha[0, 8]
+    end
+
     # Generate `file` statements for every file under a source directory.
     #
     # At compile time, walks `source_dir` (relative to template root) and
