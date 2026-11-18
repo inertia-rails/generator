@@ -2,6 +2,8 @@ import { createInertiaApp } from '@inertiajs/vue3'
 
 createInertiaApp({
   pages: '../pages',
+  serverHead: true,
+  title: (title) => title || '<%= app_title %>',
   defaults: {
     form: {
       forceIndicesArrayFormatInFormData: false,

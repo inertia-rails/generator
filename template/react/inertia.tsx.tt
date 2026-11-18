@@ -3,6 +3,8 @@ import { createInertiaApp } from '@inertiajs/react'
 void createInertiaApp({
   strictMode: true,
   pages: '../pages',
+  serverHead: true,
+  title: (title) => title || '<%= app_title %>',
   defaults: {
     form: {
       forceIndicesArrayFormatInFormData: false,

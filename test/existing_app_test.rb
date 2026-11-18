@@ -104,6 +104,30 @@ class ExistingAppTest < Minitest::Test
     end
   end
 
+  # An app that already runs rails_vite keeps its own vite.config: the
+  # installer adds the framework and Inertia plugins to it instead of
+  # writing a new one.
+  def test_app_with_rails_vite_already_installed
+    with_base_app do |app|
+      out, err, status = run_in_app(app, "bundle add rails_vite && bin/rails generate rails_vite:install")
+      assert status.success?, "rails_vite install failed:\n#{tail("#{out}\n#{err}")}"
+      commit(app)
+
+      out, status = apply_template(app, FULL_ENV)
+
+      assert status.success?, "app:template failed:\n#{tail(out)}"
+      assert_includes out, "Rails Vite: installed"
+      assert_installed(app, framework: "react")
+
+      configs = Dir.glob(File.join(app, "vite.config.*"))
+      assert_equal 1, configs.size, "expected the existing vite.config to be reused: #{configs.inspect}"
+      config = File.read(configs.first)
+      assert_match(/rails\(\),\n\s+react\(\),\n\s+babel\(.+\),\n\s+tailwindcss\(\),\n\s+inertia\(\{ ssr: /, config,
+        "plugins should be appended after rails(), in order")
+      assert_builds(app)
+    end
+  end
+
   # ─── Tier 2: clean refusals ─────────────────────────────────────────
 
   def test_refuses_jsbundling_app

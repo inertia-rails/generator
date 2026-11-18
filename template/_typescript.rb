@@ -5,7 +5,7 @@ if use_typescript
 
   # globals.d.ts augments @inertiajs/core; pnpm won't expose the adapters'
   # transitive dep to app code, so it must be declared directly
-  npm_dev_packages << "@inertiajs/core@^3.0"
+  npm_dev_packages << "@inertiajs/core@^3.5"
 
   # typescript is pinned to ~6.0 (not TS 7): typescript-eslint's peer range
   # caps at <6.1. vue/svelte have no cap but share the pin for a consistent,

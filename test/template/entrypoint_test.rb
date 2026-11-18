@@ -9,6 +9,7 @@ class EntrypointReactTsTest < GeneratorTestCase
     js_ext = "ts"
     component_ext = "tsx"
     js_destination_path = "app/javascript"
+    app_title = "Test App"
     <%= include "inertia_entrypoint" %>
   CODE
 
@@ -18,6 +19,8 @@ class EntrypointReactTsTest < GeneratorTestCase
       assert_file_contains "app/javascript/entrypoints/inertia.tsx", "createInertiaApp"
       assert_file_contains "app/javascript/entrypoints/inertia.tsx", "@inertiajs/react"
       assert_file_contains "app/javascript/entrypoints/inertia.tsx", "strictMode: true"
+      assert_file_contains "app/javascript/entrypoints/inertia.tsx", "serverHead: true"
+      assert_file_contains "app/javascript/entrypoints/inertia.tsx", "title: (title) => title || 'Test App'"
       assert_line_printed output, "Creating Inertia entrypoint"
     end
   end
@@ -30,6 +33,7 @@ class EntrypointReactJsTest < GeneratorTestCase
     js_ext = "js"
     component_ext = "jsx"
     js_destination_path = "app/javascript"
+    app_title = "Test App"
     <%= include "inertia_entrypoint" %>
   CODE
 
@@ -50,6 +54,7 @@ class EntrypointVueTsTest < GeneratorTestCase
     js_ext = "ts"
     component_ext = "vue"
     js_destination_path = "app/javascript"
+    app_title = "Test App"
     <%= include "inertia_entrypoint" %>
   CODE
 
@@ -59,6 +64,8 @@ class EntrypointVueTsTest < GeneratorTestCase
       assert_file_contains "app/javascript/entrypoints/inertia.ts", "createInertiaApp"
       assert_file_contains "app/javascript/entrypoints/inertia.ts", "@inertiajs/vue3"
       assert_file_contains "app/javascript/entrypoints/inertia.ts", "pages"
+      assert_file_contains "app/javascript/entrypoints/inertia.ts", "serverHead: true"
+      assert_file_contains "app/javascript/entrypoints/inertia.ts", "title: (title) => title || 'Test App'"
       assert_line_printed output, "Creating Inertia entrypoint"
     end
   end
@@ -71,6 +78,7 @@ class EntrypointVueJsTest < GeneratorTestCase
     js_ext = "js"
     component_ext = "vue"
     js_destination_path = "app/javascript"
+    app_title = "Test App"
     <%= include "inertia_entrypoint" %>
   CODE
 
@@ -91,6 +99,7 @@ class EntrypointSvelteTsTest < GeneratorTestCase
     js_ext = "ts"
     component_ext = "svelte"
     js_destination_path = "app/javascript"
+    app_title = "Test App"
     <%= include "inertia_entrypoint" %>
   CODE
 
@@ -100,6 +109,9 @@ class EntrypointSvelteTsTest < GeneratorTestCase
       assert_file_contains "app/javascript/entrypoints/inertia.ts", "createInertiaApp"
       assert_file_contains "app/javascript/entrypoints/inertia.ts", "@inertiajs/svelte"
       assert_file_contains "app/javascript/entrypoints/inertia.ts", "pages"
+      assert_file_contains "app/javascript/entrypoints/inertia.ts", "serverHead: true"
+      # The Svelte adapter has no title callback
+      refute_file_contains "app/javascript/entrypoints/inertia.ts", "title:"
       assert_line_printed output, "Creating Inertia entrypoint"
     end
   end
@@ -112,6 +124,7 @@ class EntrypointSvelteJsTest < GeneratorTestCase
     js_ext = "js"
     component_ext = "svelte"
     js_destination_path = "app/javascript"
+    app_title = "Test App"
     <%= include "inertia_entrypoint" %>
   CODE
 
