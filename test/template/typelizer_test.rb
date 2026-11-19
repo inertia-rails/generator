@@ -14,13 +14,13 @@ class TypelizerEnabledTest < GeneratorTestCase
     #{UPDATE_JSON_FILE}
     #{ADD_GEM}
     #{GEM_IN_GEMFILE}
-    file "Gemfile", "# frozen_string_literal: true\\n", force: true
+    file "Gemfile", %(gem "inertia_rails", "~> 9.9"\n), force: true
     <%= include "typelizer" %>
   CODE
 
   def test_adds_gem_to_gemfile
     run_generator do |output|
-      assert_file_contains "Gemfile", "typelizer"
+      assert_file_contains "Gemfile", %(gem "inertia_rails", "~> 9.9"\n\n# Brings Rails named routes to javascript\ngem "typelizer"\n)
       assert_line_printed output, "Setting up route helpers"
     end
   end

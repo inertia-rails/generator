@@ -150,6 +150,23 @@ class E2eTest < Minitest::Test
     end
   end
 
+  # The generator edits files from `rails new` next to known lines, and appends
+  # or skips when a line is gone. On a fresh app that means a stale anchor.
+  def assert_edits_in_place(app_path)
+    read = ->(path) { File.read(File.join(app_path, path)) }
+
+    appended_gems = read.call("Gemfile").rpartition(/^end\n/).last.strip
+    assert_empty appended_gems, "Gems appended to the Gemfile instead of placed next to their anchor"
+
+    assert_match(/^  system! "\w+ install"$/, read.call("bin/setup"), "bin/setup missing the JS install step")
+    assert_includes read.call("config/environments/development.rb"), "delivery_method = :letter_opener"
+    assert_includes read.call("app/views/layouts/application.html.erb"), "Inline to avoid FOUC"
+
+    deploy_yml = read.call("config/deploy.yml")
+    assert_includes deploy_yml, "asset_path: /rails/public\n"
+    assert_includes deploy_yml, "  cache:\n    type: registry\n"
+  end
+
   def assert_starter_kit_files(app_path, env)
     gemfile = File.read(File.join(app_path, "Gemfile"))
 
@@ -160,6 +177,7 @@ class E2eTest < Minitest::Test
     assert File.exist?(File.join(app_path, "app/controllers/settings/profiles_controller.rb")), "Missing Settings::ProfilesController"
     assert File.exist?(File.join(app_path, "app/mailers/user_mailer.rb")), "Missing UserMailer"
     assert gemfile.include?("bcrypt"), "Gemfile missing bcrypt"
+    assert_edits_in_place(app_path)
 
     assert Dir.glob(File.join(app_path, "app/javascript/pages/sessions/new.*")).any?, "Missing login page"
     assert Dir.glob(File.join(app_path, "app/javascript/pages/users/new.*")).any?, "Missing registration page"
