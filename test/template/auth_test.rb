@@ -124,10 +124,15 @@ class AuthStarterKitWithAlbaTest < GeneratorTestCase
 end
 
 class AuthStarterKitWithTeamsTest < GeneratorTestCase
-  template AuthStarterKitTest.template_contents.sub("use_teams = false", "use_teams = true")
+  template AuthStarterKitTest.template_contents.sub("use_teams = false", <<~CODE)
+    use_teams = true
+    self.class.define_method(:after_bundle) { |&block| block&.call }
+    file "config/recurring.yml", "production:\n"
+  CODE
 
   def test_adds_teams
     run_generator do
+      assert_file_contains "config/recurring.yml", "production:\n  delete_expired_invitations:\n"
       assert_file_contains "Gemfile", %(gem "authentication-zero"\n\n# Authorization framework)
       assert_file "app/policies/team_policy.rb"
       assert_file "db/migrate/20250801153829_create_teams.rb"
