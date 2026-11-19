@@ -14,8 +14,9 @@ if use_starter_kit
     gems_to_add << "bcrypt"
   end
 
-  inertia_gem_anchor = "gem \"inertia_rails\", \"~> 3.21\"\n"
-  if gemfile_body.include?(inertia_gem_anchor)
+  # Any version: the line is written by the inertia step and its constraint changes
+  inertia_gem_anchor = /^gem "inertia_rails".*\n/
+  if gemfile_body.match?(inertia_gem_anchor)
     insert_into_file "Gemfile",
       "\n# An authentication system generator for Rails applications\n# we leave gem here to watch for security updates\ngem \"authentication-zero\"\n",
       after: inertia_gem_anchor

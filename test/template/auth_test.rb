@@ -15,10 +15,17 @@ class AuthStarterKitTest < GeneratorTestCase
     component_ext = "tsx"
     gems_to_add = []
     npm_packages = []
+    file "Gemfile", %(gem "inertia_rails", "~> 9.9"\n), force: true
     <%= include "starter_backend" %>
     gem_names = gems_to_add.map { |e| e.is_a?(Hash) ? e[:name] : e }.sort
     file "tmp_gems.txt", gem_names.join(",")
   CODE
+
+  def test_adds_authentication_zero_after_inertia_rails
+    run_generator do
+      assert_file_contains "Gemfile", %(gem "inertia_rails", "~> 9.9"\n\n# An authentication system generator)
+    end
+  end
 
   def test_creates_models
     run_generator do
