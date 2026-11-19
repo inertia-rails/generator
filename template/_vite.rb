@@ -13,24 +13,43 @@ unless File.exist?("package.json")
 end
 
 unless vite_installed
-  say "📦 Setting up Rails Vite...", :cyan
+  say "📦 Setting up #{(vite_gem == "vite_rails") ? "Vite Rails" : "Rails Vite"}...", :cyan
 
-  # Slot rails_vite after the asset-related gems; fall back to appending
+  # Slot the Vite gem after the asset-related gems; fall back to appending
   # when the anchor is missing (existing/customized Gemfiles).
+  vite_gem_comment = (vite_gem == "vite_rails") ?
+    "Vite integration [https://vite-ruby.netlify.app]" :
+    "Vite integration [https://github.com/skryukov/rails_vite]"
   image_processing_anchor = "gem \"image_processing\", \"~> 1.2\"\n"
-  if !gem_in_gemfile.("rails_vite") && File.exist?("Gemfile") && File.read("Gemfile").include?(image_processing_anchor)
+  if !gem_in_gemfile.(vite_gem) && File.exist?("Gemfile") && File.read("Gemfile").include?(image_processing_anchor)
     insert_into_file "Gemfile",
-      "\ngem \"rails_vite\" # Vite integration [https://github.com/skryukov/rails_vite]\n",
+      "\ngem \"#{vite_gem}\" # #{vite_gem_comment}\n",
       after: image_processing_anchor
   else
-    add_gem.("rails_vite", comment: "Vite integration [https://github.com/skryukov/rails_vite]")
+    add_gem.(vite_gem, comment: vite_gem_comment)
   end
 
   # Create entrypoints directory
   empty_directory "#{js_destination_path}/entrypoints"
 
   # Add npm dev dependencies
-  npm_dev_packages.push("rails-vite-plugin", "vite@^8")
+  npm_dev_packages.push((vite_gem == "vite_rails") ? "vite-plugin-ruby" : "rails-vite-plugin", "vite@^8")
+
+  # vite_rails reads its settings from config/vite.json. Same source folder as
+  # rails_vite, and no Rack proxy in development: the browser talks to the
+  # Vite dev server, as in the config `vite install` writes.
+  # The SSR build reuses the Inertia entrypoint instead of a separate ssr/ssr.js.
+  if vite_gem == "vite_rails"
+    file "config/vite.json", JSON.pretty_generate(
+      "all" => {
+        "sourceCodeDir" => js_destination_path,
+        "ssrEntrypoint" => "~/entrypoints/inertia.{js,ts,jsx,tsx}",
+        "watchAdditionalPaths" => []
+      },
+      "development" => {"autoBuild" => true, "skipProxy" => true, "publicOutputDir" => "vite-dev", "port" => 3036},
+      "test" => {"autoBuild" => true, "publicOutputDir" => "vite-test", "port" => 3037}
+    ) + "\n"
+  end
 
   # Add .gitignore entries
   if File.exist?(".gitignore")
@@ -54,5 +73,13 @@ unless vite_installed
   vite_installed = true
   say "  Rails Vite configured ✓", :green
 else
-  say "  Rails Vite already installed, skipping", :green
+  say "  #{(vite_gem == "vite_rails") ? "Vite Rails" : "Rails Vite"} already installed, skipping", :green
+
+  # vite_rails builds SSR from its own entry (ssr/ssr.js unless set);
+  # point it at the Inertia entrypoint
+  if vite_gem == "vite_rails"
+    update_json_file.("config/vite.json") do |config|
+      (config["all"] ||= {})["ssrEntrypoint"] ||= "~/entrypoints/inertia.{js,ts,jsx,tsx}"
+    end
+  end
 end

@@ -157,6 +157,7 @@ class GeneratorTestCase < RubyBytes::TestCase
     use_shadcn = false
     use_eslint = false
     use_ssr = false
+    vite_gem = "rails_vite"
     use_starter_kit = false
     use_typelizer = false
     use_alba = false

@@ -391,29 +391,19 @@ class DetectJsbundlingBlockerTest < GeneratorTestCase
   end
 end
 
-class DetectViteRailsBlockerTest < GeneratorTestCase
-  template <<~CODE
-    require "json"
-    fresh_app = nil
-    vite_installed = false
-    framework_detected = nil
-    typescript_detected = false
-    tailwind_detected = false
-    package_manager = "npm"
-    db_adapter = "sqlite3"
-    importmap_detected = false
-    vite_config_glob = "vite.config.{ts,js,mjs,cjs,mts,cts}"
-    #{GEM_IN_GEMFILE}
-    <%= include "detect" %>
-  CODE
+class DetectViteRailsInstalledTest < GeneratorTestCase
+  template DetectViteInstalledTest.template_contents
+    .sub('gem "rails_vite"', 'gem "vite_rails"')
+    .sub('<%= include "detect" %>', <<~'CODE')
+      file "config/vite.json", '{"all": {"sourceCodeDir": "app/client"}}'
+      <%= include "detect" %>
+      say "GEM=#{vite_gem} DIR=#{js_destination_detected}"
+    CODE
 
-  def test_exits_when_vite_rails_detected
-    prepare_dummy do
-      File.write("Gemfile", "gem 'vite_rails'\n", mode: "a")
-    end
-
-    assert_raises(SystemExit) do
-      run_generator {}
+  def test_detects_vite_rails_and_its_source_folder
+    run_generator do |output|
+      assert_line_printed output, "VITE=true"
+      assert_line_printed output, "GEM=vite_rails DIR=app/client"
     end
   end
 end

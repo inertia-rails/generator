@@ -21,6 +21,11 @@ if test_framework == "rspec"
   bundle_run.("bundle binstubs rspec-core")
 end
 
+# vite_rails docs and habits rely on bin/vite (`bin/vite dev`, `bin/vite build`)
+if vite_gem == "vite_rails" && !File.exist?("bin/vite")
+  bundle_run.("bundle binstubs vite_ruby")
+end
+
 # ─── Run migrations (starter kit) ────────────────────────────────────
 
 if use_starter_kit
@@ -85,6 +90,8 @@ ssr_entrypoint = case framework
   else "entrypoints/inertia.#{js_ext}"
 end
 ssr_entry_full = "#{js_destination_path}/#{ssr_entrypoint}"
+# vite_rails makes the source folder the Vite root, so paths start from there
+ssr_entry_for_vite = (vite_gem == "vite_rails") ? ssr_entrypoint : ssr_entry_full
 
 # Framework plugins first, then tailwind
 tailwind_plugins, framework_plugins = vite_plugins.partition { |p| p[:import].include?("tailwindcss") }
@@ -100,7 +107,7 @@ if existing_vite_config
   # `react({ ... })` is not doubled by a bare `react()`
   missing_plugins = vite_plugins.reject { |plugin| vite_config.match?(/\b#{plugin[:call][/\A\w+/]}\(/) }
   unless vite_config.include?("@inertiajs/vite")
-    missing_plugins << { import: "import inertia from '@inertiajs/vite'", call: "inertia({ ssr: '#{ssr_entry_full}' })" }
+    missing_plugins << { import: "import inertia from '@inertiajs/vite'", call: "inertia({ ssr: '#{ssr_entry_for_vite}' })" }
   end
 
   missing_imports = missing_plugins.map { |plugin| plugin[:import] }.reject { |import| vite_config.include?(import) }
@@ -137,7 +144,13 @@ if existing_vite_config
   end
 else
   # Fresh app: write complete vite.config from scratch
-  vite_imports = ["import { defineConfig } from 'vite'", "import rails from 'rails-vite-plugin'", "import inertia from '@inertiajs/vite'"]
+  rails_plugin_import, rails_plugin_call =
+    if vite_gem == "vite_rails"
+      ["import ViteRuby from 'vite-plugin-ruby'", "ViteRuby()"]
+    else
+      ["import rails from 'rails-vite-plugin'", "rails()"]
+    end
+  vite_imports = ["import { defineConfig } from 'vite'", rails_plugin_import, "import inertia from '@inertiajs/vite'"]
 
   # rails + inertia go last
   vite_calls = []
@@ -145,8 +158,8 @@ else
     vite_imports << plugin[:import]
     vite_calls << plugin[:call]
   end
-  vite_calls << "rails()"
-  vite_calls << "inertia({ ssr: '#{ssr_entry_full}' })"
+  vite_calls << rails_plugin_call
+  vite_calls << "inertia({ ssr: '#{ssr_entry_for_vite}' })"
 
   # SSR config: noExternal for production builds (containerization without node_modules)
   ssr_config = "// Prebuild ssr.js so we can drop node_modules from the container.\n      noExternal: command === 'build' ? true : undefined,"

@@ -128,6 +128,35 @@ class ExistingAppTest < Minitest::Test
     end
   end
 
+  # An app that already runs vite_rails keeps it: its own source folder,
+  # config/vite.json and layout tags stay, and the installer adds what is missing.
+  def test_app_with_vite_rails_already_installed
+    with_base_app do |app|
+      out, err, status = run_in_app(app, "bundle add vite_rails && bundle exec vite install")
+      assert status.success?, "vite_rails install failed:\n#{tail("#{out}\n#{err}")}"
+      commit(app)
+
+      out, status = apply_template(app, FULL_ENV.merge("INERTIA_SSR" => "1"))
+
+      assert status.success?, "app:template failed:\n#{tail(out)}"
+      assert_includes out, "Vite Rails: installed"
+      assert_installed(app, framework: "react", vite_gem: "vite_rails")
+      refute_includes File.read(File.join(app, "Gemfile")), "rails_vite"
+
+      layout = File.read(File.join(app, "app/views/layouts/application.html.erb"))
+      assert_equal 1, layout.scan("vite_client_tag").size, "vite_client_tag should not be added twice"
+      assert_includes layout, 'vite_typescript_tag "inertia.tsx"'
+      assert_includes layout, "vite_react_refresh_tag"
+
+      config = File.read(Dir.glob(File.join(app, "vite.config.*")).first)
+      assert_includes config, "inertia({ ssr: 'entrypoints/inertia.tsx' })"
+      assert_builds(app)
+
+      out, err, status = run_in_app(app, "npx vite build --ssr")
+      assert status.success?, "vite build --ssr failed:\n#{tail("#{out}\n#{err}")}"
+    end
+  end
+
   # ─── Tier 2: clean refusals ─────────────────────────────────────────
 
   def test_refuses_jsbundling_app
@@ -139,19 +168,6 @@ class ExistingAppTest < Minitest::Test
 
       refute status.success?, "expected refusal, got success:\n#{tail(out)}"
       assert_includes out, "jsbundling-rails and/or cssbundling-rails detected"
-    end
-  end
-
-  def test_refuses_vite_rails_app
-    with_base_app do |app|
-      add_fake_gem(app, "vite_rails")
-      commit(app)
-
-      out, status = apply_template(app, FULL_ENV)
-
-      refute status.success?, "expected refusal, got success:\n#{tail(out)}"
-      assert_includes out, "vite_rails/vite_ruby detected"
-      assert_includes out, "Migrate to rails_vite"
     end
   end
 
@@ -245,13 +261,13 @@ class ExistingAppTest < Minitest::Test
     ["#{stdout}\n#{stderr}", status]
   end
 
-  def assert_installed(app, framework:)
+  def assert_installed(app, framework:, vite_gem: "rails_vite")
     assert File.exist?(File.join(app, "config/initializers/inertia_rails.rb")), "Missing inertia initializer"
     assert File.exist?(File.join(app, "bin/dev")), "Missing bin/dev"
 
     gemfile = File.read(File.join(app, "Gemfile"))
     assert_includes gemfile, "inertia_rails"
-    assert_includes gemfile, "rails_vite"
+    assert_includes gemfile, vite_gem
 
     pkg = File.read(File.join(app, "package.json"))
     assert_includes pkg, ADAPTER_PACKAGES.fetch(framework)

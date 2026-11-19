@@ -28,6 +28,7 @@ class InertiaReactTest < GeneratorTestCase
         </body>
       </html>
     HTML
+    vite_gem = "rails_vite"
     <%= include "inertia" %>
     file "tmp_npm.txt", npm_packages.sort.join(",")
     file "tmp_dev.txt", npm_dev_packages.sort.join(",")
@@ -123,6 +124,7 @@ class InertiaVueTest < GeneratorTestCase
         </body>
       </html>
     HTML
+    vite_gem = "rails_vite"
     <%= include "inertia" %>
     file "tmp_npm.txt", npm_packages.sort.join(",")
     file "tmp_dev.txt", npm_dev_packages.sort.join(",")
@@ -184,6 +186,7 @@ class InertiaSvelteTest < GeneratorTestCase
         </body>
       </html>
     HTML
+    vite_gem = "rails_vite"
     <%= include "inertia" %>
     file "tmp_npm.txt", npm_packages.sort.join(",")
     file "tmp_dev.txt", npm_dev_packages.sort.join(",")
@@ -256,6 +259,7 @@ class InertiaLayoutTitleTest < GeneratorTestCase
         </head>
       </html>
     HTML
+    vite_gem = "rails_vite"
     <%= include "inertia" %>
   CODE
 
@@ -279,12 +283,29 @@ class InertiaLayoutEmptyTitleTest < GeneratorTestCase
         </head>
       </html>
     HTML
+    vite_gem = "rails_vite"
     <%= include "inertia" %>
   CODE
 
   def test_falls_back_to_the_app_title
     run_generator do
       assert_file_contains "app/views/layouts/application.html.erb", 'inertia_meta_tags(default_title: "Test App")'
+    end
+  end
+end
+
+class InertiaViteRailsTest < GeneratorTestCase
+  template InertiaReactTest.template_contents.sub('vite_gem = "rails_vite"', 'vite_gem = "vite_rails"')
+
+  def test_uses_vite_rails_helpers
+    run_generator do
+      assert_file_contains "app/views/layouts/application.html.erb", <<-ERB
+    <%= vite_react_refresh_tag %>
+    <%= vite_client_tag %>
+    <%= vite_typescript_tag "inertia.tsx" %>
+    <%= inertia_ssr_head %>
+      ERB
+      assert_file_contains "config/initializers/inertia_rails.rb", "ViteRuby.digest"
     end
   end
 end

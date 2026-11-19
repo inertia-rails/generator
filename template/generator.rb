@@ -19,6 +19,7 @@ generator_version = "<%= template_version %>"
 fresh_app                = nil
 interactive              = nil
 vite_installed           = false
+vite_gem_detected        = nil
 framework_detected       = nil
 typescript_detected      = false
 tailwind_detected        = false
@@ -40,6 +41,7 @@ use_alba        = false
 use_system_tests = false
 test_framework  = "minitest"
 auth_strategy   = "none"
+vite_gem        = "rails_vite"
 
 # Accumulation arrays (partials append, _finalize.rb batch-installs)
 npm_packages         = []

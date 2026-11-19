@@ -66,6 +66,7 @@ Pick individual features for your project. The following options are available:
 | Option            | Env variable             | Values                          | Default     |
 |-------------------|--------------------------|---------------------------------|-------------|
 | Framework         | `INERTIA_FRAMEWORK`      | `react`, `vue`, `svelte`        | `react`     |
+| Vite integration  | `INERTIA_VITE`           | `rails_vite`, `vite_rails`      | `rails_vite` |
 | TypeScript        | `INERTIA_TS`             | `1` / `0`                       | prompted    |
 | Tailwind CSS v4   | `INERTIA_TAILWIND`       | `1` / `0`                       | prompted    |
 | shadcn/ui         | `INERTIA_SHADCN`         | `1` / `0` (requires Tailwind + TS) | prompted |
@@ -114,12 +115,15 @@ Both setup paths share the following features:
   and package manager in existing apps
 - **Package managers** — npm, yarn, pnpm, and bun
 - **Conflict cleanup** — removes `importmap-rails`, `turbo-rails`, and
-  `stimulus-rails` in fresh apps. Blocks if `jsbundling-rails`,
-  `cssbundling-rails`, or `vite_rails` are present (they conflict with the
-  Vite setup this generator installs)
+  `stimulus-rails` in fresh apps. Blocks if `jsbundling-rails` or
+  `cssbundling-rails` are present (they conflict with the Vite setup this
+  generator installs)
 - **Rails Vite** — sets up [rails_vite](https://github.com/skryukov/rails_vite)
   with HMR, SSR support, and framework-specific plugins
-  (`@vitejs/plugin-react`, `@vitejs/plugin-vue`, `@sveltejs/vite-plugin-svelte`)
+  (`@vitejs/plugin-react`, `@vitejs/plugin-vue`, `@sveltejs/vite-plugin-svelte`).
+  Apps can use [vite_rails](https://vite-ruby.netlify.app) instead: pick it
+  for a fresh app (same `app/javascript` folder, assets served straight from
+  the Vite dev server), or keep it in an app that already has it
 - **shadcn/ui** — React
   ([shadcn](https://ui.shadcn.com)), Vue
   ([shadcn-vue](https://www.shadcn-vue.com)), Svelte

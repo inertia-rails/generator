@@ -31,6 +31,10 @@ class PromptsEnvFrameworkTest < GeneratorTestCase
     ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
     ENV["INERTIA_SYSTEM_TESTS"] = "0"
 
+    vite_gem_detected = nil
+
+    vite_gem = "rails_vite"
+
     <%= include "prompts" %>
 
     say "FRAMEWORK=#{framework}"
@@ -81,6 +85,8 @@ class PromptsInvalidFrameworkTest < GeneratorTestCase
     ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
 
     begin
+      vite_gem_detected = nil
+      vite_gem = "rails_vite"
       <%= include "prompts" %>
     rescue SystemExit
       say "EXITED"
@@ -119,6 +125,10 @@ class PromptsStarterKitForcesOptionsTest < GeneratorTestCase
     ENV["INERTIA_ALBA"] = "0"
     ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
     ENV["INERTIA_SYSTEM_TESTS"] = "0"
+
+    vite_gem_detected = nil
+
+    vite_gem = "rails_vite"
 
     <%= include "prompts" %>
 
@@ -169,6 +179,10 @@ class PromptsStarterKitSsrOptOutTest < GeneratorTestCase
     ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
     ENV["INERTIA_SYSTEM_TESTS"] = "0"
 
+    vite_gem_detected = nil
+
+    vite_gem = "rails_vite"
+
     <%= include "prompts" %>
 
     say "SSR=#{use_ssr}"
@@ -215,6 +229,10 @@ class PromptsAutoDetectFrameworkTest < GeneratorTestCase
     ENV["INERTIA_ALBA"] = "0"
     ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
     ENV["INERTIA_SYSTEM_TESTS"] = "0"
+
+    vite_gem_detected = nil
+
+    vite_gem = "rails_vite"
 
     <%= include "prompts" %>
 
@@ -265,6 +283,10 @@ class PromptsShadcnRequiresTailwindTest < GeneratorTestCase
     ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
     ENV["INERTIA_SYSTEM_TESTS"] = "0"
 
+    vite_gem_detected = nil
+
+    vite_gem = "rails_vite"
+
     <%= include "prompts" %>
 
     say "SHADCN=#{use_shadcn}"
@@ -302,6 +324,10 @@ class PromptsStarterKitSystemTestsEnvTest < GeneratorTestCase
     ENV["INERTIA_ALBA"] = "0"
     ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
     ENV["INERTIA_SYSTEM_TESTS"] = "1"
+
+    vite_gem_detected = nil
+
+    vite_gem = "rails_vite"
 
     <%= include "prompts" %>
 
@@ -347,6 +373,8 @@ class PromptsNonInteractiveFailFastTest < GeneratorTestCase
     ENV["INERTIA_SYSTEM_TESTS"] = "0"
 
     begin
+      vite_gem_detected = nil
+      vite_gem = "rails_vite"
       <%= include "prompts" %>
     rescue SystemExit
       say "EXITED"
@@ -357,6 +385,32 @@ class PromptsNonInteractiveFailFastTest < GeneratorTestCase
     run_generator do |output|
       assert_line_printed output, "Non-interactive run: set INERTIA_TS=0|1."
       assert_line_printed output, "EXITED"
+    end
+  end
+end
+
+class PromptsViteIntegrationTest < GeneratorTestCase
+  template PromptsEnvFrameworkTest.template_contents.sub(
+    '<%= include "prompts" %>',
+    %(ENV["INERTIA_VITE"] = "vite_rails"\n<%= include "prompts" %>\nENV.delete("INERTIA_VITE")\nsay "VITE_GEM=\#{vite_gem}")
+  )
+
+  def test_reads_vite_integration_from_env
+    run_generator do |output|
+      assert_line_printed output, "VITE_GEM=vite_rails"
+    end
+  end
+end
+
+class PromptsViteIntegrationAskTest < GeneratorTestCase
+  template PromptsEnvFrameworkTest.template_contents.sub(
+    '<%= include "prompts" %>',
+    %(interactive = true\n<%= include "prompts" %>\nsay "VITE_GEM=\#{vite_gem}")
+  )
+
+  def test_asks_for_vite_integration
+    run_generator(input: ["vite_rails"]) do |output|
+      assert_line_printed output, "VITE_GEM=vite_rails"
     end
   end
 end
