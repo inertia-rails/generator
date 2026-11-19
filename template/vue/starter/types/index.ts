@@ -24,7 +24,57 @@ export interface FlashData {
 
 export interface SharedProps {
   auth: Auth
+<% if use_teams %>
+  current_team: Team
+  teams: Team[]
+<% end %>
 }
+<% if use_teams %>
+
+export type TeamRole = "owner" | "admin" | "member"
+
+export interface Team {
+  id: number
+  name: string
+  slug: string
+  personal: boolean
+  role?: TeamRole
+}
+
+export interface TeamMember {
+  id: number
+  name: string
+  email: string
+  avatar?: string
+  role: TeamRole
+}
+
+export interface TeamInvitation {
+  code: string
+  email: string
+  role: TeamRole
+  created_at: string
+}
+
+export interface TeamPermissions {
+  update: boolean
+  destroy: boolean
+  invite: boolean
+  update_member: boolean
+  remove_member: boolean
+}
+
+export interface TeamInvitationContext {
+  code: string
+  team_name: string
+}
+
+export interface PendingInvitation {
+  code: string
+  team_name: string
+  invited_by: string
+}
+<% end %>
 
 export interface User {
   id: number

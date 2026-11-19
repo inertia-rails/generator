@@ -17,11 +17,14 @@ if use_starter_kit
   # Any version: the line is written by the inertia step and its constraint changes
   inertia_gem_anchor = /^gem "inertia_rails".*\n/
   if gemfile_body.match?(inertia_gem_anchor)
+    action_policy_gem = use_teams ?
+      "\n# Authorization framework for Ruby and Rails applications [https://actionpolicy.evilmartians.io]\ngem \"action_policy\"\n" : ""
     insert_into_file "Gemfile",
-      "\n# An authentication system generator for Rails applications\n# we leave gem here to watch for security updates\ngem \"authentication-zero\"\n",
+      "\n# An authentication system generator for Rails applications\n# we leave gem here to watch for security updates\ngem \"authentication-zero\"\n#{action_policy_gem}",
       after: inertia_gem_anchor
   else
     gems_to_add << "authentication-zero"
+    gems_to_add << "action_policy" if use_teams
   end
 
   web_console_anchor = "  # Use console on exceptions pages [https://github.com/rails/web-console]\n  gem \"web-console\"\n"
@@ -41,12 +44,32 @@ if use_starter_kit
   # ─── Models, Controllers, Mailers, Views, Routes ───────────────
 <%= copy_dir("shared/starter_backend", force: true) %>
 
+  # ─── Teams: models, policy, controllers, mailer ────────────────
+  if use_teams
+<%= copy_dir("shared/starter_teams", force: true) %>
+
+    # Delete expired invitations once a day (Solid Queue recurring task).
+    # `rails new` writes config/recurring.yml after the template has run
+    # (solid_queue:install), so edit it in after_bundle.
+    after_bundle do
+      recurring_anchor = "production:\n"
+      if File.exist?("config/recurring.yml") && File.read("config/recurring.yml").include?(recurring_anchor)
+        insert_into_file "config/recurring.yml",
+          "  delete_expired_invitations:\n    command: \"Invitation.expired.delete_all\"\n    schedule: every day at 4am\n",
+          after: recurring_anchor
+      end
+    end
+  end
+
   # ─── Migrations (fixed timestamps: output must be deterministic) ─
   # A Time.now stamp made every generation differ, which forced the starter-kit
   # sync to skip db/ entirely. New starter migrations get the next stamp in order.
   timestamp = "20250801153827"
   file "db/migrate/#{timestamp}_create_users.rb", <%= code("shared/starter/migrations/create_users.rb") %>
   file "db/migrate/#{timestamp.to_i + 1}_create_sessions.rb", <%= code("shared/starter/migrations/create_sessions.rb") %>
+  if use_teams
+    file "db/migrate/#{timestamp.to_i + 2}_create_teams.rb", <%= code("shared/starter/migrations/create_teams.rb") %>
+  end
 
   # ─── Preview emails in the browser in development (letter_opener) ─
   dev_env = "config/environments/development.rb"
@@ -112,6 +135,10 @@ if use_starter_kit
   # ─── Alba Serializers (if enabled) ──────────────────────────────
   if use_alba
 <%= copy_dir("shared/starter_alba", force: true) %>
+
+    if use_teams
+<%= copy_dir("shared/starter_teams_alba", force: true) %>
+    end
   end
 
   say "  Starter Kit backend configured ✓", :green

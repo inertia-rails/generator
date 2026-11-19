@@ -52,8 +52,11 @@ if use_shadcn
 
     case framework
     when "react"
-      # spinner and select are only available in the React shadcn registry
+      # spinner is only available in the React shadcn registry
       shadcn_components.push("spinner", "select")
+    else
+      # the invite form picks a role
+      shadcn_components << "select" if use_teams
     end
 
     pm_exec = pm_install[package_manager][:exec]

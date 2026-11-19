@@ -9,6 +9,7 @@ class AuthStarterKitTest < GeneratorTestCase
     use_starter_kit = true
     test_framework = "minitest"
     use_alba = false
+    use_teams = false
     use_typescript = true
     js_destination_path = "app/javascript"
     js_ext = "ts"
@@ -100,6 +101,7 @@ class AuthStarterKitWithAlbaTest < GeneratorTestCase
     use_starter_kit = true
     test_framework = "minitest"
     use_alba = true
+    use_teams = false
     use_typescript = true
     js_destination_path = "app/javascript"
     js_ext = "ts"
@@ -121,6 +123,20 @@ class AuthStarterKitWithAlbaTest < GeneratorTestCase
   end
 end
 
+class AuthStarterKitWithTeamsTest < GeneratorTestCase
+  template AuthStarterKitTest.template_contents.sub("use_teams = false", "use_teams = true")
+
+  def test_adds_teams
+    run_generator do
+      assert_file_contains "Gemfile", %(gem "authentication-zero"\n\n# Authorization framework)
+      assert_file "app/policies/team_policy.rb"
+      assert_file "db/migrate/20250801153829_create_teams.rb"
+      assert_file_contains "app/models/user.rb", "include HasTeams"
+      assert_file_contains "config/routes.rb", %(scope ":team_slug", as: :team do)
+    end
+  end
+end
+
 class AuthDisabledTest < GeneratorTestCase
   template <<~CODE
     require "json"
@@ -128,6 +144,7 @@ class AuthDisabledTest < GeneratorTestCase
     use_starter_kit = false
     test_framework = "minitest"
     use_alba = false
+    use_teams = false
     use_typescript = true
     js_destination_path = "app/javascript"
     js_ext = "ts"

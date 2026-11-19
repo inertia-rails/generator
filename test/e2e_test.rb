@@ -46,6 +46,14 @@ class E2eTest < Minitest::Test
       "INERTIA_TYPELIZER" => "1",
       "INERTIA_VITE" => "vite_rails"
     },
+    # teams on top of the starter kit
+    "svelte_starter_kit_teams" => {
+      "INERTIA_FRAMEWORK" => "svelte",
+      "INERTIA_STARTER_KIT" => "1",
+      "INERTIA_SSR" => "1",
+      "INERTIA_TYPELIZER" => "1",
+      "INERTIA_TEAMS" => "1"
+    },
     # ─── Foundation (individual options) ─────────────────────────────
     "vue_minimal" => {
       "INERTIA_FRAMEWORK" => "vue",
@@ -201,6 +209,12 @@ class E2eTest < Minitest::Test
     assert auth_layouts.any?, "Missing auth layout"
 
     assert Dir.glob(File.join(app_path, "app/javascript/components/ui/sidebar*")).any?, "Missing shadcn sidebar"
+
+    if env["INERTIA_TEAMS"] == "1"
+      assert File.exist?(File.join(app_path, "app/policies/team_policy.rb")), "Missing TeamPolicy"
+      assert Dir.glob(File.join(app_path, "app/javascript/pages/settings/teams/show.*")).any?, "Missing team settings page"
+      assert_includes File.read(File.join(app_path, "config/recurring.yml")), "delete_expired_invitations"
+    end
 
     # Test files (framework-specific tests + fixtures)
     test_fw = env.fetch("INERTIA_TEST_FRAMEWORK", "minitest")

@@ -3,6 +3,9 @@
   import { Form } from "@inertiajs/svelte"
   import { LoaderCircle } from "@lucide/svelte"
 
+<% if use_teams %>
+  import TeamInvitationAlert from "@/components/team-invitation-alert.svelte"
+<% end %>
   import TextLink from "@/components/text-link.svelte"
   import { Button } from "@/components/ui/button"
   import {
@@ -14,6 +17,12 @@
   import { Input } from "@/components/ui/input"
   import AuthBase from "@/layouts/auth-layout.svelte"
   import { identityPasswordResets, sessions, users } from "@/routes"
+<% if use_teams %>
+  import type { TeamInvitationContext } from "@/types"
+
+  let { team_invitation }: { team_invitation: TeamInvitationContext | null } =
+    $props()
+<% end %>
 </script>
 
 <svelte:head>
@@ -24,6 +33,12 @@
   title="Log in to your account"
   description="Enter your email and password below to log in"
 >
+<% if use_teams %>
+  {#if team_invitation}
+    <TeamInvitationAlert invitation={team_invitation} action="Log in" />
+  {/if}
+
+<% end %>
   <Form
     action={sessions.create()}
     resetOnSuccess={["password"]}
@@ -86,7 +101,7 @@
 
       <div class="text-muted-foreground text-center text-sm">
         Don't have an account?
-        <TextLink href={users.new()} tabindex={5}>Sign up</TextLink>
+        <TextLink href={<%= use_teams ? "users.new({ query: { invitation: team_invitation?.code } })" : "users.new()" %>} tabindex={5}>Sign up</TextLink>
       </div>
     {/snippet}
   </Form>

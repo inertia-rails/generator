@@ -6,6 +6,7 @@ class TestFrameworkRspecTest < GeneratorTestCase
   template <<~CODE
     test_framework = "rspec"
     use_starter_kit = false
+    use_teams = false
     gems_to_add = []
     <%= include "test_framework" %>
   CODE
@@ -21,6 +22,7 @@ class TestFrameworkMinitestTest < GeneratorTestCase
   template <<~CODE
     test_framework = "minitest"
     use_starter_kit = false
+    use_teams = false
     gems_to_add = []
     <%= include "test_framework" %>
   CODE
@@ -36,6 +38,7 @@ class TestFrameworkStarterMinitestTest < GeneratorTestCase
   template <<~CODE
     test_framework = "minitest"
     use_starter_kit = true
+    use_teams = false
     gems_to_add = []
     file "test/test_helper.rb", <<~RUBY
       require "rails/test_help"
@@ -94,6 +97,7 @@ class TestFrameworkStarterRspecTest < GeneratorTestCase
   template <<~CODE
     test_framework = "rspec"
     use_starter_kit = true
+    use_teams = false
     gems_to_add = []
     <%= include "test_framework" %>
   CODE
@@ -157,6 +161,7 @@ class TestFrameworkNoStarterKitTest < GeneratorTestCase
   template <<~CODE
     test_framework = "minitest"
     use_starter_kit = false
+    use_teams = false
     gems_to_add = []
     <%= include "test_framework" %>
   CODE

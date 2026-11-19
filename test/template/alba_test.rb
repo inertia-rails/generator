@@ -5,6 +5,7 @@ require_relative "../test_helper"
 class AlbaWithTypescriptTest < GeneratorTestCase
   template <<~CODE
     use_alba = true
+    use_teams = false
     use_typescript = true
     use_typelizer = false
     use_starter_kit = false
@@ -48,6 +49,7 @@ end
 class AlbaWithoutTypescriptTest < GeneratorTestCase
   template <<~CODE
     use_alba = true
+    use_teams = false
     use_typescript = false
     use_typelizer = false
     use_starter_kit = false
@@ -97,6 +99,7 @@ end
 class AlbaDisabledTest < GeneratorTestCase
   template <<~CODE
     use_alba = false
+    use_teams = false
     use_typescript = false
     use_typelizer = false
     gems_to_add = []

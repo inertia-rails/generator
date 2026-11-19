@@ -17,6 +17,7 @@ class PromptsEnvFrameworkTest < GeneratorTestCase
     use_ssr = false
     use_typelizer = false
     use_alba = false
+    use_teams = false
     test_framework = "minitest"
     auth_strategy = "none"
 
@@ -78,6 +79,7 @@ class PromptsInvalidFrameworkTest < GeneratorTestCase
     use_ssr = false
     use_typelizer = false
     use_alba = false
+    use_teams = false
     test_framework = "minitest"
     auth_strategy = "none"
 
@@ -116,6 +118,7 @@ class PromptsStarterKitForcesOptionsTest < GeneratorTestCase
     use_ssr = false
     use_typelizer = false
     use_alba = false
+    use_teams = false
     test_framework = "minitest"
     auth_strategy = "none"
 
@@ -169,6 +172,7 @@ class PromptsStarterKitSsrOptOutTest < GeneratorTestCase
     use_ssr = false
     use_typelizer = false
     use_alba = false
+    use_teams = false
     test_framework = "minitest"
     auth_strategy = "none"
 
@@ -215,6 +219,7 @@ class PromptsAutoDetectFrameworkTest < GeneratorTestCase
     use_ssr = false
     use_typelizer = false
     use_alba = false
+    use_teams = false
     test_framework = "minitest"
     auth_strategy = "none"
 
@@ -268,6 +273,7 @@ class PromptsShadcnRequiresTailwindTest < GeneratorTestCase
     use_ssr = false
     use_typelizer = false
     use_alba = false
+    use_teams = false
     test_framework = "minitest"
     auth_strategy = "none"
 
@@ -314,6 +320,7 @@ class PromptsStarterKitSystemTestsEnvTest < GeneratorTestCase
     use_ssr = false
     use_typelizer = false
     use_alba = false
+    use_teams = false
     use_system_tests = false
     test_framework = "minitest"
     auth_strategy = "none"
@@ -324,6 +331,7 @@ class PromptsStarterKitSystemTestsEnvTest < GeneratorTestCase
     ENV["INERTIA_ALBA"] = "0"
     ENV["INERTIA_TEST_FRAMEWORK"] = "minitest"
     ENV["INERTIA_SYSTEM_TESTS"] = "1"
+    ENV["INERTIA_TEAMS"] = "1"
 
     vite_gem_detected = nil
 
@@ -331,13 +339,23 @@ class PromptsStarterKitSystemTestsEnvTest < GeneratorTestCase
 
     <%= include "prompts" %>
 
+    ENV.delete("INERTIA_TEAMS")
+
     say "SYSTEM_TESTS=#{use_system_tests}"
+    say "TEAMS=#{use_teams}"
   CODE
 
   def test_starter_kit_reads_system_tests_from_env
     run_generator do |output|
       assert_line_printed output, "System tests: yes (from env)"
       assert_line_printed output, "SYSTEM_TESTS=true"
+    end
+  end
+
+  def test_starter_kit_reads_teams_from_env
+    run_generator do |output|
+      assert_line_printed output, "Teams: yes (from env)"
+      assert_line_printed output, "TEAMS=true"
     end
   end
 end
@@ -358,6 +376,7 @@ class PromptsNonInteractiveFailFastTest < GeneratorTestCase
     use_ssr = false
     use_typelizer = false
     use_alba = false
+    use_teams = false
     test_framework = "minitest"
     auth_strategy = "none"
 

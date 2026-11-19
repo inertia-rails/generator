@@ -5,6 +5,9 @@
   import AppLogoIcon from "@/components/app-logo-icon.svelte"
   import AppLogo from "@/components/app-logo.svelte"
   import Breadcrumbs from "@/components/breadcrumbs.svelte"
+<% if use_teams %>
+  import TeamSwitcher from "@/components/team-switcher.svelte"
+<% end %>
   import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
   import { Button } from "@/components/ui/button"
   import {
@@ -28,7 +31,7 @@
     TooltipTrigger,
   } from "@/components/ui/tooltip"
   import UserMenuContent from "@/components/user-menu-content.svelte"
-  import { dashboard } from "@/routes"
+  import { <%= use_teams ? "teamDashboard" : "dashboard" %> } from "@/routes"
   import { getInitials } from "@/runes/use-initials"
   import type { BreadcrumbItem, NavItem } from "@/types"
 
@@ -48,6 +51,17 @@
       : "",
   )
 
+<% if use_teams %>
+  const dashboardUrl = $derived(teamDashboard(page.props.current_team.slug).url)
+
+  const mainNavItems = $derived<NavItem[]>([
+    {
+      title: "Dashboard",
+      href: dashboardUrl,
+      icon: LayoutGrid,
+    },
+  ])
+<% else %>
   const mainNavItems: NavItem[] = [
     {
       title: "Dashboard",
@@ -55,6 +69,7 @@
       icon: LayoutGrid,
     },
   ]
+<% end %>
 
   const rightNavItems: NavItem[] = [
     {
@@ -127,7 +142,7 @@
         </Sheet>
       </div>
 
-      <Link href={dashboard.index()} class="flex items-center gap-x-2">
+      <Link href={<%= use_teams ? "dashboardUrl" : "dashboard.index()" %>} class="flex items-center gap-x-2">
         <AppLogo />
       </Link>
 
@@ -221,6 +236,10 @@
             <UserMenuContent {auth} />
           </DropdownMenuContent>
         </DropdownMenu>
+<% if use_teams %>
+
+        <TeamSwitcher inHeader />
+<% end %>
       </div>
     </div>
   </div>

@@ -25,7 +25,7 @@ RSpec.describe "Sessions", type: :request do
         expect(response).to redirect_to(dashboard_path)
         expect(cookies[:session_token]).to be_present
 
-        get dashboard_path
+        get settings_profile_path
         expect(response).to have_http_status(:success)
       end
     end

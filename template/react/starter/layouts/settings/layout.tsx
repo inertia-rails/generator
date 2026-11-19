@@ -11,6 +11,9 @@ import {
   settingsPasswords,
   settingsProfiles,
   settingsSessions,
+<% if use_teams %>
+  settingsTeams,
+<% end %>
 } from "@/routes"
 import type { NavItem } from "@/types"
 
@@ -35,6 +38,13 @@ const sidebarNavItems: NavItem[] = [
     href: settingsSessions.index().url,
     icon: null,
   },
+<% if use_teams %>
+  {
+    title: "Teams",
+    href: settingsTeams.index().url,
+    icon: null,
+  },
+<% end %>
   {
     title: "Appearance",
     href: settingsAppearance().url,
@@ -62,7 +72,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                 variant="ghost"
                 asChild
                 className={cn("w-full justify-start", {
-                  "bg-muted": url === item.href,
+                  "bg-muted": url.startsWith(item.href),
                 })}
               >
                 <Link href={item.href}>

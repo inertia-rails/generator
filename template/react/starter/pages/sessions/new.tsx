@@ -1,5 +1,8 @@
 import { Form, Head } from "@inertiajs/react"
 
+<% if use_teams %>
+import TeamInvitationAlert from "@/components/team-invitation-alert"
+<% end %>
 import TextLink from "@/components/text-link"
 import { Button } from "@/components/ui/button"
 import {
@@ -12,14 +15,31 @@ import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import AuthLayout from "@/layouts/auth-layout"
 import { identityPasswordResets, sessions, users } from "@/routes"
+<% if use_teams %>
+import type { TeamInvitationContext } from "@/types"
+
+export default function Login({
+  team_invitation,
+}: {
+  team_invitation: TeamInvitationContext | null
+}) {
+<% else %>
 
 export default function Login() {
+<% end %>
   return (
     <AuthLayout
       title="Log in to your account"
       description="Enter your email and password below to log in"
     >
       <Head title="Log in" />
+<% if use_teams %>
+
+      {team_invitation && (
+        <TeamInvitationAlert invitation={team_invitation} action="Log in" />
+      )}
+
+<% end %>
       <Form
         action={sessions.create()}
         resetOnSuccess={["password"]}
@@ -83,7 +103,7 @@ export default function Login() {
 
             <div className="text-muted-foreground text-center text-sm">
               Don&apos;t have an account?{" "}
-              <TextLink href={users.new()} tabIndex={5}>
+              <TextLink href={<%= use_teams ? "users.new({ query: { invitation: team_invitation?.code } })" : "users.new()" %>} tabIndex={5}>
                 Sign up
               </TextLink>
             </div>

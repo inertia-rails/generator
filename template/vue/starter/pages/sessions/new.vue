@@ -2,6 +2,9 @@
 import { Form, Head } from "@inertiajs/vue3"
 import { LoaderCircle } from "lucide-vue-next"
 
+<% if use_teams %>
+import TeamInvitationAlert from "@/components/TeamInvitationAlert.vue"
+<% end %>
 import TextLink from "@/components/TextLink.vue"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,6 +16,11 @@ import {
 import { Input } from "@/components/ui/input"
 import AuthBase from "@/layouts/AuthLayout.vue"
 import { identityPasswordResets, sessions, users } from "@/routes"
+<% if use_teams %>
+import type { TeamInvitationContext } from "@/types"
+
+defineProps<{ team_invitation: TeamInvitationContext | null }>()
+<% end %>
 </script>
 
 <template>
@@ -21,6 +29,14 @@ import { identityPasswordResets, sessions, users } from "@/routes"
     description="Enter your email and password below to log in"
   >
     <Head title="Log in" />
+<% if use_teams %>
+
+    <TeamInvitationAlert
+      v-if="team_invitation"
+      :invitation="team_invitation"
+      action="Log in"
+    />
+<% end %>
 
     <Form
       :action="sessions.create()"
@@ -80,7 +96,7 @@ import { identityPasswordResets, sessions, users } from "@/routes"
 
       <div class="text-muted-foreground text-center text-sm">
         Don't have an account?
-        <TextLink :href="users.new()" :tabindex="5">Sign up</TextLink>
+        <TextLink :href="<%= use_teams ? "users.new({ query: { invitation: team_invitation?.code } })" : "users.new()" %>" :tabindex="5">Sign up</TextLink>
       </div>
     </Form>
   </AuthBase>

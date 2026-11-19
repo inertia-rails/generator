@@ -2,6 +2,9 @@
 import { Form, Head } from "@inertiajs/vue3"
 import { LoaderCircle } from "lucide-vue-next"
 
+<% if use_teams %>
+import TeamInvitationAlert from "@/components/TeamInvitationAlert.vue"
+<% end %>
 import TextLink from "@/components/TextLink.vue"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,6 +16,11 @@ import {
 import { Input } from "@/components/ui/input"
 import AuthBase from "@/layouts/AuthLayout.vue"
 import { sessions, users } from "@/routes"
+<% if use_teams %>
+import type { TeamInvitationContext } from "@/types"
+
+defineProps<{ team_invitation: TeamInvitationContext | null }>()
+<% end %>
 </script>
 
 <template>
@@ -29,6 +37,14 @@ import { sessions, users } from "@/routes"
       class="flex flex-col gap-6"
       #default="{ errors, processing }"
     >
+<% if use_teams %>
+      <TeamInvitationAlert
+        v-if="team_invitation"
+        :invitation="team_invitation"
+        action="Register"
+      />
+
+<% end %>
       <FieldGroup>
         <Field>
           <FieldLabel for="name">Name</FieldLabel>
@@ -101,7 +117,7 @@ import { sessions, users } from "@/routes"
       <div class="text-muted-foreground text-center text-sm">
         Already have an account?
         <TextLink
-          :href="sessions.new()"
+          :href="<%= use_teams ? "sessions.new({ query: { invitation: team_invitation?.code } })" : "sessions.new()" %>"
           class="underline underline-offset-4"
           :tabindex="6"
           >Log in</TextLink

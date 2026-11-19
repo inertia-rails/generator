@@ -6,6 +6,14 @@ class ApplicationController < ActionController::Base
 
   before_action :set_current_request_details
   before_action :authenticate
+<% if use_teams %>
+
+  authorize :user, through: -> { Current.user }
+
+  rescue_from ActionPolicy::Unauthorized do
+    redirect_back_or_to root_path, alert: "You are not allowed to do that"
+  end
+<% end %>
 
   private
 
@@ -28,4 +36,13 @@ class ApplicationController < ActionController::Base
     Current.user_agent = request.user_agent
     Current.ip_address = request.ip
   end
+<% if use_teams %>
+
+  # The team invitation a sign in or sign up page was opened with (?invitation=code)
+  def team_invitation
+    invitation = Invitation.pending.includes(:team).find_by(code: params[:invitation])
+
+    { code: invitation.code, team_name: invitation.team.name } if invitation
+  end
+<% end %>
 end

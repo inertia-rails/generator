@@ -1,5 +1,8 @@
 import { Form, Head } from "@inertiajs/react"
 
+<% if use_teams %>
+import TeamInvitationAlert from "@/components/team-invitation-alert"
+<% end %>
 import TextLink from "@/components/text-link"
 import { Button } from "@/components/ui/button"
 import {
@@ -12,8 +15,18 @@ import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import AuthLayout from "@/layouts/auth-layout"
 import { sessions, users } from "@/routes"
+<% if use_teams %>
+import type { TeamInvitationContext } from "@/types"
+
+export default function Register({
+  team_invitation,
+}: {
+  team_invitation: TeamInvitationContext | null
+}) {
+<% else %>
 
 export default function Register() {
+<% end %>
   return (
     <AuthLayout
       title="Create an account"
@@ -28,6 +41,15 @@ export default function Register() {
       >
         {({ processing, errors }) => (
           <>
+<% if use_teams %>
+            {team_invitation && (
+              <TeamInvitationAlert
+                invitation={team_invitation}
+                action="Register"
+              />
+            )}
+
+<% end %>
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="name">Name</FieldLabel>
@@ -107,7 +129,7 @@ export default function Register() {
 
             <div className="text-muted-foreground text-center text-sm">
               Already have an account?{" "}
-              <TextLink href={sessions.new()} tabIndex={6}>
+              <TextLink href={<%= use_teams ? "sessions.new({ query: { invitation: team_invitation?.code } })" : "sessions.new()" %>} tabIndex={6}>
                 Log in
               </TextLink>
             </div>

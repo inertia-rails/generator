@@ -23,7 +23,8 @@ if use_alba
     # and re-export from typelizer's serializers barrel instead.
     types_index = "#{js_destination_path}/types/index.ts"
     if use_starter_kit && File.exist?(types_index)
-      gsub_file types_index, /^export interface (Auth|User|Session|SharedProps) \{[^}]*\}\n\n?/m, ""
+      gsub_file types_index,
+        /^export interface (Auth|User|Session|SharedProps|Team|TeamMember|TeamInvitation|PendingInvitation) \{[^}]*\}\n\n?/m, ""
       append_with_blank_line.(types_index, "export * from \"./serializers\"\n")
     end
 

@@ -1,0 +1,13 @@
+<p>Hey there,</p>
+
+<p><strong><%%= @invitation.invited_by.name %></strong> has invited you to join the <strong><%%= @invitation.team.name %></strong> team.</p>
+
+<p>Log in and visit your dashboard to accept or decline this invitation.</p>
+
+<p><%%= link_to "Log in", sign_in_url(invitation: @invitation.code) %></p>
+
+<p>If you were not expecting this invitation you can safely ignore this email, it expires in 3 days.</p>
+
+<hr>
+
+<p>Have questions or need help? Just reply to this email and our support team will help you sort it out.</p>
