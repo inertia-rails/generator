@@ -15,6 +15,7 @@ class ViteAlreadyInstalledTest < GeneratorTestCase
     #{NOOP_ADD_GEM}
     #{UPDATE_PACKAGE_JSON}
     #{APPEND_WITH_BLANK_LINE}
+    vite_gem = "rails_vite"
     <%= include "vite" %>
   CODE
 
@@ -48,6 +49,7 @@ class ViteFreshInstallTest < GeneratorTestCase
       append_to_file path, "\n" unless File.read(path).end_with?("\n\n")
       append_to_file path, content
     }
+    vite_gem = "rails_vite"
     <%= include "vite" %>
     file "tmp_dev_pkgs.txt", npm_dev_packages.join(",")
   CODE
@@ -84,6 +86,20 @@ class ViteFreshInstallTest < GeneratorTestCase
   def test_adds_rails_vite_gem
     run_generator do
       assert_file_contains "Gemfile", 'gem "rails_vite"'
+    end
+  end
+end
+
+class ViteRailsInstallTest < GeneratorTestCase
+  template ViteFreshInstallTest.template_contents.sub('vite_gem = "rails_vite"', 'vite_gem = "vite_rails"')
+
+  def test_sets_up_vite_rails_instead_of_rails_vite
+    run_generator do
+      assert_file_contains "Gemfile", 'gem "vite_rails"'
+      assert_file_contains "tmp_dev_pkgs.txt", "vite-plugin-ruby"
+      assert_file_contains "config/vite.json", '"sourceCodeDir": "app/javascript"'
+      assert_file_contains "config/vite.json", '"skipProxy": true'
+      assert_file_contains "config/vite.json", '"ssrEntrypoint": "~/entrypoints/inertia.{js,ts,jsx,tsx}"'
     end
   end
 end

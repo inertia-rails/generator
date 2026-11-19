@@ -317,3 +317,21 @@ class FinalizeExistingViteConfigSingleLineTest < GeneratorTestCase
     end
   end
 end
+
+class FinalizeViteRailsConfigTest < GeneratorTestCase
+  template <<~CODE
+    #{FINALIZE_PREAMBLE}
+    vite_gem = "vite_rails"
+    #{NOOP_ADD_GEM}
+    self.class.define_method(:after_bundle) { |&block| block&.call }
+    <%= include "finalize" %>
+  CODE
+
+  # vite_rails makes the source folder the Vite root, so the SSR entry is relative to it
+  def test_vite_config_uses_the_ruby_plugin
+    run_generator do
+      assert_file_contains "vite.config.js", "import ViteRuby from 'vite-plugin-ruby'"
+      assert_file_contains "vite.config.js", "ViteRuby(),\n    inertia({ ssr: 'entrypoints/inertia.jsx' }),"
+    end
+  end
+end

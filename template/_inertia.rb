@@ -3,12 +3,12 @@
 say "📦 Setting up Inertia...", :cyan
 
 # Add inertia_rails to Gemfile (installed in _finalize.rb with single bundle install)
-rails_vite_anchor = "gem \"rails_vite\" # Vite integration [https://github.com/skryukov/rails_vite]\n"
+vite_gem_anchor = /^gem "#{vite_gem}".*\n/
 unless gem_in_gemfile.("inertia_rails")
-  if File.exist?("Gemfile") && File.read("Gemfile").include?(rails_vite_anchor)
+  if File.exist?("Gemfile") && File.read("Gemfile").match?(vite_gem_anchor)
     insert_into_file "Gemfile",
       "\n# The Rails adapter for Inertia.js [https://inertia-rails.dev]\ngem \"inertia_rails\", \"~> 3.23\"\n",
-      after: rails_vite_anchor
+      after: vite_gem_anchor
   else
     append_to_file "Gemfile", <<~GEM
       gem "inertia_rails", "~> 3.23" # The Rails adapter for Inertia.js [https://inertia-rails.dev]
@@ -53,19 +53,35 @@ file "app/controllers/inertia_controller.rb", <%= code("shared/inertia_controlle
 # Modify application layout
 layout_file = "app/views/layouts/application.html.erb"
 if File.exist?(layout_file)
-  # Add vite_tags with all entrypoints in a single call
-  unless File.read(layout_file).include?("vite_tags")
-    inertia_entrypoint = case framework
-      when "react" then "inertia.#{component_ext}"
-      else "inertia.#{js_ext}"
+  inertia_entrypoint = case framework
+    when "react" then "\"inertia.#{component_ext}\""
+    else "\"inertia.#{js_ext}\""
+  end
+
+  # rails_vite: one vite_tags call with all entrypoints.
+  # vite_rails: one tag helper per kind of asset.
+  # Each tag comes with the text that tells it is already in the layout, so
+  # an app with Vite set up only gets what it lacks.
+  vite_head_tags =
+    if vite_gem == "vite_rails"
+      entry_helper = use_typescript ? "vite_typescript_tag" : "vite_javascript_tag"
+      [
+        (["vite_react_refresh_tag", "vite_react_refresh_tag"] if framework == "react"),
+        ["vite_client_tag", "vite_client_tag"],
+        (["vite_stylesheet_tag", "vite_stylesheet_tag \"application.css\""] if use_tailwind),
+        [inertia_entrypoint, "#{entry_helper} #{inertia_entrypoint}"]
+      ].compact
+    else
+      vite_entries = [("\"application.css\"" if use_tailwind), inertia_entrypoint].compact
+      [[inertia_entrypoint, "vite_tags #{vite_entries.join(", ")}"]]
     end
+  vite_head_tags << ["inertia_ssr_head", "inertia_ssr_head"]
 
-    vite_entries = []
-    vite_entries << "\"application.css\"" if use_tailwind
-    vite_entries << "\"#{inertia_entrypoint}\""
-
+  layout = File.read(layout_file)
+  missing_head_tags = vite_head_tags.reject { |present_as, _tag| layout.include?(present_as) }
+  if missing_head_tags.any?
     insert_into_file layout_file,
-      "    <%%= vite_tags #{vite_entries.join(", ")} %>\n    <%%= inertia_ssr_head %>\n",
+      missing_head_tags.map { |_present_as, tag| "    <%%= #{tag} %>\n" }.join,
       before: "  </head>"
   end
 

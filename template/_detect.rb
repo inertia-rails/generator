@@ -57,29 +57,20 @@ if gem_in_gemfile.("jsbundling-rails") || gem_in_gemfile.("cssbundling-rails")
   exit(1)
 end
 
-# Blocker: vite_rails (vite-ruby) apps — this generator sets up rails_vite, which
-# conflicts (duplicate Vite integrations, different digest/config conventions)
-if gem_in_gemfile.("vite_rails") || gem_in_gemfile.("vite_ruby")
-  say ""
-  say "❌ vite_rails/vite_ruby detected.", :red
-  say "   This generator sets up rails_vite, which conflicts with vite_rails.", :red
-  say ""
-  say "   Options:", :yellow
-  say "     1. Migrate to rails_vite: https://github.com/skryukov/rails_vite#migrating-from-vite_rails", :yellow
-  say "        then re-run this generator", :yellow
-  say "     2. Set up Inertia manually: https://inertia-rails.dev/guide/server-side-setup", :yellow
-  say ""
-  exit(1)
-end
+# An app that already has a Vite gem keeps it: the two integrations conflict
+# (duplicate tag helpers, different digest and config conventions)
+vite_gem_detected = %w[rails_vite vite_rails vite_ruby].find { |name| gem_in_gemfile.(name) }
+vite_gem = (vite_gem_detected == "rails_vite") ? "rails_vite" : "vite_rails" if vite_gem_detected
 
 # Existing app: detect what's already installed
 unless fresh_app
   # Track importmap for post-install warning
   importmap_detected = gem_in_gemfile.("importmap-rails")
 
-  # Detect Vite
-  vite_installed = Dir.glob(vite_config_glob).any? && gem_in_gemfile.("rails_vite")
-  say "  Rails Vite: #{vite_installed ? 'installed' : 'not installed'}"
+  # Detect Vite: a vite.config plus the gem (and, for vite_rails, its config file)
+  vite_installed = Dir.glob(vite_config_glob).any? &&
+    ((vite_gem_detected == "rails_vite") || (vite_gem == "vite_rails" && File.exist?("config/vite.json")))
+  say "  #{(vite_gem == "vite_rails") ? "Vite Rails" : "Rails Vite"}: #{vite_installed ? 'installed' : 'not installed'}"
 
   # Detect framework from package.json
   pkg = JSON.parse(File.read("package.json")) rescue {}
@@ -107,6 +98,11 @@ unless fresh_app
   js_destination_detected = %w[app/frontend app/javascript app/client].find { |p|
     Dir.exist?("#{p}/entrypoints")
   }
+  # vite_rails says where its source folder is
+  if vite_installed && vite_gem == "vite_rails"
+    vite_json = JSON.parse(File.read("config/vite.json")) rescue {}
+    js_destination_detected = vite_json.dig("all", "sourceCodeDir") || js_destination_detected || "app/frontend"
+  end
   say "  Frontend dir: #{js_destination_detected || 'app/javascript (default)'}"
 end
 

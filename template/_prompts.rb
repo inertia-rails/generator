@@ -39,6 +39,24 @@ if fresh_app
   end
 end
 
+# Vite integration (only when the app has no Vite gem yet). rails_vite is the
+# default; non-interactive runs get it without having to say so.
+if vite_gem_detected
+  say "  Vite integration: #{vite_gem} (auto-detected)"
+else
+  if ENV.key?("INERTIA_VITE")
+    vite_gem = ENV["INERTIA_VITE"].downcase
+    unless %w[rails_vite vite_rails].include?(vite_gem)
+      say "Invalid INERTIA_VITE=#{vite_gem}. Must be rails_vite or vite_rails.", :red
+      exit(1)
+    end
+    say "  Vite integration: #{vite_gem} (from env)"
+  elsif interactive
+    vite_gem = ask("Vite integration?", :green,
+      limited_to: %w[rails_vite vite_rails], default: "rails_vite")
+  end
+end
+
 # Helper: resolve a boolean option from env, auto-detection, or interactive prompt
 prompt_bool = ->(env_key, label, prompt_text, detected: false) {
   if ENV.key?(env_key)
@@ -137,6 +155,7 @@ say ""
 say "━━━ Configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", :cyan
 say "  Setup:          #{use_starter_kit ? 'Starter Kit' : 'Foundation'}"
 say "  Framework:      #{framework}"
+say "  Vite:           #{vite_gem}"
 say "  TypeScript:     #{use_typescript ? 'yes' : 'no'}"
 say "  Tailwind CSS:   #{use_tailwind ? 'yes' : 'no'}"
 say "  shadcn/ui:      #{use_shadcn ? 'yes' : 'no'}"

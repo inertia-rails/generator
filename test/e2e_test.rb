@@ -38,6 +38,14 @@ class E2eTest < Minitest::Test
       "INERTIA_SSR" => "1",
       "INERTIA_TYPELIZER" => "1"
     },
+    # vite_rails instead of the default rails_vite
+    "vue_starter_kit_vite_rails" => {
+      "INERTIA_FRAMEWORK" => "vue",
+      "INERTIA_STARTER_KIT" => "1",
+      "INERTIA_SSR" => "1",
+      "INERTIA_TYPELIZER" => "1",
+      "INERTIA_VITE" => "vite_rails"
+    },
     # ─── Foundation (individual options) ─────────────────────────────
     "vue_minimal" => {
       "INERTIA_FRAMEWORK" => "vue",
@@ -101,7 +109,7 @@ class E2eTest < Minitest::Test
       output = "#{stdout}\n#{stderr}"
       assert status.success?, "rails new failed for #{name} (exit #{status.exitstatus}):\n#{tail(output)}"
 
-      assert_core_files(app_path)
+      assert_core_files(app_path, env)
       assert_framework_deps(app_path, env)
 
       if is_starter_kit
@@ -116,7 +124,7 @@ class E2eTest < Minitest::Test
     end
   end
 
-  def assert_core_files(app_path)
+  def assert_core_files(app_path, env)
     assert File.exist?(File.join(app_path, "Gemfile")), "Missing Gemfile"
     assert File.exist?(File.join(app_path, "package.json")), "Missing package.json"
     assert File.exist?(File.join(app_path, "config/initializers/inertia_rails.rb")), "Missing inertia initializer"
@@ -125,7 +133,8 @@ class E2eTest < Minitest::Test
 
     gemfile = File.read(File.join(app_path, "Gemfile"))
     assert gemfile.include?("inertia_rails"), "Gemfile missing inertia_rails"
-    assert gemfile.include?("rails_vite"), "Gemfile missing rails_vite"
+    vite_gem = env.fetch("INERTIA_VITE", "rails_vite")
+    assert gemfile.include?(vite_gem), "Gemfile missing #{vite_gem}"
 
     vite_configs = Dir.glob(File.join(app_path, "vite.config.*"))
     assert vite_configs.any?, "Missing vite.config.*"
@@ -133,7 +142,9 @@ class E2eTest < Minitest::Test
     assert File.exist?(File.join(app_path, "app/controllers/inertia_controller.rb")), "Missing InertiaController"
 
     app_layout = File.read(File.join(app_path, "app/views/layouts/application.html.erb"))
-    assert app_layout.include?("vite_tags"), "Layout missing vite_tags"
+    vite_tag = (vite_gem == "vite_rails") ? "vite_client_tag" : "vite_tags"
+    assert app_layout.include?(vite_tag), "Layout missing #{vite_tag}"
+    assert File.exist?(File.join(app_path, "bin/vite")), "Missing bin/vite" if vite_gem == "vite_rails"
   end
 
   def assert_framework_deps(app_path, env)
