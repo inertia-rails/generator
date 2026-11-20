@@ -3,6 +3,9 @@ import { BookOpen, Folder, LayoutGrid, Menu, Search } from "lucide-react"
 
 import { Breadcrumbs } from "@/components/breadcrumbs"
 import { Icon } from "@/components/icon"
+<% if use_teams %>
+import { TeamSwitcher } from "@/components/team-switcher"
+<% end %>
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -32,12 +35,13 @@ import {
 import { UserMenuContent } from "@/components/user-menu-content"
 import { useInitials } from "@/hooks/use-initials"
 import { cn } from "@/lib/utils"
-import { dashboard } from "@/routes"
+import { <%= use_teams ? "teamDashboard" : "dashboard" %> } from "@/routes"
 import type { BreadcrumbItem, NavItem } from "@/types"
 
 import AppLogo from "./app-logo"
 import AppLogoIcon from "./app-logo-icon"
 
+<% unless use_teams %>
 const mainNavItems: NavItem[] = [
   {
     title: "Dashboard",
@@ -46,6 +50,7 @@ const mainNavItems: NavItem[] = [
   },
 ]
 
+<% end %>
 const rightNavItems: NavItem[] = [
   {
     title: "Repository",
@@ -68,8 +73,22 @@ interface AppHeaderProps {
 
 export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
   const page = usePage()
+<% if use_teams %>
+  const { auth, current_team } = page.props
+  const getInitials = useInitials()
+
+  const mainNavItems: NavItem[] = [
+    {
+      title: "Dashboard",
+      href: teamDashboard(current_team.slug).url,
+      icon: LayoutGrid,
+    },
+  ]
+
+<% else %>
   const { auth } = page.props
   const getInitials = useInitials()
+<% end %>
   return (
     <>
       <div className="border-sidebar-border/80 border-b">
@@ -134,7 +153,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
           </div>
 
           <Link
-            href={dashboard.index()}
+            href={<%= use_teams ? "teamDashboard(current_team.slug)" : "dashboard.index()" %>}
             prefetch
             className="flex items-center space-x-2"
           >
@@ -224,6 +243,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                 <UserMenuContent auth={auth} />
               </DropdownMenuContent>
             </DropdownMenu>
+<% if use_teams %>
+
+            <TeamSwitcher inHeader />
+<% end %>
           </div>
         </div>
       </div>

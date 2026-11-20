@@ -1,10 +1,13 @@
 <script lang="ts">
-  import { Link } from "@inertiajs/svelte"
+  import { Link<%= ", page" if use_teams %> } from "@inertiajs/svelte"
   import { BookOpen, Folder, LayoutGrid } from "@lucide/svelte"
 
   import NavFooter from "@/components/nav-footer.svelte"
   import NavMain from "@/components/nav-main.svelte"
   import NavUser from "@/components/nav-user.svelte"
+<% if use_teams %>
+  import TeamSwitcher from "@/components/team-switcher.svelte"
+<% end %>
   import {
     Sidebar,
     SidebarContent,
@@ -14,11 +17,22 @@
     SidebarMenuButton,
     SidebarMenuItem,
   } from "@/components/ui/sidebar"
-  import { dashboard } from "@/routes"
+  import { <%= use_teams ? "teamDashboard" : "dashboard" %> } from "@/routes"
   import { type NavItem } from "@/types"
 
   import AppLogo from "./app-logo.svelte"
 
+<% if use_teams %>
+  const dashboardUrl = $derived(teamDashboard(page.props.current_team.slug).url)
+
+  const mainNavItems = $derived<NavItem[]>([
+    {
+      title: "Dashboard",
+      href: dashboardUrl,
+      icon: LayoutGrid,
+    },
+  ])
+<% else %>
   const mainNavItems: NavItem[] = [
     {
       title: "Dashboard",
@@ -26,6 +40,7 @@
       icon: LayoutGrid,
     },
   ]
+<% end %>
 
   const footerNavItems: NavItem[] = [
     {
@@ -47,13 +62,20 @@
       <SidebarMenuItem>
         <SidebarMenuButton size="lg">
           {#snippet child({ props })}
-            <Link {...props} href={dashboard.index()}>
+            <Link {...props} href={<%= use_teams ? "dashboardUrl" : "dashboard.index()" %>}>
               <AppLogo />
             </Link>
           {/snippet}
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
+<% if use_teams %>
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <TeamSwitcher />
+      </SidebarMenuItem>
+    </SidebarMenu>
+<% end %>
   </SidebarHeader>
 
   <SidebarContent>

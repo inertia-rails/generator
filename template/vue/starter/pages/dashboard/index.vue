@@ -1,4 +1,26 @@
 <script setup lang="ts">
+<% if use_teams %>
+import { Head, usePage } from "@inertiajs/vue3"
+import { computed } from "vue"
+
+import PendingInvitationsModal from "@/components/PendingInvitationsModal.vue"
+import AppLayout from "@/layouts/AppLayout.vue"
+import { teamDashboard } from "@/routes"
+import { type BreadcrumbItem, type DashboardShow } from "@/types"
+
+import PlaceholderPattern from "../../components/PlaceholderPattern.vue"
+
+defineProps<DashboardShow>()
+
+const page = usePage()
+
+const breadcrumbs = computed<BreadcrumbItem[]>(() => [
+  {
+    title: "Dashboard",
+    href: teamDashboard(page.props.current_team.slug).url,
+  },
+])
+<% else %>
 import { Head } from "@inertiajs/vue3"
 
 import AppLayout from "@/layouts/AppLayout.vue"
@@ -13,10 +35,18 @@ const breadcrumbs: BreadcrumbItem[] = [
     href: dashboard.index().url,
   },
 ]
+<% end %>
 </script>
 
 <template>
   <Head :title="breadcrumbs[breadcrumbs.length - 1].title" />
+<% if use_teams %>
+
+  <PendingInvitationsModal
+    v-if="pending_invitations.length > 0"
+    :invitations="pending_invitations"
+  />
+<% end %>
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div

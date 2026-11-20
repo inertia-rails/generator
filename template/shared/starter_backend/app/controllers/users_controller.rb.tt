@@ -11,6 +11,12 @@ class UsersController < InertiaController
 <% unless use_alba %>
     @user = User.new
 <% end %>
+<% if use_teams && use_alba %>
+    @team_invitation = team_invitation
+<% elsif use_teams %>
+
+    render inertia: { team_invitation: team_invitation }
+<% end %>
   end
 
   def create
@@ -30,6 +36,13 @@ class UsersController < InertiaController
   def destroy
     user = Current.user
     if user.authenticate(params[:password_challenge] || "")
+<% if use_teams %>
+      if user.shared_owned_teams.exists?
+        return redirect_to settings_teams_path,
+          alert: "Delete the teams you own or remove their members before deleting your account"
+      end
+
+<% end %>
       user.destroy!
       Current.session = nil
       redirect_to root_path, notice: "Your account has been deleted", inertia: { clear_history: true }

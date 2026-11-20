@@ -10,6 +10,9 @@ import {
   settingsPasswords,
   settingsProfiles,
   settingsSessions,
+<% if use_teams %>
+  settingsTeams,
+<% end %>
 } from "@/routes"
 import { type NavItem } from "@/types"
 
@@ -30,6 +33,12 @@ const sidebarNavItems: NavItem[] = [
     title: "Sessions",
     href: settingsSessions.index().url,
   },
+<% if use_teams %>
+  {
+    title: "Teams",
+    href: settingsTeams.index().url,
+  },
+<% end %>
   {
     title: "Appearance",
     href: settingsAppearance().url,
@@ -55,7 +64,7 @@ const page = usePage()
             variant="ghost"
             :class="[
               'w-full justify-start',
-              { 'bg-muted': page.url === item.href },
+              { 'bg-muted': page.url.startsWith(item.href) },
             ]"
             as-child
           >

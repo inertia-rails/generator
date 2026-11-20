@@ -46,7 +46,7 @@ RSpec.describe "Users", type: :request do
 
   describe "DELETE /users" do
     it "destroys current user with valid password" do
-      sign_in users(:one)
+      sign_in users(:two)
       expect {
         delete users_path, params: { password_challenge: "Secret1*3*5*" }
       }.to change(User, :count).by(-1)

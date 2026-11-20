@@ -6,6 +6,9 @@ import { computed } from "vue"
 import AppLogo from "@/components/AppLogo.vue"
 import AppLogoIcon from "@/components/AppLogoIcon.vue"
 import Breadcrumbs from "@/components/Breadcrumbs.vue"
+<% if use_teams %>
+import TeamSwitcher from "@/components/TeamSwitcher.vue"
+<% end %>
 import UserMenuContent from "@/components/UserMenuContent.vue"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -34,7 +37,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { getInitials } from "@/composables/useInitials"
-import { dashboard } from "@/routes"
+import { <%= use_teams ? "teamDashboard" : "dashboard" %> } from "@/routes"
 import type { BreadcrumbItem, NavItem } from "@/types"
 
 interface Props {
@@ -57,6 +60,19 @@ const activeItemStyles = computed(
       : "",
 )
 
+<% if use_teams %>
+const dashboardUrl = computed(
+  () => teamDashboard(page.props.current_team.slug).url,
+)
+
+const mainNavItems = computed<NavItem[]>(() => [
+  {
+    title: "Dashboard",
+    href: dashboardUrl.value,
+    icon: LayoutGrid,
+  },
+])
+<% else %>
 const mainNavItems: NavItem[] = [
   {
     title: "Dashboard",
@@ -64,6 +80,7 @@ const mainNavItems: NavItem[] = [
     icon: LayoutGrid,
   },
 ]
+<% end %>
 
 const rightNavItems: NavItem[] = [
   {
@@ -139,7 +156,10 @@ const rightNavItems: NavItem[] = [
           </Sheet>
         </div>
 
-        <Link :href="dashboard.index()" class="flex items-center gap-x-2">
+        <Link
+          :href="<%= use_teams ? "dashboardUrl" : "dashboard.index()" %>"
+          class="flex items-center gap-x-2"
+        >
           <AppLogo />
         </Link>
 
@@ -244,6 +264,10 @@ const rightNavItems: NavItem[] = [
               <UserMenuContent :auth="auth" />
             </DropdownMenuContent>
           </DropdownMenu>
+<% if use_teams %>
+
+          <TeamSwitcher in-header />
+<% end %>
         </div>
       </div>
     </div>

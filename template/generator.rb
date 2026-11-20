@@ -40,6 +40,7 @@ use_ssr         = false
 use_typelizer   = false
 use_alba        = false
 use_system_tests = false
+use_teams       = false
 test_framework  = "minitest"
 auth_strategy   = "none"
 vite_gem        = "rails_vite"

@@ -46,6 +46,8 @@ end
 # the published kits (react/vue/svelte-starter-kit all use rspec).
 STARTER_COMMON_ENV = {
   "INERTIA_TEST_FRAMEWORK" => ENV.fetch("INERTIA_TEST_FRAMEWORK", "minitest"),
+  # INERTIA_TEAMS=1 generates the teams variant (the kits' `teams` branch)
+  "INERTIA_TEAMS" => ENV.fetch("INERTIA_TEAMS", "0"),
   "INERTIA_ALBA" => "0",
   "BUNDLE_IGNORE_MESSAGES" => "1"
 }.freeze

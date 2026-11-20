@@ -13,13 +13,9 @@
   import { Input } from "@/components/ui/input"
   import AuthLayout from "@/layouts/auth-layout.svelte"
   import { identityPasswordResets } from "@/routes"
+  import type { IdentityPasswordResetsEdit } from "@/types"
 
-  interface Props {
-    sid: string
-    email: string
-  }
-
-  let { sid, email }: Props = $props()
+  let { sid, email }: IdentityPasswordResetsEdit = $props()
 </script>
 
 <svelte:head>

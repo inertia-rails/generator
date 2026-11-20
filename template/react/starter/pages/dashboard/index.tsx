@@ -1,3 +1,27 @@
+<% if use_teams %>
+import { Head, usePage } from "@inertiajs/react"
+import { useState } from "react"
+
+import PendingInvitationsModal from "@/components/pending-invitations-modal"
+import { PlaceholderPattern } from "@/components/placeholder-pattern"
+import AppLayout from "@/layouts/app-layout"
+import { teamDashboard } from "@/routes"
+import type { BreadcrumbItem, DashboardShow } from "@/types"
+
+export default function Dashboard({ pending_invitations }: DashboardShow) {
+  const { current_team } = usePage().props
+  const [showInvitations, setShowInvitations] = useState(
+    pending_invitations.length > 0,
+  )
+
+  const breadcrumbs: BreadcrumbItem[] = [
+    {
+      title: "Dashboard",
+      href: teamDashboard(current_team.slug).url,
+    },
+  ]
+
+<% else %>
 import { Head } from "@inertiajs/react"
 
 import { PlaceholderPattern } from "@/components/placeholder-pattern"
@@ -13,9 +37,17 @@ const breadcrumbs: BreadcrumbItem[] = [
 ]
 
 export default function Dashboard() {
+<% end %>
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={breadcrumbs[breadcrumbs.length - 1].title} />
+<% if use_teams %>
+      <PendingInvitationsModal
+        invitations={pending_invitations}
+        open={pending_invitations.length > 0 && showInvitations}
+        onOpenChange={setShowInvitations}
+      />
+<% end %>
 
       <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
         <div className="grid auto-rows-min gap-4 md:grid-cols-3">

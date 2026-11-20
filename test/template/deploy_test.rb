@@ -473,6 +473,7 @@ class DeployCiRunnerTypelizerTest < GeneratorTestCase
     #{GeneratorTestCase::DEPLOY_PREAMBLE}
     use_typelizer = true
     use_alba = true
+    use_teams = false
     use_typescript = true
     file "config/ci.rb", "placeholder"
     <%= include "deploy" %>

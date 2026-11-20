@@ -1,9 +1,12 @@
-import { Link } from "@inertiajs/react"
+import { Link<%= ", usePage" if use_teams %> } from "@inertiajs/react"
 import { BookOpen, Folder, LayoutGrid } from "lucide-react"
 
 import { NavFooter } from "@/components/nav-footer"
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
+<% if use_teams %>
+import { TeamSwitcher } from "@/components/team-switcher"
+<% end %>
 import {
   Sidebar,
   SidebarContent,
@@ -13,11 +16,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { dashboard } from "@/routes"
+import { <%= use_teams ? "teamDashboard" : "dashboard" %> } from "@/routes"
 import type { NavItem } from "@/types"
 
 import AppLogo from "./app-logo"
 
+<% unless use_teams %>
 const mainNavItems: NavItem[] = [
   {
     title: "Dashboard",
@@ -26,6 +30,7 @@ const mainNavItems: NavItem[] = [
   },
 ]
 
+<% end %>
 const footerNavItems: NavItem[] = [
   {
     title: "Repository",
@@ -40,18 +45,40 @@ const footerNavItems: NavItem[] = [
 ]
 
 export function AppSidebar() {
+<% if use_teams %>
+  const { current_team } = usePage().props
+
+  const mainNavItems: NavItem[] = [
+    {
+      title: "Dashboard",
+      href: teamDashboard(current_team.slug).url,
+      icon: LayoutGrid,
+    },
+  ]
+
+<% end %>
   return (
     <Sidebar collapsible="icon" variant="inset">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href={dashboard.index()} prefetch>
+              <Link
+                href={<%= use_teams ? "teamDashboard(current_team.slug)" : "dashboard.index()" %>}
+                prefetch
+              >
                 <AppLogo />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+<% if use_teams %>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <TeamSwitcher />
+          </SidebarMenuItem>
+        </SidebarMenu>
+<% end %>
       </SidebarHeader>
 
       <SidebarContent>

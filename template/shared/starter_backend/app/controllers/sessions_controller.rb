@@ -9,6 +9,11 @@ class SessionsController < InertiaController
     with: -> { redirect_to sign_in_path, alert: "Too many attempts. Try again later" }
 
   def new
+<% if use_teams && use_alba %>
+    @team_invitation = team_invitation
+<% elsif use_teams %>
+    render inertia: { team_invitation: team_invitation }
+<% end %>
   end
 
   def create

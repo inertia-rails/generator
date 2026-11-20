@@ -24,10 +24,22 @@ if use_starter_kit
   case framework
   when "react"
 <%= copy_dir("react/starter", "js_destination_path", force: true) %>
+
+    if use_teams
+<%= copy_dir("react/starter_teams", "js_destination_path", force: true) %>
+    end
   when "vue"
 <%= copy_dir("vue/starter", "js_destination_path", force: true) %>
+
+    if use_teams
+<%= copy_dir("vue/starter_teams", "js_destination_path", force: true) %>
+    end
   when "svelte"
 <%= copy_dir("svelte/starter", "js_destination_path", force: true) %>
+
+    if use_teams
+<%= copy_dir("svelte/starter_teams", "js_destination_path", force: true) %>
+    end
   end
 
   # ─── Dark-mode guard: set the theme class inline before assets load (avoids FOUC) ─

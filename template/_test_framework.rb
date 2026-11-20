@@ -22,6 +22,10 @@ if use_starter_kit
   if test_framework == "minitest"
 <%= copy_dir("shared/starter_test_minitest", force: true) %>
 
+    if use_teams
+<%= copy_dir("shared/starter_teams_test_minitest", force: true) %>
+    end
+
     # Add session helper require to test_helper.rb
     if File.exist?("test/test_helper.rb")
       insert_into_file "test/test_helper.rb",
@@ -40,6 +44,10 @@ if use_starter_kit
   if test_framework == "rspec"
     file ".rspec", "--require spec_helper\n", force: true
 <%= copy_dir("shared/starter_test_rspec", force: true) %>
+
+    if use_teams
+<%= copy_dir("shared/starter_teams_test_rspec", force: true) %>
+    end
 
     # Remove Rails-scaffolded minitest structure
     %w[

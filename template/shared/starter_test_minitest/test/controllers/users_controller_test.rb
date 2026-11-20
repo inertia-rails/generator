@@ -41,7 +41,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "destroys current user with valid password" do
-    sign_in users(:one)
+    sign_in users(:two)
     assert_difference "User.count", -1 do
       delete users_path, params: { password_challenge: "Secret1*3*5*" }
     end

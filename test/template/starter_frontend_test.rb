@@ -8,6 +8,7 @@ class StarterFrontendReactTest < GeneratorTestCase
     use_starter_kit = true
     use_shadcn = true
     use_alba = false
+    use_teams = false
     js_destination_path = "app/javascript"
     js_ext = "ts"
     component_ext = "tsx"
@@ -100,12 +101,25 @@ class StarterFrontendReactTest < GeneratorTestCase
   end
 end
 
+class StarterFrontendReactTeamsTest < GeneratorTestCase
+  template StarterFrontendReactTest.template_contents.sub("use_teams = false", "use_teams = true")
+
+  def test_adds_teams
+    run_generator do
+      assert_file "app/javascript/pages/settings/teams/show.tsx"
+      assert_file_contains "app/javascript/components/app-sidebar.tsx", "<TeamSwitcher />"
+      assert_file_contains "app/javascript/types/index.ts", "current_team: Team"
+    end
+  end
+end
+
 class StarterFrontendVueTest < GeneratorTestCase
   template <<~CODE
     framework = "vue"
     use_starter_kit = true
     use_shadcn = true
     use_alba = false
+    use_teams = false
     js_destination_path = "app/javascript"
     js_ext = "ts"
     component_ext = "vue"
@@ -146,6 +160,7 @@ class StarterFrontendSvelteTest < GeneratorTestCase
     use_starter_kit = true
     use_shadcn = true
     use_alba = false
+    use_teams = false
     js_destination_path = "app/javascript"
     js_ext = "ts"
     component_ext = "svelte"
@@ -183,6 +198,7 @@ class StarterFrontendDisabledTest < GeneratorTestCase
     use_starter_kit = false
     use_shadcn = false
     use_alba = false
+    use_teams = false
     js_destination_path = "app/javascript"
     js_ext = "ts"
     component_ext = "tsx"

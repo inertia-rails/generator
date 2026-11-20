@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - 5-day Dependabot cooldown on the JS ecosystem entry
 - Starter kit rate-limits sign-in, sign-up, password reset, and password update (10 attempts per 3 minutes per IP)
 - Stamp the compiled template with the commit SHA it was built from and print it at startup, so bug reports can name the build
+- Opt-in teams for the starter kit (`INERTIA_TEAMS=1` or the prompt): personal and shared teams, owner/admin/member roles with Action Policy, email invitations, a team switcher, and team pages under `/:team_slug`. The published kits carry it on a `teams` branch
 
 ### Fixed
 

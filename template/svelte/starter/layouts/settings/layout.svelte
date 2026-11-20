@@ -11,6 +11,9 @@
     settingsPasswords,
     settingsProfiles,
     settingsSessions,
+<% if use_teams %>
+    settingsTeams,
+<% end %>
   } from "@/routes"
   import { type NavItem } from "@/types"
 
@@ -37,6 +40,12 @@
       title: "Sessions",
       href: settingsSessions.index().url,
     },
+<% if use_teams %>
+    {
+      title: "Teams",
+      href: settingsTeams.index().url,
+    },
+<% end %>
     {
       title: "Appearance",
       href: settingsAppearance().url,
@@ -56,7 +65,7 @@
         {#each sidebarNavItems as item (item.href)}
           <Button
             variant="ghost"
-            class="w-full justify-start {page.url === item.href
+            class="w-full justify-start {page.url.startsWith(item.href)
               ? 'bg-muted'
               : ''}"
           >
