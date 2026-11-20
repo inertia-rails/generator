@@ -6,13 +6,9 @@ import PendingInvitationsModal from "@/components/pending-invitations-modal"
 import { PlaceholderPattern } from "@/components/placeholder-pattern"
 import AppLayout from "@/layouts/app-layout"
 import { teamDashboard } from "@/routes"
-import type { BreadcrumbItem, PendingInvitation } from "@/types"
+import type { BreadcrumbItem, DashboardShow } from "@/types"
 
-export default function Dashboard({
-  pending_invitations,
-}: {
-  pending_invitations: PendingInvitation[]
-}) {
+export default function Dashboard({ pending_invitations }: DashboardShow) {
   const { current_team } = usePage().props
   const [showInvitations, setShowInvitations] = useState(
     pending_invitations.length > 0,

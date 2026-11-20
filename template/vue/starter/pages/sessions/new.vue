@@ -17,9 +17,9 @@ import { Input } from "@/components/ui/input"
 import AuthBase from "@/layouts/AuthLayout.vue"
 import { identityPasswordResets, sessions, users } from "@/routes"
 <% if use_teams %>
-import type { TeamInvitationContext } from "@/types"
+import type { SessionsNew } from "@/types"
 
-defineProps<{ team_invitation: TeamInvitationContext | null }>()
+defineProps<SessionsNew>()
 <% end %>
 </script>
 

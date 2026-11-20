@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import AppLayout from "@/layouts/AppLayout.vue"
 import SettingsLayout from "@/layouts/settings/Layout.vue"
 import { sessions as sessionsRoutes, settingsSessions } from "@/routes"
-import type { BreadcrumbItem, Session } from "@/types"
+import type { BreadcrumbItem, SettingsSessionsIndex } from "@/types"
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -15,11 +15,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ]
 
-interface Props {
-  sessions: Session[]
-}
-
-defineProps<Props>()
+defineProps<SettingsSessionsIndex>()
 
 const { auth } = usePage().props
 </script>

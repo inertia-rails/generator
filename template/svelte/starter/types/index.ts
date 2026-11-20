@@ -94,3 +94,36 @@ export interface Session {
   ip_address: string
   created_at: string
 }
+
+// Props of each page, named after the controller action that renders it
+
+export interface SettingsSessionsIndex {
+  sessions: Session[]
+}
+
+export interface IdentityPasswordResetsEdit {
+  sid: string
+  email: string
+}
+<% if use_teams %>
+
+export interface DashboardShow {
+  pending_invitations: PendingInvitation[]
+}
+
+export interface SessionsNew {
+  team_invitation: TeamInvitationContext | null
+}
+
+export interface UsersNew {
+  team_invitation: TeamInvitationContext | null
+}
+
+export interface SettingsTeamsShow {
+  team: Team
+  members: TeamMember[]
+  invitations: TeamInvitation[]
+  permissions: TeamPermissions
+  assignable_roles: MembershipRole[]
+}
+<% end %>

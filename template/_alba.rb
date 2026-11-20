@@ -23,8 +23,14 @@ if use_alba
     # and re-export from typelizer's serializers barrel instead.
     types_index = "#{js_destination_path}/types/index.ts"
     if use_starter_kit && File.exist?(types_index)
-      gsub_file types_index,
-        /^export interface (Auth|User|Session|SharedProps|Team|TeamMember|TeamInvitation|TeamPermissions|TeamInvitationContext|PendingInvitation) \{[^}]*\}\n\n?/m, ""
+      generated_types = %w[
+        Auth User Session SharedProps
+        Team TeamMember TeamInvitation TeamPermissions TeamInvitationContext PendingInvitation
+        SettingsSessionsIndex IdentityPasswordResetsEdit
+        DashboardShow SessionsNew UsersNew SettingsTeamsShow
+      ]
+      gsub_file types_index, /^export interface (#{generated_types.join("|")}) \{[^}]*\}\n\n?/m, ""
+      gsub_file types_index, /^\/\/ Props of each page, .*\n\n?/, ""
       # Enums come from the models (Enums.ts)
       gsub_file types_index, /^export type MembershipRole = .*\n\n?/, "" if use_teams
       append_with_blank_line.(types_index, "export * from \"./serializers\"\n")

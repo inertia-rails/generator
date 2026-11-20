@@ -8,10 +8,9 @@
   import PlaceholderPattern from "@/components/placeholder-pattern.svelte"
   import AppLayout from "@/layouts/app-layout.svelte"
   import { teamDashboard } from "@/routes"
-  import { type BreadcrumbItem, type PendingInvitation } from "@/types"
+  import { type BreadcrumbItem, type DashboardShow } from "@/types"
 
-  let { pending_invitations }: { pending_invitations: PendingInvitation[] } =
-    $props()
+  let { pending_invitations }: DashboardShow = $props()
 
   const breadcrumbs = $derived<BreadcrumbItem[]>([
     {

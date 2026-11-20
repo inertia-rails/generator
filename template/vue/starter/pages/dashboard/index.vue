@@ -6,11 +6,11 @@ import { computed } from "vue"
 import PendingInvitationsModal from "@/components/PendingInvitationsModal.vue"
 import AppLayout from "@/layouts/AppLayout.vue"
 import { teamDashboard } from "@/routes"
-import { type BreadcrumbItem, type PendingInvitation } from "@/types"
+import { type BreadcrumbItem, type DashboardShow } from "@/types"
 
 import PlaceholderPattern from "../../components/PlaceholderPattern.vue"
 
-defineProps<{ pending_invitations: PendingInvitation[] }>()
+defineProps<DashboardShow>()
 
 const page = usePage()
 

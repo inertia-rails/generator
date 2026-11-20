@@ -32,10 +32,9 @@
   import type {
     BreadcrumbItem,
     MembershipRole,
-    Team,
+    SettingsTeamsShow,
     TeamInvitation,
     TeamMember,
-    TeamPermissions,
   } from "@/types"
 
   let {
@@ -44,13 +43,7 @@
     invitations,
     permissions,
     assignable_roles,
-  }: {
-    team: Team
-    members: TeamMember[]
-    invitations: TeamInvitation[]
-    permissions: TeamPermissions
-    assignable_roles: MembershipRole[]
-  } = $props()
+  }: SettingsTeamsShow = $props()
 
   const breadcrumbs = $derived<BreadcrumbItem[]>([
     {

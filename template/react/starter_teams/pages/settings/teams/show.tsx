@@ -31,19 +31,10 @@ import { settingsTeams, settingsTeamsMembers } from "@/routes"
 import type {
   BreadcrumbItem,
   MembershipRole,
-  Team,
+  SettingsTeamsShow,
   TeamInvitation,
   TeamMember,
-  TeamPermissions,
 } from "@/types"
-
-interface TeamEditProps {
-  team: Team
-  members: TeamMember[]
-  invitations: TeamInvitation[]
-  permissions: TeamPermissions
-  assignable_roles: MembershipRole[]
-}
 
 export default function TeamEdit({
   team,
@@ -51,7 +42,7 @@ export default function TeamEdit({
   invitations,
   permissions,
   assignable_roles,
-}: TeamEditProps) {
+}: SettingsTeamsShow) {
   const getInitials = useInitials()
 
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false)

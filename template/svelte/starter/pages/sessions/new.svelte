@@ -18,10 +18,9 @@
   import AuthBase from "@/layouts/auth-layout.svelte"
   import { identityPasswordResets, sessions, users } from "@/routes"
 <% if use_teams %>
-  import type { TeamInvitationContext } from "@/types"
+  import type { SessionsNew } from "@/types"
 
-  let { team_invitation }: { team_invitation: TeamInvitationContext | null } =
-    $props()
+  let { team_invitation }: SessionsNew = $props()
 <% end %>
 </script>
 

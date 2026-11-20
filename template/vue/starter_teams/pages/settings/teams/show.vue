@@ -32,21 +32,12 @@ import { settingsTeams, settingsTeamsMembers } from "@/routes"
 import type {
   BreadcrumbItem,
   MembershipRole,
-  Team,
+  SettingsTeamsShow,
   TeamInvitation,
   TeamMember,
-  TeamPermissions,
 } from "@/types"
 
-interface Props {
-  team: Team
-  members: TeamMember[]
-  invitations: TeamInvitation[]
-  permissions: TeamPermissions
-  assignable_roles: MembershipRole[]
-}
-
-const props = defineProps<Props>()
+const props = defineProps<SettingsTeamsShow>()
 
 const breadcrumbs = computed<BreadcrumbItem[]>(() => [
   {

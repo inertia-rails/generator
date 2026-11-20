@@ -16,13 +16,9 @@ import { Spinner } from "@/components/ui/spinner"
 import AuthLayout from "@/layouts/auth-layout"
 import { identityPasswordResets, sessions, users } from "@/routes"
 <% if use_teams %>
-import type { TeamInvitationContext } from "@/types"
+import type { SessionsNew } from "@/types"
 
-export default function Login({
-  team_invitation,
-}: {
-  team_invitation: TeamInvitationContext | null
-}) {
+export default function Login({ team_invitation }: SessionsNew) {
 <% else %>
 
 export default function Login() {

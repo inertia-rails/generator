@@ -16,13 +16,9 @@ import { Spinner } from "@/components/ui/spinner"
 import AuthLayout from "@/layouts/auth-layout"
 import { sessions, users } from "@/routes"
 <% if use_teams %>
-import type { TeamInvitationContext } from "@/types"
+import type { UsersNew } from "@/types"
 
-export default function Register({
-  team_invitation,
-}: {
-  team_invitation: TeamInvitationContext | null
-}) {
+export default function Register({ team_invitation }: UsersNew) {
 <% else %>
 
 export default function Register() {

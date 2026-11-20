@@ -12,13 +12,9 @@ import {
 import { Input } from "@/components/ui/input"
 import AuthLayout from "@/layouts/AuthLayout.vue"
 import { identityPasswordResets } from "@/routes"
+import type { IdentityPasswordResetsEdit } from "@/types"
 
-interface Props {
-  sid: string
-  email: string
-}
-
-const props = defineProps<Props>()
+const props = defineProps<IdentityPasswordResetsEdit>()
 </script>
 
 <template>
