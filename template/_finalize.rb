@@ -205,7 +205,7 @@ chmod "bin/dev", 0o755
 
 say "🔍 Verifying installation...", :cyan
 
-if in_root { run("bundle exec rails runner 'puts :ok'") }
+if bundle_run.("bundle exec rails runner 'puts :ok'")
   say "  Rails boot check passed ✓", :green
 else
   say "  ⚠ Rails boot check failed (the app may still work — check the error above)", :yellow
