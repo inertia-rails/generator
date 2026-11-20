@@ -21,11 +21,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { settingsTeamsInvitations } from "@/routes"
-import type { Team, TeamRole } from "@/types"
+import type { MembershipRole, Team } from "@/types"
 
 interface InviteMemberModalProps {
   team: Team
-  availableRoles: TeamRole[]
+  availableRoles: MembershipRole[]
   open: boolean
   onOpenChange: (open: boolean) => void
 }
@@ -36,7 +36,7 @@ export default function InviteMemberModal({
   open,
   onOpenChange,
 }: InviteMemberModalProps) {
-  const [inviteRole, setInviteRole] = useState<TeamRole>("member")
+  const [inviteRole, setInviteRole] = useState<MembershipRole>("member")
 
   const handleOpenChange = (nextOpen: boolean) => {
     onOpenChange(nextOpen)
@@ -86,7 +86,7 @@ export default function InviteMemberModal({
                   <Select
                     name="role"
                     value={inviteRole}
-                    onValueChange={(value) => setInviteRole(value as TeamRole)}
+                    onValueChange={(value) => setInviteRole(value as MembershipRole)}
                   >
                     <SelectTrigger
                       id="invitation_role"

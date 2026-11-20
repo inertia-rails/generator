@@ -31,11 +31,11 @@ import SettingsLayout from "@/layouts/settings/Layout.vue"
 import { settingsTeams, settingsTeamsMembers } from "@/routes"
 import type {
   BreadcrumbItem,
+  MembershipRole,
   Team,
   TeamInvitation,
   TeamMember,
   TeamPermissions,
-  TeamRole,
 } from "@/types"
 
 interface Props {
@@ -43,7 +43,7 @@ interface Props {
   members: TeamMember[]
   invitations: TeamInvitation[]
   permissions: TeamPermissions
-  assignable_roles: TeamRole[]
+  assignable_roles: MembershipRole[]
 }
 
 const props = defineProps<Props>()
@@ -72,7 +72,7 @@ const pageTitle = computed(() =>
     : `View ${props.team.name}`,
 )
 
-const updateMemberRole = (member: TeamMember, newRole: TeamRole) => {
+const updateMemberRole = (member: TeamMember, newRole: MembershipRole) => {
   router.visit(
     settingsTeamsMembers.update({ teamSlug: props.team.slug, id: member.id }),
     {

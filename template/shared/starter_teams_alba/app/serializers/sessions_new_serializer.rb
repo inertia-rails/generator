@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
 class SessionsNewSerializer < ApplicationSerializer
-  attributes :team_invitation
-  typelize team_invitation: "{ code: string; team_name: string } | null"
+  one :team_invitation, resource: TeamInvitationContextSerializer
+  typelize team_invitation: [ TeamInvitationContextSerializer, nullable: true ]
 end

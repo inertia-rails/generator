@@ -31,14 +31,14 @@ export interface SharedProps {
 }
 <% if use_teams %>
 
-export type TeamRole = "owner" | "admin" | "member"
+export type MembershipRole = "owner" | "admin" | "member"
 
 export interface Team {
   id: number
   name: string
   slug: string
   personal: boolean
-  role?: TeamRole
+  role?: MembershipRole
 }
 
 export interface TeamMember {
@@ -46,13 +46,13 @@ export interface TeamMember {
   name: string
   email: string
   avatar?: string
-  role: TeamRole
+  role: MembershipRole
 }
 
 export interface TeamInvitation {
   code: string
   email: string
-  role: TeamRole
+  role: MembershipRole
   created_at: string
 }
 

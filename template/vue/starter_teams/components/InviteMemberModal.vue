@@ -22,11 +22,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { settingsTeamsInvitations } from "@/routes"
-import type { Team, TeamRole } from "@/types"
+import type { MembershipRole, Team } from "@/types"
 
 interface Props {
   team: Team
-  availableRoles: TeamRole[]
+  availableRoles: MembershipRole[]
   open: boolean
 }
 
@@ -35,7 +35,7 @@ const emit = defineEmits<{
   "update:open": [value: boolean]
 }>()
 
-const inviteRole = ref<TeamRole>("member")
+const inviteRole = ref<MembershipRole>("member")
 const formKey = ref(0)
 
 function handleOpenChange(value: boolean) {

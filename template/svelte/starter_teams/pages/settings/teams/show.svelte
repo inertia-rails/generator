@@ -31,11 +31,11 @@
   import { getInitials } from "@/runes/use-initials"
   import type {
     BreadcrumbItem,
+    MembershipRole,
     Team,
     TeamInvitation,
     TeamMember,
     TeamPermissions,
-    TeamRole,
   } from "@/types"
 
   let {
@@ -49,7 +49,7 @@
     members: TeamMember[]
     invitations: TeamInvitation[]
     permissions: TeamPermissions
-    assignable_roles: TeamRole[]
+    assignable_roles: MembershipRole[]
   } = $props()
 
   const breadcrumbs = $derived<BreadcrumbItem[]>([
@@ -74,7 +74,7 @@
     permissions.update ? `Edit ${team.name}` : `View ${team.name}`,
   )
 
-  const updateMemberRole = (member: TeamMember, newRole: TeamRole) => {
+  const updateMemberRole = (member: TeamMember, newRole: MembershipRole) => {
     router.visit(
       settingsTeamsMembers.update({ teamSlug: team.slug, id: member.id }),
       {

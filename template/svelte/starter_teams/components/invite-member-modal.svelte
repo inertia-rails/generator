@@ -20,7 +20,7 @@
     SelectTrigger,
   } from "@/components/ui/select"
   import { settingsTeamsInvitations } from "@/routes"
-  import type { Team, TeamRole } from "@/types"
+  import type { MembershipRole, Team } from "@/types"
 
   let {
     team,
@@ -28,7 +28,7 @@
     open = $bindable(),
   }: {
     team: Team
-    availableRoles: TeamRole[]
+    availableRoles: MembershipRole[]
     open: boolean
   } = $props()
 
