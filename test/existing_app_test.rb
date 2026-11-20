@@ -55,6 +55,8 @@ class ExistingAppTest < Minitest::Test
       assert status.success?, "app:template failed:\n#{tail(out)}"
       assert_includes out, "Detected: existing Rails app"
       assert_includes out, "Inertia Rails installed successfully"
+      # The installer's own bundler commands see the gems it has just added
+      assert_includes out, "Rails boot check passed"
       # Plain Rails apps ship importmap; we warn instead of removing it
       assert_includes out, "importmap-rails is still installed"
       assert_installed(app, framework: "react")

@@ -25,3 +25,4 @@ All notable changes to this project will be documented in this file.
 - An existing `vite.config` that already sets up the framework plugin (including with options, e.g. `react({ ... })`) no longer gets a second copy or a duplicate import, and `reactCompilerPreset` is imported for the added `babel()` plugin
 - `bin/ci` runs lint, format, type check, and audit through the app's package manager instead of always `npm`
 - Dependabot uses the `bun` ecosystem for Bun apps instead of `npm`
+- Existing apps: the installer's own `bundle install` failed on the gems it had just added, because it inherited the bundle of the running `bin/rails app:template`. Rails installed them afterwards, but the boot check, binstubs and `typelizer:generate` ran too early. These commands now run with the original environment

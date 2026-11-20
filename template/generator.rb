@@ -8,6 +8,7 @@
 # Non-interactive mode via env vars:
 #   INERTIA_FRAMEWORK=react INERTIA_STARTER_KIT=1 rails new myapp -m https://inertia-rails.dev
 
+require "bundler"
 require "json"
 
 # Build this template was compiled from — quote it in bug reports.
@@ -78,9 +79,12 @@ remove_gem = ->(name) {
   gsub_file "Gemfile", /^\s*gem\s+['"]#{Regexp.escape(name)}['"].*\n/, ""
 }
 
+# Runs bundler commands with the environment the installer was started from.
+# `bin/rails app:template` runs inside the app's bundle; a command that
+# inherits it fails on the gems the installer has just added to the Gemfile.
 bundle_run = ->(*cmds) {
   in_root do
-    cmds.each { |cmd| run cmd }
+    Bundler.with_original_env { cmds.all? { |cmd| run cmd } }
   end
 }
 
