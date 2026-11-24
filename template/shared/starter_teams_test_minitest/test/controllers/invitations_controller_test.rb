@@ -17,11 +17,13 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal teams(:one_personal), users(:two).reload.current_team
   end
 
-  test "accepting an owner invitation grants ownership" do
-    @invitation.update!(role: :owner)
-    post accept_invitation_path(@invitation)
+  test "an old owner invitation is unavailable" do
+    @invitation.update_column(:role, "owner")
 
-    assert_predicate @invitation.team.memberships.find_by!(user: users(:two)), :owner?
+    assert_no_difference "Membership.count" do
+      post accept_invitation_path(@invitation)
+    end
+    assert_response :not_found
   end
 
   test "is not found once the invitation has expired" do

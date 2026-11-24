@@ -19,6 +19,14 @@ RSpec.describe "Settings::Teams::Invitations", type: :request do
       expect(team.invitations.pending.last).to have_attributes(email: "new@example.com", role: "admin")
     end
 
+    it "rejects an invitation with the owner role" do
+      sign_in users(:one)
+      expect {
+        post settings_team_invitations_path(team), params: { email: "new@example.com", role: "owner" }
+      }.not_to change(Invitation, :count)
+      expect(session[:inertia_errors]).to have_key(:role)
+    end
+
     it "rejects someone who is already a member" do
       sign_in users(:one)
       post settings_team_invitations_path(team), params: { email: "two@example.com", role: "member" }

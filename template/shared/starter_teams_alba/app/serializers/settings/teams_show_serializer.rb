@@ -7,7 +7,7 @@ module Settings
     has_many :invitations, resource: TeamInvitationSerializer
     one :permissions, resource: TeamPermissionsSerializer
 
-    attributes :assignable_roles, :invitation_roles
-    typelize assignable_roles: [ :MembershipRole, multi: true ], invitation_roles: [ :MembershipRole, multi: true ]
+    attributes :assignable_roles
+    typelize assignable_roles: [ :MembershipRole, multi: true ]
   end
 end

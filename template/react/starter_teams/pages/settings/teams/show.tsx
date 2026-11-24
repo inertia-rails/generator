@@ -42,7 +42,6 @@ export default function TeamEdit({
   invitations,
   permissions,
   assignable_roles,
-  invitation_roles,
 }: SettingsTeamsShow) {
   const getInitials = useInitials()
 
@@ -311,7 +310,7 @@ export default function TeamEdit({
         {permissions.invite ? (
           <InviteMemberModal
             team={team}
-            availableRoles={invitation_roles}
+            availableRoles={assignable_roles}
             open={inviteDialogOpen}
             onOpenChange={setInviteDialogOpen}
           />

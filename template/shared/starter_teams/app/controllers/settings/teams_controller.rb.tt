@@ -21,7 +21,6 @@ class Settings::TeamsController < InertiaController
     @members = @team.memberships.includes(:user).order(:created_at)
     @invitations = @team.invitations.pending.order(:created_at)
     @assignable_roles = Membership::ASSIGNABLE_ROLES
-    @invitation_roles = Membership.roles.keys
     @permissions = team_permissions
 <% else %>
     render inertia: {
@@ -31,7 +30,6 @@ class Settings::TeamsController < InertiaController
       },
       invitations: @team.invitations.pending.order(:created_at).as_json(only: %i[code email role created_at]),
       assignable_roles: Membership::ASSIGNABLE_ROLES,
-      invitation_roles: Membership.roles.keys,
       permissions: team_permissions
     }
 <% end %>

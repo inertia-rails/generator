@@ -125,6 +125,5 @@ export interface SettingsTeamsShow {
   invitations: TeamInvitation[]
   permissions: TeamPermissions
   assignable_roles: MembershipRole[]
-  invitation_roles: MembershipRole[]
 }
 <% end %>

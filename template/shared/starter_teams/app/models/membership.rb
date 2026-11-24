@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Membership < ApplicationRecord
-  # Roles that can be assigned when editing an existing member
+  # Roles the team page offers when inviting someone or changing a member's role
   ASSIGNABLE_ROLES = %w[admin member].freeze
 
   belongs_to :team

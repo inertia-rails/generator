@@ -285,7 +285,7 @@ const confirmCancelInvitation = (invitation: TeamInvitation) => {
         v-if="permissions.invite"
         v-model:open="inviteDialogOpen"
         :team="team"
-        :available-roles="invitation_roles"
+        :available-roles="assignable_roles"
       />
 
       <RemoveMemberModal

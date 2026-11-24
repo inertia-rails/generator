@@ -6,7 +6,7 @@ class Invitation < ApplicationRecord
 
   has_secure_token :code
 
-  enum :role, Membership.roles, validate: true
+  enum :role, Membership.roles.slice(*Membership::ASSIGNABLE_ROLES), validate: true
 
   normalizes :email, with: -> { _1.strip.downcase }
 
@@ -15,7 +15,7 @@ class Invitation < ApplicationRecord
 
   before_create { self.expires_at ||= 3.days.from_now }
 
-  scope :pending, -> { where(accepted_at: nil).where("expires_at > ?", Time.current) }
+  scope :pending, -> { where(accepted_at: nil, role: roles.keys).where("expires_at > ?", Time.current) }
   # Deleted daily in production, see config/recurring.yml
   scope :expired, -> { where(expires_at: ...Time.current) }
 
@@ -24,7 +24,7 @@ class Invitation < ApplicationRecord
   end
 
   def pending?
-    accepted_at.nil? && expires_at.future?
+    role.present? && accepted_at.nil? && expires_at.future?
   end
 
   def accept!(user)

@@ -43,7 +43,6 @@
     invitations,
     permissions,
     assignable_roles,
-    invitation_roles,
   }: SettingsTeamsShow = $props()
 
   const breadcrumbs = $derived<BreadcrumbItem[]>([
@@ -303,7 +302,7 @@
     {#if permissions.invite}
       <InviteMemberModal
         {team}
-        availableRoles={invitation_roles}
+        availableRoles={assignable_roles}
         bind:open={inviteDialogOpen}
       />
     {/if}

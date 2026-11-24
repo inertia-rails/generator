@@ -22,6 +22,14 @@ class Settings::Teams::InvitationsControllerTest < ActionDispatch::IntegrationTe
     assert_predicate @team.invitations.pending.last, :admin?
   end
 
+  test "rejects an invitation with the owner role" do
+    sign_in users(:one)
+    assert_no_difference "Invitation.count" do
+      post settings_team_invitations_path(@team), params: { email: "new@example.com", role: "owner" }
+    end
+    assert session[:inertia_errors].key?(:role)
+  end
+
   test "rejects someone who is already a member" do
     sign_in users(:one)
     post settings_team_invitations_path(@team), params: { email: "two@example.com", role: "member" }
