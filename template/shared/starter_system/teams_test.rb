@@ -17,6 +17,8 @@ class TeamsTest < ApplicationSystemTestCase
 
     click_on "Invite member"
     fill_in "Email address", with: "two@example.com"
+    find("#invitation_role").click
+    find("[role=option]", text: /owner/i).click
     click_on "Send invitation"
     assert_text "Pending invitations"
     assert_text "two@example.com"

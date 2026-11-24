@@ -57,6 +57,11 @@ module HasTeams
   private
 
   def create_personal_team
-    create_team(name: "#{name}'s Team", personal: true)
+    suffix = "'s Team"
+    team = create_team(name: name.first(Team::MAX_NAME_LENGTH - suffix.length) + suffix, personal: true)
+    return if team.persisted?
+
+    errors.add(:base, "Could not create personal team: #{team.errors.full_messages.to_sentence}")
+    raise ActiveRecord::RecordInvalid.new(self)
   end
 end

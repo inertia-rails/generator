@@ -19,6 +19,13 @@ RSpec.describe "Invitations", type: :request do
       expect(users(:two).reload.current_team).to eq(teams(:one_personal))
     end
 
+    it "grants ownership when an owner invitation is accepted" do
+      invitation.update!(role: :owner)
+      post accept_invitation_path(invitation)
+
+      expect(invitation.team.memberships.find_by!(user: users(:two))).to be_owner
+    end
+
     it "is not found once the invitation has expired" do
       invitation.update!(expires_at: 1.minute.ago)
       post accept_invitation_path(invitation)

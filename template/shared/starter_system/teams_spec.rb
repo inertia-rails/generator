@@ -28,6 +28,8 @@ RSpec.describe "Teams", type: :system do
 
     click_on "Invite member"
     fill_in "Email address", with: "two@example.com"
+    find("#invitation_role").click
+    find("[role=option]", text: /owner/i).click
     click_on "Send invitation"
     expect(page).to have_text("Pending invitations")
     expect(page).to have_text("two@example.com")

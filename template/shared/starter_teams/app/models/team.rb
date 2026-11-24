@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 class Team < ApplicationRecord
+  MAX_NAME_LENGTH = 255
+
   has_many :memberships, dependent: :destroy
   has_many :members, through: :memberships, source: :user
   has_many :invitations, dependent: :destroy
 
-  validates :name, presence: true, length: { maximum: 255 }
+  validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
   validate :name_is_not_reserved, if: :name_changed?
 
   before_save :assign_slug, if: :name_changed?

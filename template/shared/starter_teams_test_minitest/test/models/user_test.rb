@@ -13,6 +13,24 @@ class UserTest < ActiveSupport::TestCase
     assert_equal user, user.current_team.owner
   end
 
+  test "fits a long name into the personal team name" do
+    user = User.create!(name: "A" * 249, email: "new@example.com", password: "Secret1*3*5*")
+
+    assert_equal "A" * 248 + "'s Team", user.current_team.name
+    assert_equal user, user.current_team.owner
+  end
+
+  test "rolls back sign up when the personal team is invalid" do
+    user = User.new(name: "New User", email: "new@example.com", password: "Secret1*3*5*")
+
+    stub_const(Team::ReservedNames, :ALL, Set["new-user-s-team"]) do
+      assert_no_difference [ "User.count", "Team.count", "Membership.count" ] do
+        assert_not user.save
+      end
+    end
+    assert user.errors[:base].present?
+  end
+
   test "takes the teams nobody else belongs to with it when deleted" do
     users(:two).destroy!
 
