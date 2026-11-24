@@ -128,11 +128,11 @@ This adds:
   is accepted or declined from the dashboard; expired ones are deleted daily
 - Deleting an account is refused while it owns a team other people belong to
 - A team switcher, and team settings under Settings → Teams
-- Team pages under `/:team_slug/...`, so links and browser tabs keep pointing
+- Team pages under `/:team_id/...`, so links and browser tabs keep pointing
   at the same team; `/dashboard` redirects to the current team
 
 To put a page of your own under a team, add its route to the
-`scope ":team_slug"` block and include `TeamScoped` in the controller.
+`scope ":team_id"` block and include `TeamScoped` in the controller.
 
 ## Features
 

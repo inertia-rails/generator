@@ -23,32 +23,22 @@ RSpec.describe "Settings::Teams", type: :request do
         post settings_teams_path, params: { name: "New Team" }
       }.to change(Team, :count).by(1)
 
-      team = Team.find_by!(slug: "new-team")
+      team = Team.find_by!(name: "New Team")
       expect(response).to redirect_to(settings_team_path(team))
       expect(team.owner).to eq(users(:one))
       expect(users(:one).reload.current_team).to eq(team)
     end
 
-    it "gives teams with the same name different slugs" do
-      post settings_teams_path, params: { name: "Acme" }
-      expect(Team.last.slug).to eq("acme-2")
-    end
-
-    it "rejects a name that clashes with an app route" do
-      expect {
-        post settings_teams_path, params: { name: "Settings" }
-      }.not_to change(Team, :count)
-      expect(session[:inertia_errors]).to eq(name: [ "is reserved" ])
-    end
-
-    it "rejects a reserved name" do
-      expect {
-        post settings_teams_path, params: { name: "Admin" }
-      }.not_to change(Team, :count)
+    it "routes teams with the same name independently" do
+      post settings_teams_path, params: { name: team.name }
+      created = users(:one).reload.current_team
+      expect(created.id).not_to eq(team.id)
+      expect(created.to_param).to eq("#{created.id}-acme")
+      expect(response).to redirect_to(settings_team_path(created))
     end
   end
 
-  describe "GET /settings/teams/:slug" do
+  describe "GET /settings/teams/:id" do
     it "renders the team page for a member" do
       sign_in users(:two)
       get settings_team_path(team)
@@ -62,12 +52,15 @@ RSpec.describe "Settings::Teams", type: :request do
     end
   end
 
-  describe "PATCH /settings/teams/:slug" do
-    it "renames the team" do
+  describe "PATCH /settings/teams/:id" do
+    it "renames the team and keeps its old dashboard URL working" do
       sign_in users(:one)
+      bookmark = team_dashboard_path(team)
       patch settings_team_path(team), params: { name: "Acme Corp" }
-      expect(response).to redirect_to(settings_team_path("acme-corp"))
-      expect(team.reload.name).to eq("Acme Corp")
+      expect(response).to redirect_to(settings_team_path("#{team.id}-acme-corp"))
+      get bookmark
+      expect(response).to have_http_status(:success)
+      expect(users(:one).reload.current_team).to eq(team)
     end
 
     it "is not allowed for a member" do
@@ -78,7 +71,7 @@ RSpec.describe "Settings::Teams", type: :request do
     end
   end
 
-  describe "DELETE /settings/teams/:slug" do
+  describe "DELETE /settings/teams/:id" do
     before { sign_in users(:one) }
 
     it "deletes the team when the name is confirmed" do
@@ -105,7 +98,7 @@ RSpec.describe "Settings::Teams", type: :request do
     end
   end
 
-  describe "DELETE /settings/teams/:slug/leave" do
+  describe "DELETE /settings/teams/:id/leave" do
     it "removes the member from the team" do
       sign_in users(:two)
       delete leave_settings_team_path(team)

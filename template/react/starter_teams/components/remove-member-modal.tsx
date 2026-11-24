@@ -35,7 +35,7 @@ export default function RemoveMemberModal({
     }
 
     router.visit(
-      settingsTeamsMembers.destroy({ teamSlug: team.slug, id: member.id }),
+      settingsTeamsMembers.destroy({ teamId: team.to_param, id: member.id }),
       {
         onStart: () => setProcessing(true),
         onFinish: () => setProcessing(false),

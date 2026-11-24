@@ -49,7 +49,7 @@
   <DialogContent>
     {#key formKey}
       <Form
-        action={settingsTeamsInvitations.create(team.slug)}
+        action={settingsTeamsInvitations.create(team.to_param)}
         class="space-y-6"
         onSuccess={() => handleOpenChange(false)}
       >

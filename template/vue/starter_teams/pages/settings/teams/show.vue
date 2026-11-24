@@ -46,7 +46,7 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
   },
   {
     title: props.team.name,
-    href: settingsTeams.show(props.team.slug).url,
+    href: settingsTeams.show(props.team.to_param).url,
   },
 ])
 
@@ -65,7 +65,7 @@ const pageTitle = computed(() =>
 
 const updateMemberRole = (member: TeamMember, newRole: MembershipRole) => {
   router.visit(
-    settingsTeamsMembers.update({ teamSlug: props.team.slug, id: member.id }),
+    settingsTeamsMembers.update({ teamId: props.team.to_param, id: member.id }),
     {
       data: { role: newRole },
       preserveScroll: true,
@@ -98,7 +98,7 @@ const confirmCancelInvitation = (invitation: TeamInvitation) => {
           />
 
           <Form
-            :action="settingsTeams.update(team.slug)"
+            :action="settingsTeams.update(team.to_param)"
             class="space-y-6"
             #default="{ errors, processing }"
           >

@@ -43,7 +43,7 @@
   <DialogContent>
     {#key formKey}
       <Form
-        action={settingsTeams.destroy(team.slug)}
+        action={settingsTeams.destroy(team.to_param)}
         class="space-y-6"
         onSuccess={() => handleOpenChange(false)}
       >

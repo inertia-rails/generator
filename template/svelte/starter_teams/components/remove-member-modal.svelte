@@ -30,7 +30,7 @@
       return
     }
 
-    router.visit(settingsTeamsMembers.destroy({ teamSlug: team.slug, id: member.id }), {
+    router.visit(settingsTeamsMembers.destroy({ teamId: team.to_param, id: member.id }), {
       onStart: () => (processing = true),
       onFinish: () => (processing = false),
       onSuccess: () => {

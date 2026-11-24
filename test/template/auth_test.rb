@@ -137,7 +137,7 @@ class AuthStarterKitWithTeamsTest < GeneratorTestCase
       assert_file "app/policies/team_policy.rb"
       assert_file "db/migrate/20250801153829_create_teams.rb"
       assert_file_contains "app/models/user.rb", "include HasTeams"
-      assert_file_contains "config/routes.rb", %(scope ":team_slug", as: :team do)
+      assert_file_contains "config/routes.rb", %(scope ":team_id", as: :team do)
     end
   end
 end

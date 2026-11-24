@@ -21,31 +21,19 @@ class Settings::TeamsControllerTest < ActionDispatch::IntegrationTest
       post settings_teams_path, params: { name: "New Team" }
     end
 
-    team = Team.find_by!(slug: "new-team")
+    team = Team.find_by!(name: "New Team")
     assert_redirected_to settings_team_path(team)
     assert_equal users(:one), team.owner
     assert_equal team, users(:one).reload.current_team
   end
 
-  test "gives teams with the same name different slugs" do
+  test "routes teams with the same name independently" do
     sign_in users(:one)
-    post settings_teams_path, params: { name: "Acme" }
-    assert_equal "acme-2", Team.last.slug
-  end
-
-  test "rejects a name that clashes with an app route" do
-    sign_in users(:one)
-    assert_no_difference "Team.count" do
-      post settings_teams_path, params: { name: "Settings" }
-    end
-    assert_equal({ name: [ "is reserved" ] }, session[:inertia_errors])
-  end
-
-  test "rejects a reserved name" do
-    sign_in users(:one)
-    assert_no_difference "Team.count" do
-      post settings_teams_path, params: { name: "Admin" }
-    end
+    post settings_teams_path, params: { name: @team.name }
+    created = users(:one).reload.current_team
+    assert_not_equal @team.id, created.id
+    assert_equal "#{created.id}-acme", created.to_param
+    assert_redirected_to settings_team_path(created)
   end
 
   test "renders the team page for a member" do
@@ -60,11 +48,14 @@ class Settings::TeamsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  test "renames the team" do
+  test "renames the team and keeps its old dashboard URL working" do
     sign_in users(:one)
+    bookmark = team_dashboard_path(@team)
     patch settings_team_path(@team), params: { name: "Acme Corp" }
-    assert_redirected_to settings_team_path("acme-corp")
-    assert_equal "Acme Corp", @team.reload.name
+    assert_redirected_to settings_team_path("#{@team.id}-acme-corp")
+    get bookmark
+    assert_response :success
+    assert_equal @team, users(:one).reload.current_team
   end
 
   test "renaming is not allowed for a member" do

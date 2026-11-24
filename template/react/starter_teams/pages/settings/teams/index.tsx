@@ -103,7 +103,7 @@ export default function TeamsIndex() {
                           <TooltipTrigger asChild>
                             <Button variant="ghost" size="sm" asChild>
                               <Link
-                                href={settingsTeams.show(team.slug)}
+                                href={settingsTeams.show(team.to_param)}
                                 aria-label="View team"
                               >
                                 <Eye className="h-4 w-4" />
@@ -119,7 +119,7 @@ export default function TeamsIndex() {
                           <TooltipTrigger asChild>
                             <Button variant="ghost" size="sm" asChild>
                               <Link
-                                href={settingsTeams.show(team.slug)}
+                                href={settingsTeams.show(team.to_param)}
                                 aria-label="Edit team"
                               >
                                 <Pencil className="h-4 w-4" />

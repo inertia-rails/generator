@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# For pages that belong to a team. Their URLs carry the team (/:team_slug/...),
+# For pages that belong to a team. Their URLs carry the team (/:team_id/...),
 # so links, bookmarks and browser tabs keep pointing at the same team.
 module TeamScoped
   extend ActiveSupport::Concern
@@ -12,7 +12,7 @@ module TeamScoped
   private
 
   def set_team
-    @team = Current.user.teams.find_by!(slug: params[:team_slug])
+    @team = Current.user.teams.find(params[:team_id])
 
     # Opening a team's page makes it the current team
     Current.user.update!(current_team: @team) unless Current.user.current_team_id == @team.id

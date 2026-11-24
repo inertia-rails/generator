@@ -106,7 +106,7 @@
                       {#snippet child({ props })}
                         <Link
                           {...props}
-                          href={settingsTeams.show(team.slug)}
+                          href={settingsTeams.show(team.to_param)}
                           class={buttonVariants({ variant: "ghost", size: "sm" })}
                           aria-label="View team"
                         >
@@ -124,7 +124,7 @@
                       {#snippet child({ props })}
                         <Link
                           {...props}
-                          href={settingsTeams.show(team.slug)}
+                          href={settingsTeams.show(team.to_param)}
                           class={buttonVariants({ variant: "ghost", size: "sm" })}
                           aria-label="Edit team"
                         >

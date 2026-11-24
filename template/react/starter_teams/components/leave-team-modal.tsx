@@ -32,7 +32,7 @@ export default function LeaveTeamModal({
       return
     }
 
-    router.visit(settingsTeams.leave(team.slug), {
+    router.visit(settingsTeams.leave(team.to_param), {
       onStart: () => setProcessing(true),
       onFinish: () => setProcessing(false),
       onSuccess: () => onOpenChange(false),

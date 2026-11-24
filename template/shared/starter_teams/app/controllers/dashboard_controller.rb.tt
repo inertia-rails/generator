@@ -10,7 +10,7 @@ class DashboardController < InertiaController
     redirect_to team_dashboard_path(Current.user.current_team)
   end
 
-  # GET /:team_slug/dashboard
+  # GET /:team_id/dashboard
   def show
 <% if use_alba %>
     @pending_invitations = Current.user.pending_invitations.includes(:team, :invited_by)

@@ -27,7 +27,7 @@ class Settings::Teams::InvitationsController < InertiaController
   private
 
   def set_team
-    @team = Current.user.teams.find_by!(slug: params[:team_slug])
+    @team = Current.user.teams.find(params[:team_id])
     authorize! @team, to: :invite?
   end
 end

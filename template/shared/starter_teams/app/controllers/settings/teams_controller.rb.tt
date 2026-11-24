@@ -24,7 +24,7 @@ class Settings::TeamsController < InertiaController
     @permissions = team_permissions
 <% else %>
     render inertia: {
-      team: @team.as_json(only: %i[id name slug personal]),
+      team: @team.as_json(only: %i[id name personal], methods: :to_param),
       members: @team.memberships.includes(:user).order(:created_at).map { |membership|
         { id: membership.id, role: membership.role, **membership.user.slice(:name, :email) }
       },
@@ -41,7 +41,7 @@ class Settings::TeamsController < InertiaController
     if @team.update(name: params[:name])
       redirect_to settings_team_path(@team), notice: "Team updated"
     else
-      redirect_to settings_team_path(@team.slug_was), inertia: { errors: @team.errors }
+      redirect_to settings_team_path(params[:id]), inertia: { errors: @team.errors }
     end
   end
 
@@ -67,7 +67,7 @@ class Settings::TeamsController < InertiaController
   private
 
   def set_team
-    @team = Current.user.teams.find_by!(slug: params[:slug])
+    @team = Current.user.teams.find(params[:id])
   end
 
   # What the current user can do with the team, so the page can hide the rest

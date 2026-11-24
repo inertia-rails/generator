@@ -65,13 +65,13 @@ export default function TeamEdit({
     },
     {
       title: team.name,
-      href: settingsTeams.show(team.slug).url,
+      href: settingsTeams.show(team.to_param).url,
     },
   ]
 
   const updateMemberRole = (member: TeamMember, newRole: MembershipRole) => {
     router.visit(
-      settingsTeamsMembers.update({ teamSlug: team.slug, id: member.id }),
+      settingsTeamsMembers.update({ teamId: team.to_param, id: member.id }),
       {
         data: { role: newRole },
         preserveScroll: true,
@@ -104,7 +104,7 @@ export default function TeamEdit({
                 />
 
                 <Form
-                  action={settingsTeams.update(team.slug)}
+                  action={settingsTeams.update(team.to_param)}
                   className="space-y-6"
                 >
                   {({ errors, processing }) => (

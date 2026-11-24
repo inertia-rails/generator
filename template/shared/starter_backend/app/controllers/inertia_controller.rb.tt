@@ -12,8 +12,8 @@ class InertiaController < ApplicationController
         session: -> { Current.session.as_json(only: %i[id]) }
 <% if use_teams %>
       },
-      current_team: -> { Current.user&.current_team.as_json(only: %i[id name slug personal]) },
-      teams: -> { Current.user&.teams_with_roles.as_json(only: %i[id name slug personal role]) }
+      current_team: -> { Current.user&.current_team.as_json(only: %i[id name personal], methods: :to_param) },
+      teams: -> { Current.user&.teams_with_roles.as_json(only: %i[id name personal role], methods: :to_param) }
 <% else %>
       }
 <% end %>

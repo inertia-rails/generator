@@ -36,7 +36,7 @@ export type MembershipRole = "owner" | "admin" | "member"
 export interface Team {
   id: number
   name: string
-  slug: string
+  to_param: string
   personal: boolean
   role?: MembershipRole
 }

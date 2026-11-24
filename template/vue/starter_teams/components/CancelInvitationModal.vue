@@ -35,7 +35,7 @@ const cancelInvitation = () => {
 
   router.visit(
     settingsTeamsInvitations.destroy({
-      teamSlug: props.team.slug,
+      teamId: props.team.to_param,
       code: props.invitation.code,
     }),
     {

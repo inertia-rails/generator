@@ -13,7 +13,7 @@ class TeamsTest < ApplicationSystemTestCase
     find("[role=menuitem]", text: "New team").click
     fill_in "Team name", with: "Rocket"
     click_on "Create team"
-    assert_current_path settings_team_path("rocket")
+    assert_current_path %r{\A/settings/teams/\d+-rocket\z}
 
     click_on "Invite member"
     fill_in "Email address", with: "two@example.com"

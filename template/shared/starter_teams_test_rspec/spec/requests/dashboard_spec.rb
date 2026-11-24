@@ -14,7 +14,7 @@ RSpec.describe "Dashboard", type: :request do
     end
   end
 
-  describe "GET /:team_slug/dashboard" do
+  describe "GET /:team_id/dashboard" do
     it "renders the dashboard and makes the team current" do
       get team_dashboard_path(teams(:acme))
       expect(response).to have_http_status(:success)

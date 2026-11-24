@@ -24,7 +24,7 @@ Rails.application.routes.draw do
 <% if use_teams %>
 
   # Pages that belong to a team carry it in the URL
-  scope ":team_slug", as: :team do
+  scope ":team_id", as: :team do
     get :dashboard, to: "dashboard#show"
   end
 <% end %>
@@ -35,7 +35,7 @@ Rails.application.routes.draw do
     resource :email, only: [ :show, :update ]
     resources :sessions, only: [ :index ]
 <% if use_teams %>
-    resources :teams, only: [ :index, :create, :show, :update, :destroy ], param: :slug do
+    resources :teams, only: [ :index, :create, :show, :update, :destroy ] do
       delete :leave, on: :member
 
       scope module: :teams do

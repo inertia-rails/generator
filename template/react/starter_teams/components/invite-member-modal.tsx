@@ -51,7 +51,7 @@ export default function InviteMemberModal({
       <DialogContent>
         <Form
           key={String(open)}
-          action={settingsTeamsInvitations.create(team.slug)}
+          action={settingsTeamsInvitations.create(team.to_param)}
           className="space-y-6"
           onSuccess={() => handleOpenChange(false)}
         >

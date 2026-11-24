@@ -35,7 +35,7 @@ const removeMember = () => {
 
   router.visit(
     settingsTeamsMembers.destroy({
-      teamSlug: props.team.slug,
+      teamId: props.team.to_param,
       id: props.member.id,
     }),
     {

@@ -52,7 +52,7 @@
     },
     {
       title: team.name,
-      href: settingsTeams.show(team.slug).url,
+      href: settingsTeams.show(team.to_param).url,
     },
   ])
 
@@ -69,7 +69,7 @@
 
   const updateMemberRole = (member: TeamMember, newRole: MembershipRole) => {
     router.visit(
-      settingsTeamsMembers.update({ teamSlug: team.slug, id: member.id }),
+      settingsTeamsMembers.update({ teamId: team.to_param, id: member.id }),
       {
         data: { role: newRole },
         preserveScroll: true,
@@ -102,7 +102,7 @@
             description="Update your team name and settings"
           />
 
-          <Form action={settingsTeams.update(team.slug)} class="space-y-6">
+          <Form action={settingsTeams.update(team.to_param)} class="space-y-6">
             {#snippet children({ errors, processing }: FormComponentSlotProps)}
               <Field>
                 <FieldLabel for="name">Team name</FieldLabel>

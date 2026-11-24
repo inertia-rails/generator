@@ -1,14 +1,11 @@
 one_personal:
   name: Test User's Team
-  slug: test-user-s-team
   personal: true
 
 two_personal:
   name: Another User's Team
-  slug: another-user-s-team
   personal: true
 
 # Owned by user one, user two is a member
 acme:
   name: Acme
-  slug: acme

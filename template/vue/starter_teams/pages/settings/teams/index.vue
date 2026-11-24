@@ -99,7 +99,7 @@ const openLeaveTeamDialog = (team: Team) => {
                   <TooltipTrigger as-child>
                     <Button variant="ghost" size="sm" as-child>
                       <Link
-                        :href="settingsTeams.show(team.slug)"
+                        :href="settingsTeams.show(team.to_param)"
                         aria-label="View team"
                       >
                         <Eye class="h-4 w-4" />
@@ -115,7 +115,7 @@ const openLeaveTeamDialog = (team: Team) => {
                   <TooltipTrigger as-child>
                     <Button variant="ghost" size="sm" as-child>
                       <Link
-                        :href="settingsTeams.show(team.slug)"
+                        :href="settingsTeams.show(team.to_param)"
                         aria-label="Edit team"
                       >
                         <Pencil class="h-4 w-4" />

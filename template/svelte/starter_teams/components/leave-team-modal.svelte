@@ -28,7 +28,7 @@
       return
     }
 
-    router.visit(settingsTeams.leave(team.slug), {
+    router.visit(settingsTeams.leave(team.to_param), {
       onStart: () => (processing = true),
       onFinish: () => (processing = false),
       onSuccess: () => {

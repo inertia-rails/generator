@@ -8,7 +8,7 @@ RSpec.describe "Settings::Teams::Members", type: :request do
   let(:team) { teams(:acme) }
   let(:membership) { memberships(:acme_member) }
 
-  describe "PATCH /settings/teams/:team_slug/members/:id" do
+  describe "PATCH /settings/teams/:team_id/members/:id" do
     it "changes the member's role" do
       sign_in users(:one)
       patch settings_team_member_path(team, membership), params: { role: "admin" }
@@ -30,7 +30,7 @@ RSpec.describe "Settings::Teams::Members", type: :request do
     end
   end
 
-  describe "DELETE /settings/teams/:team_slug/members/:id" do
+  describe "DELETE /settings/teams/:team_id/members/:id" do
     before { sign_in users(:one) }
 
     it "removes the member" do

@@ -23,7 +23,7 @@
   import AppLogo from "./app-logo.svelte"
 
 <% if use_teams %>
-  const dashboardUrl = $derived(teamDashboard(page.props.current_team.slug).url)
+  const dashboardUrl = $derived(teamDashboard(page.props.current_team.to_param).url)
 
   const mainNavItems = $derived<NavItem[]>([
     {

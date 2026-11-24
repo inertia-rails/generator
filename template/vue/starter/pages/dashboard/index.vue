@@ -17,7 +17,7 @@ const page = usePage()
 const breadcrumbs = computed<BreadcrumbItem[]>(() => [
   {
     title: "Dashboard",
-    href: teamDashboard(page.props.current_team.slug).url,
+    href: teamDashboard(page.props.current_team.to_param).url,
   },
 ])
 <% else %>

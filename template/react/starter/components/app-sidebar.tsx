@@ -51,7 +51,7 @@ export function AppSidebar() {
   const mainNavItems: NavItem[] = [
     {
       title: "Dashboard",
-      href: teamDashboard(current_team.slug).url,
+      href: teamDashboard(current_team.to_param).url,
       icon: LayoutGrid,
     },
   ]
@@ -64,7 +64,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link
-                href={<%= use_teams ? "teamDashboard(current_team.slug)" : "dashboard.index()" %>}
+                href={<%= use_teams ? "teamDashboard(current_team.to_param)" : "dashboard.index()" %>}
 <% unless use_teams %>
                 prefetch
 <% end %>

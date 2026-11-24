@@ -53,7 +53,7 @@ function handleOpenChange(value: boolean) {
     <DialogContent>
       <Form
         :key="formKey"
-        :action="settingsTeamsInvitations.create(props.team.slug)"
+        :action="settingsTeamsInvitations.create(props.team.to_param)"
         class="space-y-6"
         #default="{ errors, processing }"
         @success="handleOpenChange(false)"

@@ -17,7 +17,7 @@ export default function Dashboard({ pending_invitations }: DashboardShow) {
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: "Dashboard",
-      href: teamDashboard(current_team.slug).url,
+      href: teamDashboard(current_team.to_param).url,
     },
   ]
 

@@ -32,7 +32,7 @@ const leaveTeam = () => {
     return
   }
 
-  router.visit(settingsTeams.leave(props.team.slug), {
+  router.visit(settingsTeams.leave(props.team.to_param), {
     onStart: () => (processing.value = true),
     onFinish: () => (processing.value = false),
     onSuccess: () => emit("update:open", false),

@@ -46,11 +46,11 @@ const plusIconClass = computed(() => (props.inHeader ? "size-4" : "h-4 w-4"))
 
 // Opening a team's page switches to it. On a team page, stay on the same page.
 const teamUrl = (team: Team) => {
-  const segment = `/${currentTeam.value.slug}/`
+  const [, teamParam, ...path] = page.url.split("/")
 
-  return page.url.startsWith(segment)
-    ? `/${team.slug}/${page.url.slice(segment.length)}`
-    : teamDashboard(team.slug).url
+  return teamParam?.split("-")[0] === String(currentTeam.value.id)
+    ? `/${team.to_param}/${path.join("/")}`
+    : teamDashboard(team.to_param).url
 }
 </script>
 

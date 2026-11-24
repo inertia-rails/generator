@@ -23,10 +23,12 @@ class UserTest < ActiveSupport::TestCase
   test "rolls back sign up when the personal team is invalid" do
     user = User.new(name: "New User", email: "new@example.com", password: "Secret1*3*5*")
 
-    stub_const(Team::ReservedNames, :ALL, Set["new-user-s-team"]) do
-      assert_no_difference [ "User.count", "Team.count", "Membership.count" ] do
-        assert_not user.save
-      end
+    def user.create_team(**attributes)
+      super(**attributes, name: "")
+    end
+
+    assert_no_difference [ "User.count", "Team.count", "Membership.count" ] do
+      assert_not user.save
     end
     assert user.errors[:base].present?
   end

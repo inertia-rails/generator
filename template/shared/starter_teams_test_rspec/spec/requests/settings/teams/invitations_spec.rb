@@ -7,7 +7,7 @@ RSpec.describe "Settings::Teams::Invitations", type: :request do
 
   let(:team) { teams(:acme) }
 
-  describe "POST /settings/teams/:team_slug/invitations" do
+  describe "POST /settings/teams/:team_id/invitations" do
     it "invites someone by email" do
       sign_in users(:one)
 
@@ -43,7 +43,7 @@ RSpec.describe "Settings::Teams::Invitations", type: :request do
     end
   end
 
-  describe "DELETE /settings/teams/:team_slug/invitations/:code" do
+  describe "DELETE /settings/teams/:team_id/invitations/:code" do
     it "cancels the invitation" do
       sign_in users(:one)
       invitation = team.invitations.create!(email: "new@example.com", role: "member", invited_by: users(:one))

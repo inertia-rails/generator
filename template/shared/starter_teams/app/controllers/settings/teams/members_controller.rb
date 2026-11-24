@@ -25,7 +25,7 @@ class Settings::Teams::MembersController < InertiaController
   private
 
   def set_team
-    @team = Current.user.teams.find_by!(slug: params[:team_slug])
+    @team = Current.user.teams.find(params[:team_id])
   end
 
   # The owner's membership cannot be changed or removed

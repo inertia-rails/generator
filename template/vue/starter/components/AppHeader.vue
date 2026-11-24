@@ -62,7 +62,7 @@ const activeItemStyles = computed(
 
 <% if use_teams %>
 const dashboardUrl = computed(
-  () => teamDashboard(page.props.current_team.slug).url,
+  () => teamDashboard(page.props.current_team.to_param).url,
 )
 
 const mainNavItems = computed<NavItem[]>(() => [

@@ -20,8 +20,11 @@ RSpec.describe User, type: :model do
   end
 
   it "rolls back sign up when the personal team is invalid" do
-    stub_const("Team::ReservedNames::ALL", Set["new-user-s-team"])
     user = described_class.new(name: "New User", email: "new@example.com", password: "Secret1*3*5*")
+
+    def user.create_team(**attributes)
+      super(**attributes, name: "")
+    end
 
     expect { expect(user.save).to be(false) }.not_to change { [ User.count, Team.count, Membership.count ] }
     expect(user.errors[:base]).to be_present

@@ -36,7 +36,7 @@ export default function CancelInvitationModal({
 
     router.visit(
       settingsTeamsInvitations.destroy({
-        teamSlug: team.slug,
+        teamId: team.to_param,
         code: invitation.code,
       }),
       {

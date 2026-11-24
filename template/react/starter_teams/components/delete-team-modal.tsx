@@ -44,7 +44,7 @@ export default function DeleteTeamModal({
       <DialogContent>
         <Form
           key={String(open)}
-          action={settingsTeams.destroy(team.slug)}
+          action={settingsTeams.destroy(team.to_param)}
           className="space-y-6"
           onSuccess={() => handleOpenChange(false)}
         >
