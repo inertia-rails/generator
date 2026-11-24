@@ -31,6 +31,14 @@ class UserTest < ActiveSupport::TestCase
     assert user.errors[:base].present?
   end
 
+  test "preserves the owner and their teams while another member belongs to one" do
+    assert_raises(ActiveRecord::RecordNotDestroyed) { users(:one).destroy! }
+
+    assert User.exists?(users(:one).id)
+    assert_equal users(:one), teams(:one_personal).reload.owner
+    assert_equal [ users(:one), users(:two) ].sort_by(&:id), teams(:acme).members.order(:id).to_a
+  end
+
   test "takes the teams nobody else belongs to with it when deleted" do
     users(:two).destroy!
 

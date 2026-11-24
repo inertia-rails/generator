@@ -53,7 +53,7 @@ export default function InviteMemberModal({
           key={String(open)}
           action={settingsTeamsInvitations.create(team.slug)}
           className="space-y-6"
-          onSuccess={() => onOpenChange(false)}
+          onSuccess={() => handleOpenChange(false)}
         >
           {({ errors, processing }) => (
             <>

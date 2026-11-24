@@ -65,7 +65,9 @@ export function AppSidebar() {
             <SidebarMenuButton size="lg" asChild>
               <Link
                 href={<%= use_teams ? "teamDashboard(current_team.slug)" : "dashboard.index()" %>}
+<% unless use_teams %>
                 prefetch
+<% end %>
               >
                 <AppLogo />
               </Link>

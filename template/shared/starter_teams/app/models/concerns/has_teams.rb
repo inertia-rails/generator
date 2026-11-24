@@ -4,10 +4,8 @@ module HasTeams
   extend ActiveSupport::Concern
 
   included do
-    # Teams nobody else belongs to go away with the account (see #shared_owned_teams
-    # for the rest). Declared before the memberships association, so it runs
-    # while they still exist.
-    before_destroy { owned_teams.each(&:destroy!) }
+    # Check ownership before the dependent memberships are destroyed.
+    before_destroy :destroy_owned_teams
 
     has_many :memberships, dependent: :destroy
     has_many :teams, through: :memberships
@@ -27,12 +25,6 @@ module HasTeams
 
   def personal_team
     owned_teams.find_by(personal: true)
-  end
-
-  # Owned teams that other people belong to. They block deleting the account:
-  # the owner has to delete them or remove their members first.
-  def shared_owned_teams
-    owned_teams.where(id: Membership.where.not(user_id: id).select(:team_id))
   end
 
   def create_team(name:, personal: false)
@@ -55,6 +47,18 @@ module HasTeams
   end
 
   private
+
+  def destroy_owned_teams
+    # Lock the teams before checking membership so a new member cannot join
+    # between the check and deletion.
+    teams_to_destroy = owned_teams.order(:id).lock.to_a
+    if Membership.where(team: teams_to_destroy).where.not(user_id: id).lock.exists?
+      errors.add(:base, "Delete the teams you own or remove their members before deleting your account")
+      throw :abort
+    end
+
+    teams_to_destroy.each(&:destroy!)
+  end
 
   def create_personal_team
     suffix = "'s Team"

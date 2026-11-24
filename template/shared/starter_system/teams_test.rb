@@ -23,6 +23,10 @@ class TeamsTest < ApplicationSystemTestCase
     click_on "Send invitation"
     assert_text "Pending invitations"
     assert_text "two@example.com"
+
+    assert_no_selector "#invitation_role", visible: :all
+    click_on "Invite member"
+    assert_selector "#invitation_role", text: /member/i
   end
 
   test "accepting an invitation from the dashboard" do

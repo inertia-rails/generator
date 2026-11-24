@@ -37,13 +37,12 @@ class UsersController < InertiaController
     user = Current.user
     if user.authenticate(params[:password_challenge] || "")
 <% if use_teams %>
-      if user.shared_owned_teams.exists?
-        return redirect_to settings_teams_path,
-          alert: "Delete the teams you own or remove their members before deleting your account"
+      unless user.destroy
+        return redirect_to settings_teams_path, alert: user.errors.full_messages.to_sentence
       end
-
-<% end %>
+<% else %>
       user.destroy!
+<% end %>
       Current.session = nil
       redirect_to root_path, notice: "Your account has been deleted", inertia: { clear_history: true }
     else

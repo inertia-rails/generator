@@ -34,6 +34,10 @@ RSpec.describe "Teams", type: :system do
     click_on "Send invitation"
     expect(page).to have_text("Pending invitations")
     expect(page).to have_text("two@example.com")
+
+    expect(page).to have_no_selector("#invitation_role", visible: :all)
+    click_on "Invite member"
+    expect(page).to have_selector("#invitation_role", text: /member/i)
   end
 
   it "accepts an invitation from the dashboard" do

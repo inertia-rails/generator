@@ -27,6 +27,14 @@ RSpec.describe User, type: :model do
     expect(user.errors[:base]).to be_present
   end
 
+  it "preserves the owner and their teams while another member belongs to one" do
+    expect { users(:one).destroy! }.to raise_error(ActiveRecord::RecordNotDestroyed)
+
+    expect(User.exists?(users(:one).id)).to be(true)
+    expect(teams(:one_personal).reload.owner).to eq(users(:one))
+    expect(teams(:acme).members).to contain_exactly(users(:one), users(:two))
+  end
+
   it "takes the teams nobody else belongs to with it when deleted" do
     users(:two).destroy!
 

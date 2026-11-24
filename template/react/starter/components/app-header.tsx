@@ -154,7 +154,9 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
           <Link
             href={<%= use_teams ? "teamDashboard(current_team.slug)" : "dashboard.index()" %>}
+<% unless use_teams %>
             prefetch
+<% end %>
             className="flex items-center space-x-2"
           >
             <AppLogo />
