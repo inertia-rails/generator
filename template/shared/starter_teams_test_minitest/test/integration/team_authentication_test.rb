@@ -14,6 +14,15 @@ class TeamAuthenticationTest < ActionDispatch::IntegrationTest
     assert_redirected_to bookmark
   end
 
+  test "sends a signed-in invitee from the email link to the dashboard" do
+    user = users(:two)
+    invitation = teams(:one_personal).invitations.create!(email: user.email, role: "member", invited_by: users(:one))
+    sign_in user
+
+    get sign_in_path(invitation: invitation.code)
+    assert_redirected_to dashboard_path
+  end
+
   test "keeps the invitation on the form after an authentication error" do
     [ sign_in_path, sign_up_path ].each do |path|
       form_url = "http://www.example.com#{path}?invitation=example"

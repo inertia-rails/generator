@@ -28,9 +28,9 @@ class SessionsController < InertiaController
   end
 
   def destroy
+    destination = @session == Current.session ? sign_in_path : settings_sessions_path
     @session.destroy!
-    Current.session = nil
-    redirect_to settings_sessions_path, notice: "That session has been logged out", inertia: { clear_history: true }
+    redirect_to destination, notice: "That session has been logged out", inertia: { clear_history: true }
   end
 
   private

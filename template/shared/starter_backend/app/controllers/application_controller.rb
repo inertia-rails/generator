@@ -30,6 +30,9 @@ class ApplicationController < ActionController::Base
 
   def require_no_authentication
     return unless perform_authentication
+<% if use_teams %>
+    return redirect_to dashboard_path if params[:invitation].present?
+<% end %>
 
     flash[:notice] = "You are already signed in"
     redirect_to root_path
