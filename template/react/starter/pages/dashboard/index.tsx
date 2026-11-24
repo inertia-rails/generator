@@ -5,7 +5,7 @@ import { useState } from "react"
 import PendingInvitationsModal from "@/components/pending-invitations-modal"
 import { PlaceholderPattern } from "@/components/placeholder-pattern"
 import AppLayout from "@/layouts/app-layout"
-import { teamDashboard } from "@/routes"
+import { dashboardRoute } from "@/lib/dashboard-route"
 import type { BreadcrumbItem, DashboardShow } from "@/types"
 
 export default function Dashboard({ pending_invitations }: DashboardShow) {
@@ -17,7 +17,7 @@ export default function Dashboard({ pending_invitations }: DashboardShow) {
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: "Dashboard",
-      href: teamDashboard(current_team.to_param).url,
+      href: dashboardRoute(current_team).url,
     },
   ]
 

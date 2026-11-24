@@ -5,7 +5,7 @@ import { computed } from "vue"
 
 import PendingInvitationsModal from "@/components/PendingInvitationsModal.vue"
 import AppLayout from "@/layouts/AppLayout.vue"
-import { teamDashboard } from "@/routes"
+import { dashboardRoute } from "@/lib/dashboard-route"
 import { type BreadcrumbItem, type DashboardShow } from "@/types"
 
 import PlaceholderPattern from "../../components/PlaceholderPattern.vue"
@@ -17,7 +17,7 @@ const page = usePage()
 const breadcrumbs = computed<BreadcrumbItem[]>(() => [
   {
     title: "Dashboard",
-    href: teamDashboard(page.props.current_team.to_param).url,
+    href: dashboardRoute(page.props.current_team).url,
   },
 ])
 <% else %>

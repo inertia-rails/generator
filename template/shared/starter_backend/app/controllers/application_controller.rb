@@ -18,7 +18,14 @@ class ApplicationController < ActionController::Base
   private
 
   def authenticate
+<% if use_teams %>
+    return if perform_authentication
+
+    session[:return_to_after_sign_in] = request.fullpath if request.get?
+    redirect_to sign_in_path
+<% else %>
     redirect_to sign_in_path unless perform_authentication
+<% end %>
   end
 
   def require_no_authentication

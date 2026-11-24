@@ -29,7 +29,7 @@ export function TeamSwitcher({ inHeader = false }: TeamSwitcherProps) {
   const teamUrl = (team: Team) => {
     const [, teamParam, ...path] = page.url.split("/")
 
-    return teamParam?.split("-")[0] === String(currentTeam.id)
+    return teamParam?.split("-")[0] === String(currentTeam?.id)
       ? `/${team.to_param}/${path.join("/")}`
       : teamDashboard(team.to_param).url
   }
@@ -66,7 +66,7 @@ export function TeamSwitcher({ inHeader = false }: TeamSwitcherProps) {
                   : "truncate font-semibold"
               }
             >
-              {currentTeam.name}
+              {currentTeam?.name ?? "Select team"}
             </span>
           </div>
           <ChevronsUpDown
@@ -101,7 +101,7 @@ export function TeamSwitcher({ inHeader = false }: TeamSwitcherProps) {
           >
             <Link href={teamUrl(team)}>
               {team.name}
-              {currentTeam.id === team.id && (
+              {currentTeam?.id === team.id && (
                 <Check
                   className={inHeader ? "ml-auto size-4" : "ml-auto h-4 w-4"}
                 />

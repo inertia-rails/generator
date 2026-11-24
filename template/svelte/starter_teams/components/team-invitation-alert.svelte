@@ -19,5 +19,8 @@
   <Info class="size-4" />
   <AlertDescription class="text-blue-900 dark:text-blue-100">
     {action} to join the "{invitation.team_name}" team.
+    {#if action === "Register"}
+      Verify your email after signing up, then open your dashboard to accept.
+    {/if}
   </AlertDescription>
 </Alert>

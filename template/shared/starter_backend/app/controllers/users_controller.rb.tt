@@ -5,7 +5,7 @@ class UsersController < InertiaController
   before_action :require_no_authentication, only: %i[new create]
 
   rate_limit to: 10, within: 3.minutes, only: :create,
-    with: -> { redirect_to sign_up_path, alert: "Too many attempts. Try again later" }
+    with: -> { <%= use_teams ? "redirect_back_or_to sign_up_path, allow_other_host: false" : "redirect_to sign_up_path" %>, alert: "Too many attempts. Try again later" }
 
   def new
 <% unless use_alba %>
@@ -29,7 +29,7 @@ class UsersController < InertiaController
       send_email_verification
       redirect_to dashboard_path, notice: "Welcome! You have signed up successfully"
     else
-      redirect_to sign_up_path, inertia: { errors: @user.errors }
+      <%= use_teams ? "redirect_back_or_to sign_up_path, allow_other_host: false" : "redirect_to sign_up_path" %>, inertia: { errors: @user.errors }
     end
   end
 

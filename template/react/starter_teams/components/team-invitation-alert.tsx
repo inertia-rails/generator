@@ -17,6 +17,8 @@ export default function TeamInvitationAlert({
       <InfoIcon />
       <AlertDescription className="text-blue-900 dark:text-blue-100">
         {action} to join the &quot;{invitation.team_name}&quot; team.
+        {action === "Register" &&
+          " Verify your email after signing up, then open your dashboard to accept."}
       </AlertDescription>
     </Alert>
   )

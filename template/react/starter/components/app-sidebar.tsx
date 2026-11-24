@@ -16,7 +16,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { <%= use_teams ? "teamDashboard" : "dashboard" %> } from "@/routes"
+<% if use_teams %>
+import { dashboardRoute } from "@/lib/dashboard-route"
+<% else %>
+import { dashboard } from "@/routes"
+<% end %>
 import type { NavItem } from "@/types"
 
 import AppLogo from "./app-logo"
@@ -51,7 +55,7 @@ export function AppSidebar() {
   const mainNavItems: NavItem[] = [
     {
       title: "Dashboard",
-      href: teamDashboard(current_team.to_param).url,
+      href: dashboardRoute(current_team).url,
       icon: LayoutGrid,
     },
   ]
@@ -64,7 +68,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link
-                href={<%= use_teams ? "teamDashboard(current_team.to_param)" : "dashboard.index()" %>}
+                href={<%= use_teams ? "dashboardRoute(current_team)" : "dashboard.index()" %>}
 <% unless use_teams %>
                 prefetch
 <% end %>

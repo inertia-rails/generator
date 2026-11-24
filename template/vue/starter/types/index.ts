@@ -25,7 +25,7 @@ export interface FlashData {
 export interface SharedProps {
   auth: Auth
 <% if use_teams %>
-  current_team: Team
+  current_team: Team | null
   teams: Team[]
 <% end %>
 }

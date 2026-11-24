@@ -48,7 +48,7 @@ const plusIconClass = computed(() => (props.inHeader ? "size-4" : "h-4 w-4"))
 const teamUrl = (team: Team) => {
   const [, teamParam, ...path] = page.url.split("/")
 
-  return teamParam?.split("-")[0] === String(currentTeam.value.id)
+  return teamParam?.split("-")[0] === String(currentTeam.value?.id)
     ? `/${team.to_param}/${path.join("/")}`
     : teamDashboard(team.to_param).url
 }
@@ -86,7 +86,7 @@ const teamUrl = (team: Team) => {
                 : 'truncate font-semibold'
             "
           >
-            {{ currentTeam.name }}
+            {{ currentTeam?.name ?? "Select team" }}
           </span>
         </div>
         <ChevronsUpDown
@@ -116,7 +116,7 @@ const teamUrl = (team: Team) => {
       >
         <Link :href="teamUrl(team)">
           {{ team.name }}
-          <Check v-if="currentTeam.id === team.id" :class="checkIconClass" />
+          <Check v-if="currentTeam?.id === team.id" :class="checkIconClass" />
         </Link>
       </DropdownMenuItem>
       <DropdownMenuSeparator />

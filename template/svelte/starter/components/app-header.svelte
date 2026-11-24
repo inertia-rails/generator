@@ -31,7 +31,11 @@
     TooltipTrigger,
   } from "@/components/ui/tooltip"
   import UserMenuContent from "@/components/user-menu-content.svelte"
-  import { <%= use_teams ? "teamDashboard" : "dashboard" %> } from "@/routes"
+<% if use_teams %>
+  import { dashboardRoute } from "@/lib/dashboard-route"
+<% else %>
+  import { dashboard } from "@/routes"
+<% end %>
   import { getInitials } from "@/runes/use-initials"
   import type { BreadcrumbItem, NavItem } from "@/types"
 
@@ -52,7 +56,7 @@
   )
 
 <% if use_teams %>
-  const dashboardUrl = $derived(teamDashboard(page.props.current_team.to_param).url)
+  const dashboardUrl = $derived(dashboardRoute(page.props.current_team).url)
 
   const mainNavItems = $derived<NavItem[]>([
     {

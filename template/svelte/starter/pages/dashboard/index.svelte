@@ -7,7 +7,7 @@
   import PendingInvitationsModal from "@/components/pending-invitations-modal.svelte"
   import PlaceholderPattern from "@/components/placeholder-pattern.svelte"
   import AppLayout from "@/layouts/app-layout.svelte"
-  import { teamDashboard } from "@/routes"
+  import { dashboardRoute } from "@/lib/dashboard-route"
   import { type BreadcrumbItem, type DashboardShow } from "@/types"
 
   let { pending_invitations }: DashboardShow = $props()
@@ -15,7 +15,7 @@
   const breadcrumbs = $derived<BreadcrumbItem[]>([
     {
       title: "Dashboard",
-      href: teamDashboard(page.props.current_team.to_param).url,
+      href: dashboardRoute(page.props.current_team).url,
     },
   ])
 <% else %>

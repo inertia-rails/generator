@@ -35,7 +35,11 @@ import {
 import { UserMenuContent } from "@/components/user-menu-content"
 import { useInitials } from "@/hooks/use-initials"
 import { cn } from "@/lib/utils"
-import { <%= use_teams ? "teamDashboard" : "dashboard" %> } from "@/routes"
+<% if use_teams %>
+import { dashboardRoute } from "@/lib/dashboard-route"
+<% else %>
+import { dashboard } from "@/routes"
+<% end %>
 import type { BreadcrumbItem, NavItem } from "@/types"
 
 import AppLogo from "./app-logo"
@@ -80,7 +84,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
   const mainNavItems: NavItem[] = [
     {
       title: "Dashboard",
-      href: teamDashboard(current_team.to_param).url,
+      href: dashboardRoute(current_team).url,
       icon: LayoutGrid,
     },
   ]
@@ -153,7 +157,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
           </div>
 
           <Link
-            href={<%= use_teams ? "teamDashboard(current_team.to_param)" : "dashboard.index()" %>}
+            href={<%= use_teams ? "dashboardRoute(current_team)" : "dashboard.index()" %>}
 <% unless use_teams %>
             prefetch
 <% end %>

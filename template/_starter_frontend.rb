@@ -20,6 +20,8 @@ if use_starter_kit
   file "#{js_destination_path}/lib/browser.ts", <%= code("shared/starter_lib/browser.ts") %>, force: true
   file "#{js_destination_path}/lib/storage.ts", <%= code("shared/starter_lib/storage.ts") %>, force: true
 
+  file "#{js_destination_path}/lib/dashboard-route.ts", <%= code("shared/starter_lib/dashboard-route.ts") %>, force: true if use_teams
+
   # ─── Framework-specific files (auto-generated from directory tree) ─
   case framework
   when "react"

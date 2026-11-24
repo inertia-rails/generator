@@ -37,7 +37,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { getInitials } from "@/composables/useInitials"
-import { <%= use_teams ? "teamDashboard" : "dashboard" %> } from "@/routes"
+<% if use_teams %>
+import { dashboardRoute } from "@/lib/dashboard-route"
+<% else %>
+import { dashboard } from "@/routes"
+<% end %>
 import type { BreadcrumbItem, NavItem } from "@/types"
 
 interface Props {
@@ -61,9 +65,7 @@ const activeItemStyles = computed(
 )
 
 <% if use_teams %>
-const dashboardUrl = computed(
-  () => teamDashboard(page.props.current_team.to_param).url,
-)
+const dashboardUrl = computed(() => dashboardRoute(page.props.current_team).url)
 
 const mainNavItems = computed<NavItem[]>(() => [
   {

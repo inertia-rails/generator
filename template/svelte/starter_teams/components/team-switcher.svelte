@@ -29,7 +29,7 @@
   const teamUrl = (team: Team) => {
     const [, teamParam, ...path] = page.url.split("/")
 
-    return teamParam?.split("-")[0] === String(currentTeam.id)
+    return teamParam?.split("-")[0] === String(currentTeam?.id)
       ? `/${team.to_param}/${path.join("/")}`
       : teamDashboard(team.to_param).url
   }
@@ -60,7 +60,7 @@
               ? "max-w-[120px] truncate font-medium"
               : "truncate font-semibold"}
           >
-            {currentTeam.name}
+            {currentTeam?.name ?? "Select team"}
           </span>
         </div>
         <ChevronsUpDown
@@ -88,7 +88,7 @@
         {#snippet child({ props })}
           <Link {...props} href={teamUrl(team)}>
             {team.name}
-            {#if currentTeam.id === team.id}
+            {#if currentTeam?.id === team.id}
               <Check class={inHeader ? "ml-auto size-4" : "ml-auto h-4 w-4"} />
             {/if}
           </Link>

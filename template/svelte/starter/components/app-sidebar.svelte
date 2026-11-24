@@ -17,13 +17,17 @@
     SidebarMenuButton,
     SidebarMenuItem,
   } from "@/components/ui/sidebar"
-  import { <%= use_teams ? "teamDashboard" : "dashboard" %> } from "@/routes"
+<% if use_teams %>
+  import { dashboardRoute } from "@/lib/dashboard-route"
+<% else %>
+  import { dashboard } from "@/routes"
+<% end %>
   import { type NavItem } from "@/types"
 
   import AppLogo from "./app-logo.svelte"
 
 <% if use_teams %>
-  const dashboardUrl = $derived(teamDashboard(page.props.current_team.to_param).url)
+  const dashboardUrl = $derived(dashboardRoute(page.props.current_team).url)
 
   const mainNavItems = $derived<NavItem[]>([
     {

@@ -13,7 +13,7 @@ class InertiaController < ApplicationController
 <% if use_teams %>
       },
       current_team: -> { Current.user&.current_team.as_json(only: %i[id name personal], methods: :to_param) },
-      teams: -> { Current.user&.teams_with_roles.as_json(only: %i[id name personal role], methods: :to_param) }
+      teams: -> { (Current.user&.teams_with_roles || []).as_json(only: %i[id name personal role], methods: :to_param) }
 <% else %>
       }
 <% end %>
