@@ -104,7 +104,6 @@ export default [
     ...importPlugin.flatConfigs.recommended,
     ...importPlugin.flatConfigs.react,
     rules: {
-      "react/prop-types": "off",
       "import/order": [
         "error",
         {
