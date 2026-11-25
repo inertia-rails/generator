@@ -15,8 +15,16 @@ Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new
 class E2eTest < Minitest::Test
   COMPILED_TEMPLATE = E2eHelpers.compiled_template_path
 
+  JS_ESLINT = {
+    "INERTIA_STARTER_KIT" => "0",
+    "INERTIA_TS" => "0",
+    "INERTIA_TAILWIND" => "0",
+    "INERTIA_ESLINT" => "1",
+    "INERTIA_SSR" => "0",
+    "INERTIA_SYSTEM_TESTS" => "0"
+  }.freeze
+
   # Test configurations: [name, env_vars]
-  # 5 configs covering the key code paths (~3 min total).
   # Extended configs for pre-release matrix runs are in matrix_test.rb.
   CONFIGS = {
     # ─── Starter Kit (all options forced on) ─────────────────────────
@@ -55,6 +63,9 @@ class E2eTest < Minitest::Test
       "INERTIA_TEAMS" => "1"
     },
     # ─── Foundation (individual options) ─────────────────────────────
+    "react_js_eslint" => JS_ESLINT.merge("INERTIA_FRAMEWORK" => "react"),
+    "vue_js_eslint" => JS_ESLINT.merge("INERTIA_FRAMEWORK" => "vue"),
+    "svelte_js_eslint" => JS_ESLINT.merge("INERTIA_FRAMEWORK" => "svelte"),
     "vue_minimal" => {
       "INERTIA_FRAMEWORK" => "vue",
       "INERTIA_STARTER_KIT" => "0",
@@ -138,6 +149,12 @@ class E2eTest < Minitest::Test
     assert File.exist?(File.join(app_path, "config/initializers/inertia_rails.rb")), "Missing inertia initializer"
     assert File.exist?(File.join(app_path, "Procfile.dev")), "Missing Procfile.dev"
     assert File.exist?(File.join(app_path, "bin/dev")), "Missing bin/dev"
+
+    if env["INERTIA_STARTER_KIT"] == "1" || env["INERTIA_ESLINT"] == "1"
+      %w[eslint.config.js .prettierrc .prettierignore].each do |file|
+        assert File.file?(File.join(app_path, file)), "Missing #{file}"
+      end
+    end
 
     gemfile = File.read(File.join(app_path, "Gemfile"))
     assert gemfile.include?("inertia_rails"), "Gemfile missing inertia_rails"
@@ -279,7 +296,6 @@ class E2eTest < Minitest::Test
       assert st.success?, "vite build --ssr failed for #{name}:\n#{tail("#{out}\n#{err}")}"
     end
 
-    # Run npm scripts only if they exist in package.json
     pkg = JSON.parse(File.read(File.join(app_path, "package.json")))
     scripts = pkg.fetch("scripts", {})
 
@@ -288,12 +304,10 @@ class E2eTest < Minitest::Test
       assert st.success?, "npm run check failed for #{name}:\n#{tail("#{out}\n#{err}")}"
     end
 
-    if scripts.key?("lint")
+    if is_starter_kit || env["INERTIA_ESLINT"] == "1"
       out, err, st = run_in_app(app_path, "npm run lint")
       assert st.success?, "npm run lint failed for #{name}:\n#{tail("#{out}\n#{err}")}"
-    end
 
-    if scripts.key?("format")
       out, err, st = run_in_app(app_path, "npm run format")
       assert st.success?, "npm run format failed for #{name}:\n#{tail("#{out}\n#{err}")}"
     end
