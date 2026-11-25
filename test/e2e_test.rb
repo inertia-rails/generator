@@ -15,6 +15,15 @@ Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new
 class E2eTest < Minitest::Test
   COMPILED_TEMPLATE = E2eHelpers.compiled_template_path
 
+  JS_ESLINT = {
+    "INERTIA_STARTER_KIT" => "0",
+    "INERTIA_TS" => "0",
+    "INERTIA_TAILWIND" => "0",
+    "INERTIA_ESLINT" => "1",
+    "INERTIA_SSR" => "0",
+    "INERTIA_SYSTEM_TESTS" => "0"
+  }.freeze
+
   # Test configurations: [name, env_vars]
   # Extended configs for pre-release matrix runs are in matrix_test.rb.
   CONFIGS = {
@@ -54,15 +63,9 @@ class E2eTest < Minitest::Test
       "INERTIA_TEAMS" => "1"
     },
     # ─── Foundation (individual options) ─────────────────────────────
-    "react_js_eslint" => {
-      "INERTIA_FRAMEWORK" => "react",
-      "INERTIA_STARTER_KIT" => "0",
-      "INERTIA_TS" => "0",
-      "INERTIA_TAILWIND" => "0",
-      "INERTIA_ESLINT" => "1",
-      "INERTIA_SSR" => "0",
-      "INERTIA_SYSTEM_TESTS" => "0"
-    },
+    "react_js_eslint" => JS_ESLINT.merge("INERTIA_FRAMEWORK" => "react"),
+    "vue_js_eslint" => JS_ESLINT.merge("INERTIA_FRAMEWORK" => "vue"),
+    "svelte_js_eslint" => JS_ESLINT.merge("INERTIA_FRAMEWORK" => "svelte"),
     "vue_minimal" => {
       "INERTIA_FRAMEWORK" => "vue",
       "INERTIA_STARTER_KIT" => "0",
