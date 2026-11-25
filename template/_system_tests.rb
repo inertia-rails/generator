@@ -63,8 +63,10 @@ if use_system_tests
   if use_starter_kit
     if test_framework == "rspec"
       file "spec/system/sessions_spec.rb", <%= code("shared/starter_system/sessions_spec.rb") %>
+      file "spec/system/teams_spec.rb", <%= code("shared/starter_system/teams_spec.rb") %> if use_teams
     else
       file "test/system/sessions_test.rb", <%= code("shared/starter_system/sessions_test.rb") %>
+      file "test/system/teams_test.rb", <%= code("shared/starter_system/teams_test.rb") %> if use_teams
     end
   end
 

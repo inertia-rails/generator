@@ -1,0 +1,19 @@
+one_personal:
+  team: one_personal
+  user: one
+  role: owner
+
+two_personal:
+  team: two_personal
+  user: two
+  role: owner
+
+acme_owner:
+  team: acme
+  user: one
+  role: owner
+
+acme_member:
+  team: acme
+  user: two
+  role: member

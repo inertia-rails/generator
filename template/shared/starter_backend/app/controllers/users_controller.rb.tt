@@ -5,11 +5,17 @@ class UsersController < InertiaController
   before_action :require_no_authentication, only: %i[new create]
 
   rate_limit to: 10, within: 3.minutes, only: :create,
-    with: -> { redirect_to sign_up_path, alert: "Too many attempts. Try again later" }
+    with: -> { <%= use_teams ? "redirect_back_or_to sign_up_path, allow_other_host: false" : "redirect_to sign_up_path" %>, alert: "Too many attempts. Try again later" }
 
   def new
 <% unless use_alba %>
     @user = User.new
+<% end %>
+<% if use_teams && use_alba %>
+    @team_invitation = team_invitation
+<% elsif use_teams %>
+
+    render inertia: { team_invitation: team_invitation }
 <% end %>
   end
 
@@ -23,14 +29,20 @@ class UsersController < InertiaController
       send_email_verification
       redirect_to dashboard_path, notice: "Welcome! You have signed up successfully"
     else
-      redirect_to sign_up_path, inertia: { errors: @user.errors }
+      <%= use_teams ? "redirect_back_or_to sign_up_path, allow_other_host: false" : "redirect_to sign_up_path" %>, inertia: { errors: @user.errors }
     end
   end
 
   def destroy
     user = Current.user
     if user.authenticate(params[:password_challenge] || "")
+<% if use_teams %>
+      unless user.destroy
+        return redirect_to settings_teams_path, alert: user.errors.full_messages.to_sentence
+      end
+<% else %>
       user.destroy!
+<% end %>
       Current.session = nil
       redirect_to root_path, notice: "Your account has been deleted", inertia: { clear_history: true }
     else

@@ -1,0 +1,11 @@
+one_personal:
+  name: Test User's Team
+  personal: true
+
+two_personal:
+  name: Another User's Team
+  personal: true
+
+# Owned by user one, user two is a member
+acme:
+  name: Acme

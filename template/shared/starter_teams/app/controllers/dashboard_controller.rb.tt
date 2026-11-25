@@ -1,0 +1,27 @@
+# frozen_string_literal: true
+
+class DashboardController < InertiaController
+  include TeamScoped
+
+  skip_before_action :set_team, only: :index
+
+  # GET /dashboard: a link that works for everyone (emails, redirects after sign in)
+  def index
+    redirect_to team_dashboard_path(Current.user.current_team)
+  end
+
+  # GET /:team_id/dashboard
+  def show
+<% if use_alba %>
+    @pending_invitations = Current.user.pending_invitations.includes(:team, :invited_by)
+
+    render_inertia "dashboard/index"
+<% else %>
+    render inertia: "dashboard/index", props: {
+      pending_invitations: Current.user.pending_invitations.includes(:team, :invited_by).map { |invitation|
+        { code: invitation.code, team_name: invitation.team.name, invited_by: invitation.invited_by.name }
+      }
+    }
+<% end %>
+  end
+end

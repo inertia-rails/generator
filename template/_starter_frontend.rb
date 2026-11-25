@@ -20,14 +20,28 @@ if use_starter_kit
   file "#{js_destination_path}/lib/browser.ts", <%= code("shared/starter_lib/browser.ts") %>, force: true
   file "#{js_destination_path}/lib/storage.ts", <%= code("shared/starter_lib/storage.ts") %>, force: true
 
+  file "#{js_destination_path}/lib/dashboard-route.ts", <%= code("shared/starter_lib/dashboard-route.ts") %>, force: true if use_teams
+
   # ─── Framework-specific files (auto-generated from directory tree) ─
   case framework
   when "react"
 <%= copy_dir("react/starter", "js_destination_path", force: true) %>
+
+    if use_teams
+<%= copy_dir("react/starter_teams", "js_destination_path", force: true) %>
+    end
   when "vue"
 <%= copy_dir("vue/starter", "js_destination_path", force: true) %>
+
+    if use_teams
+<%= copy_dir("vue/starter_teams", "js_destination_path", force: true) %>
+    end
   when "svelte"
 <%= copy_dir("svelte/starter", "js_destination_path", force: true) %>
+
+    if use_teams
+<%= copy_dir("svelte/starter_teams", "js_destination_path", force: true) %>
+    end
   end
 
   # ─── Dark-mode guard: set the theme class inline before assets load (avoids FOUC) ─

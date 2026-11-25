@@ -5,6 +5,7 @@ require_relative "../test_helper"
 class SystemTestsRspecStarterTest < GeneratorTestCase
   template <<~CODE
     use_system_tests = true
+    use_teams = false
     use_starter_kit = true
     test_framework = "rspec"
     gems_to_add = []
@@ -80,6 +81,7 @@ end
 class SystemTestsMinitestStarterTest < GeneratorTestCase
   template <<~CODE
     use_system_tests = true
+    use_teams = false
     use_starter_kit = true
     test_framework = "minitest"
     gems_to_add = []
@@ -125,6 +127,7 @@ end
 class SystemTestsSkipSystemTestFallbackTest < GeneratorTestCase
   template <<~'CODE'
     use_system_tests = true
+    use_teams = false
     use_starter_kit = false
     test_framework = "minitest"
     gems_to_add = []
@@ -155,6 +158,7 @@ end
 class SystemTestsDisabledTest < GeneratorTestCase
   template <<~'CODE'
     use_system_tests = false
+    use_teams = false
     use_starter_kit = true
     test_framework = "rspec"
     gems_to_add = []

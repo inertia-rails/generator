@@ -3,6 +3,9 @@ name: Sync starter kits
 # Regenerates each published starter kit from the current generator and opens a PR
 # on the kit repo. Runs on a version tag (deliberate, versioned) or on demand.
 #
+# Every kit has two branches: main, and teams (the same kit generated with
+# INERTIA_TEAMS=1). Each gets its own PR.
+#
 # Auth: a GitHub App (inertia-rails-generator-sync) installed on the three kit repos.
 # Its installation token is short-lived AND its PRs trigger the kit's CI — unlike the
 # default GITHUB_TOKEN, whose PRs do not. App id + private key live in this repo's
@@ -45,8 +48,11 @@ jobs:
       fail-fast: false
       matrix:
         kit: ${{ fromJSON(needs.select.outputs.kits) }}
+        branch: [main, teams]
     env:
       SYNC_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || format('manual-{0}', github.run_id) }}
+      # main keeps the historical branch name; teams gets a suffix so both PRs can coexist
+      SYNC_BRANCH: generator-sync/${{ github.ref_type == 'tag' && github.ref_name || format('manual-{0}', github.run_id) }}${{ matrix.branch != 'main' && format('-{0}', matrix.branch) || '' }}
     steps:
       - name: Checkout generator
         uses: actions/checkout@v4
@@ -64,6 +70,18 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.token.outputs.token }}
         run: git clone "https://x-access-token:${GH_TOKEN}@github.com/inertia-rails/${{ matrix.kit }}-starter-kit.git" kit
+
+      # The first teams sync starts the branch from main.
+      - name: Check out the ${{ matrix.branch }} branch
+        if: matrix.branch != 'main'
+        working-directory: kit
+        run: |
+          if git ls-remote --exit-code --heads origin "${{ matrix.branch }}" >/dev/null; then
+            git checkout "${{ matrix.branch }}"
+          else
+            git checkout -b "${{ matrix.branch }}"
+            git push -u origin "${{ matrix.branch }}"
+          fi
 
       # Generation and validation both run on the latest stable ruby ("ruby" in
       # setup-ruby): rails new stamps .ruby-version and the Dockerfile's
@@ -88,6 +106,7 @@ jobs:
       - name: Generate ${{ matrix.kit }} starter kit (rspec)
         env:
           INERTIA_TEST_FRAMEWORK: rspec
+          INERTIA_TEAMS: ${{ matrix.branch == 'teams' && '1' || '0' }}
         run: bundle exec rake starter:${{ matrix.kit }}
 
       - name: Apply generator output over the kit
@@ -102,7 +121,7 @@ jobs:
         run: |
           git config user.name "inertia-rails-generator-sync[bot]"
           git config user.email "inertia-rails-generator-sync[bot]@users.noreply.github.com"
-          git checkout -b "generator-sync/${SYNC_VERSION}"
+          git checkout -b "${SYNC_BRANCH}"
           git add -A
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -171,7 +190,7 @@ jobs:
         working-directory: kit
         env:
           GH_TOKEN: ${{ steps.token.outputs.token }}
-        run: git push -u origin "generator-sync/${SYNC_VERSION}"
+        run: git push -u origin "${SYNC_BRANCH}"
 
       - name: Open PR
         if: steps.sync.outputs.changed == 'true' || steps.deps.outputs.changed == 'true'
@@ -185,7 +204,7 @@ jobs:
             verdict="⚠️ **validation failed — opened as draft.** See the workflow run logs. Do not merge until green."
           fi
           body=$(cat <<EOF
-          Automated sync of \`${{ matrix.kit }}-starter-kit\` with generator \`${SYNC_VERSION}\`.
+          Automated sync of \`${{ matrix.kit }}-starter-kit\` (\`${{ matrix.branch }}\` branch) with generator \`${SYNC_VERSION}\`.
 
           Up to two commits: **Sync with generator** — regenerated from [inertia-rails/generator](https://github.com/inertia-rails/generator) and applied over this repo (\`bin/sync_apply.sh\`; includes shadcn \`ui/*\` and \`db/\`) — and **Update dependencies** (\`bundle update --all\` + \`npm update\`, run in this repo's own context so lockfile platforms are preserved). The keep-list (README, deploy.yml, per-repo credentials, repo meta) is untouched.
 
@@ -193,8 +212,8 @@ jobs:
           EOF
           )
           gh pr create \
-            --title "Sync with generator ${SYNC_VERSION}" \
+            --title "Sync with generator ${SYNC_VERSION}${{ matrix.branch != 'main' && format(' ({0})', matrix.branch) || '' }}" \
             --body "$body" \
-            --base main \
-            --head "generator-sync/${SYNC_VERSION}" \
+            --base "${{ matrix.branch }}" \
+            --head "${SYNC_BRANCH}" \
             $DRAFT

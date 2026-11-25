@@ -8,13 +8,9 @@
   import AppLayout from "@/layouts/app-layout.svelte"
   import SettingsLayout from "@/layouts/settings/layout.svelte"
   import { sessions as sessionsRoutes, settingsSessions } from "@/routes"
-  import type { BreadcrumbItem, Session } from "@/types"
+  import type { BreadcrumbItem, SettingsSessionsIndex } from "@/types"
 
-  interface Props {
-    sessions: Session[]
-  }
-
-  let { sessions }: Props = $props()
+  let { sessions }: SettingsSessionsIndex = $props()
 
   const breadcrumbs: BreadcrumbItem[] = [
     {

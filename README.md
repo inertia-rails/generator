@@ -83,8 +83,8 @@ to get you started.
 ### Starter Kit
 
 The Starter Kit forces TypeScript, Tailwind, shadcn/ui, ESLint, and Typelizer
-on, asks about SSR and browser system tests (default: yes for both), and adds
-full authentication:
+on, asks about SSR and browser system tests (default: yes for both), offers
+teams (default: no), and adds full authentication:
 
 ```sh
 INERTIA_FRAMEWORK=react INERTIA_STARTER_KIT=1 \
@@ -100,12 +100,39 @@ The Starter Kit includes:
 - Controller and mailer test suites (Minitest or RSpec)
 - Flake-free browser system tests with capybara-lockstep (optional)
 - Alba + Typelizer for typed serializers (optional)
+- Teams (optional, see below)
 
 Pre-built starter kit apps are also available as standalone repos:
 
 - [inertia-rails/react-starter-kit](https://github.com/inertia-rails/react-starter-kit)
 - [inertia-rails/vue-starter-kit](https://github.com/inertia-rails/vue-starter-kit)
 - [inertia-rails/svelte-starter-kit](https://github.com/inertia-rails/svelte-starter-kit)
+
+Each repo has a `teams` branch with the teams variant.
+
+#### Teams
+
+Answer yes to the teams prompt, or set `INERTIA_TEAMS=1`:
+
+```sh
+INERTIA_FRAMEWORK=react INERTIA_STARTER_KIT=1 INERTIA_TEAMS=1 \
+rails new myapp -m https://inertia-rails.dev
+```
+
+This adds:
+
+- A personal team for every user, plus any number of shared teams
+- Three roles, checked with [Action Policy](https://actionpolicy.evilmartians.io):
+  owner (everything), admin (rename, invite), member (view, leave)
+- Email invitations: the email links to the sign in page, and the invitation
+  is accepted or declined from the dashboard; expired ones are deleted daily
+- Deleting an account is refused while it owns a team other people belong to
+- A team switcher, and team settings under Settings → Teams
+- Team pages under `/:team_id/...`, so links and browser tabs keep pointing
+  at the same team; `/dashboard` redirects to the current team
+
+To put a page of your own under a team, add its route to the
+`scope ":team_id"` block and include `TeamScoped` in the controller.
 
 ## Features
 
@@ -193,6 +220,8 @@ bundle exec rake starter:vue     # tmp/vue-starter-kit/
 bundle exec rake starter:svelte  # tmp/svelte-starter-kit/
 bundle exec rake starter:all     # all three
 ```
+
+Set `INERTIA_TEAMS=1` to generate the teams variant.
 
 Run the detect + prompts phase without making changes (useful for debugging):
 

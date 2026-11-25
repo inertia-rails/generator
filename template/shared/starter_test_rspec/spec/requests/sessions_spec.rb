@@ -25,7 +25,7 @@ RSpec.describe "Sessions", type: :request do
         expect(response).to redirect_to(dashboard_path)
         expect(cookies[:session_token]).to be_present
 
-        get dashboard_path
+        get settings_profile_path
         expect(response).to have_http_status(:success)
       end
     end
@@ -43,12 +43,29 @@ RSpec.describe "Sessions", type: :request do
   end
 
   describe "DELETE /sessions/:id" do
-    it "destroys the session" do
-      sign_in users(:one)
-      session_record = users(:one).sessions.last
+    it "returns to the dashboard on the next sign-in after logging out" do
+      user = users(:one)
+      sign_in user
+      session_record = user.sessions.last
       delete session_path(session_record)
-      expect(response).to redirect_to(settings_sessions_path)
+      expect(response).to redirect_to(sign_in_path)
       expect(Session.exists?(session_record.id)).to be(false)
+
+      follow_redirect!
+      post sign_in_path, params: { email: user.email, password: "Secret1*3*5*" }
+      expect(response).to redirect_to(dashboard_path)
+    end
+
+    it "stays in session settings when revoking another session" do
+      user = users(:one)
+      other_session = user.sessions.create!
+      sign_in user
+
+      delete session_path(other_session)
+      expect(response).to redirect_to(settings_sessions_path)
+      expect(Session.exists?(other_session.id)).to be(false)
+      follow_redirect!
+      expect(response).to have_http_status(:success)
     end
   end
 end

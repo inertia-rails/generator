@@ -3,6 +3,6 @@
 module Identity
   class PasswordResetsEditSerializer < ApplicationSerializer
     attributes :email, :sid
-    typelize email: :string, sid: :string?
+    typelize email: :string, sid: :string
   end
 end

@@ -109,6 +109,15 @@ if use_starter_kit
     use_system_tests = true
     say "  System tests: yes (default)"
   end
+
+  # Teams: members, roles and invitations on top of the starter kit (opt-in)
+  if ENV.key?("INERTIA_TEAMS")
+    use_teams = ENV["INERTIA_TEAMS"] == "1"
+    say "  Teams: #{use_teams ? 'yes' : 'no'} (from env)"
+  elsif interactive
+    use_teams = ask("Add teams (members, roles, invitations)?", :green,
+      limited_to: %w[y n], default: "n") == "y"
+  end
 else
   # Foundation: individual option prompts
   use_typescript = prompt_bool.("INERTIA_TS", "TypeScript", "Use TypeScript?", detected: typescript_detected)
@@ -166,5 +175,6 @@ say "  Serializers:    #{use_alba ? 'yes' : 'no'}"
 say "  Test framework: #{test_framework}"
 say "  System tests:   #{use_system_tests ? 'yes' : 'no'}"
 say "  Authentication: #{auth_strategy}"
+say "  Teams:          #{use_teams ? 'yes' : 'no'}" if use_starter_kit
 say "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", :cyan
 say ""

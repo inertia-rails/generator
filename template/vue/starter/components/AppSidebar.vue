@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import { Link } from "@inertiajs/vue3"
+import { Link<%= ", usePage" if use_teams %> } from "@inertiajs/vue3"
 import { BookOpen, Folder, LayoutGrid } from "lucide-vue-next"
+<% if use_teams %>
+import { computed } from "vue"
+<% end %>
 
 import NavFooter from "@/components/NavFooter.vue"
 import NavMain from "@/components/NavMain.vue"
 import NavUser from "@/components/NavUser.vue"
+<% if use_teams %>
+import TeamSwitcher from "@/components/TeamSwitcher.vue"
+<% end %>
 import {
   Sidebar,
   SidebarContent,
@@ -14,11 +20,27 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+<% if use_teams %>
+import { dashboardRoute } from "@/lib/dashboard-route"
+<% else %>
 import { dashboard } from "@/routes"
+<% end %>
 import { type NavItem } from "@/types"
 
 import AppLogo from "./AppLogo.vue"
 
+<% if use_teams %>
+const page = usePage()
+const dashboardUrl = computed(() => dashboardRoute(page.props.current_team).url)
+
+const mainNavItems = computed<NavItem[]>(() => [
+  {
+    title: "Dashboard",
+    href: dashboardUrl.value,
+    icon: LayoutGrid,
+  },
+])
+<% else %>
 const mainNavItems: NavItem[] = [
   {
     title: "Dashboard",
@@ -26,6 +48,7 @@ const mainNavItems: NavItem[] = [
     icon: LayoutGrid,
   },
 ]
+<% end %>
 
 const footerNavItems: NavItem[] = [
   {
@@ -47,12 +70,19 @@ const footerNavItems: NavItem[] = [
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton size="lg" as-child>
-            <Link :href="dashboard.index()">
+            <Link :href="<%= use_teams ? "dashboardUrl" : "dashboard.index()" %>">
               <AppLogo />
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
+<% if use_teams %>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <TeamSwitcher />
+        </SidebarMenuItem>
+      </SidebarMenu>
+<% end %>
     </SidebarHeader>
 
     <SidebarContent>

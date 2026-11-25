@@ -1,0 +1,50 @@
+# frozen_string_literal: true
+
+require "test_helper"
+
+class UserTest < ActiveSupport::TestCase
+  fixtures :users, :teams, :memberships
+
+  test "gets a personal team on sign up" do
+    user = User.create!(name: "New User", email: "new@example.com", password: "Secret1*3*5*")
+
+    assert_equal "New User's Team", user.current_team.name
+    assert_predicate user.current_team, :personal?
+    assert_equal user, user.current_team.owner
+  end
+
+  test "fits a long name into the personal team name" do
+    user = User.create!(name: "A" * 249, email: "new@example.com", password: "Secret1*3*5*")
+
+    assert_equal "A" * 248 + "'s Team", user.current_team.name
+    assert_equal user, user.current_team.owner
+  end
+
+  test "rolls back sign up when the personal team is invalid" do
+    user = User.new(name: "New User", email: "new@example.com", password: "Secret1*3*5*")
+
+    def user.create_team(**attributes)
+      super(**attributes, name: "")
+    end
+
+    assert_no_difference [ "User.count", "Team.count", "Membership.count" ] do
+      assert_not user.save
+    end
+    assert user.errors[:base].present?
+  end
+
+  test "preserves the owner and their teams while another member belongs to one" do
+    assert_raises(ActiveRecord::RecordNotDestroyed) { users(:one).destroy! }
+
+    assert User.exists?(users(:one).id)
+    assert_equal users(:one), teams(:one_personal).reload.owner
+    assert_equal [ users(:one), users(:two) ].sort_by(&:id), teams(:acme).members.order(:id).to_a
+  end
+
+  test "takes the teams nobody else belongs to with it when deleted" do
+    users(:two).destroy!
+
+    assert_equal [ teams(:acme), teams(:one_personal) ], Team.order(:name).to_a
+    assert_equal [ users(:one) ], teams(:acme).members.to_a
+  end
+end

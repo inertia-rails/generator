@@ -6,9 +6,14 @@ class SessionsController < InertiaController
   before_action :set_session, only: :destroy
 
   rate_limit to: 10, within: 3.minutes, only: :create,
-    with: -> { redirect_to sign_in_path, alert: "Too many attempts. Try again later" }
+    with: -> { <%= use_teams ? "redirect_back_or_to sign_in_path, allow_other_host: false" : "redirect_to sign_in_path" %>, alert: "Too many attempts. Try again later" }
 
   def new
+<% if use_teams && use_alba %>
+    @team_invitation = team_invitation
+<% elsif use_teams %>
+    render inertia: { team_invitation: team_invitation }
+<% end %>
   end
 
   def create
@@ -16,16 +21,16 @@ class SessionsController < InertiaController
       @session = user.sessions.create!
       cookies.signed.permanent[:session_token] = { value: @session.id, httponly: true }
 
-      redirect_to dashboard_path, notice: "Signed in successfully"
+      redirect_to <%= use_teams ? "url_from(session.delete(:return_to_after_sign_in)) || dashboard_path" : "dashboard_path" %>, notice: "Signed in successfully"
     else
-      redirect_to sign_in_path, alert: "That email or password is incorrect"
+      <%= use_teams ? "redirect_back_or_to sign_in_path, allow_other_host: false" : "redirect_to sign_in_path" %>, alert: "That email or password is incorrect"
     end
   end
 
   def destroy
+    destination = @session == Current.session ? sign_in_path : settings_sessions_path
     @session.destroy!
-    Current.session = nil
-    redirect_to settings_sessions_path, notice: "That session has been logged out", inertia: { clear_history: true }
+    redirect_to destination, notice: "That session has been logged out", inertia: { clear_history: true }
   end
 
   private

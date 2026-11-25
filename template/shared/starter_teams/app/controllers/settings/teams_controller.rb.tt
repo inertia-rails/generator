@@ -1,0 +1,77 @@
+# frozen_string_literal: true
+
+class Settings::TeamsController < InertiaController
+  before_action :set_team, except: %i[index create]
+
+  def index
+  end
+
+  def create
+    team = Current.user.create_team(name: params[:name])
+
+    if team.persisted?
+      redirect_to settings_team_path(team), notice: "Team created"
+    else
+      redirect_back_or_to settings_teams_path, inertia: { errors: team.errors }
+    end
+  end
+
+  def show
+<% if use_alba %>
+    @members = @team.memberships.includes(:user).order(:created_at)
+    @invitations = @team.invitations.pending.order(:created_at)
+    @assignable_roles = Membership::ASSIGNABLE_ROLES
+    @permissions = team_permissions
+<% else %>
+    render inertia: {
+      team: @team.as_json(only: %i[id name personal], methods: :to_param),
+      members: @team.memberships.includes(:user).order(:created_at).map { |membership|
+        { id: membership.id, role: membership.role, **membership.user.slice(:name, :email) }
+      },
+      invitations: @team.invitations.pending.order(:created_at).as_json(only: %i[code email role created_at]),
+      assignable_roles: Membership::ASSIGNABLE_ROLES,
+      permissions: team_permissions
+    }
+<% end %>
+  end
+
+  def update
+    authorize! @team
+
+    if @team.update(name: params[:name])
+      redirect_to settings_team_path(@team), notice: "Team updated"
+    else
+      redirect_to settings_team_path(params[:id]), inertia: { errors: @team.errors }
+    end
+  end
+
+  def destroy
+    authorize! @team
+
+    if params[:name] == @team.name
+      @team.destroy!
+      redirect_to settings_teams_path, notice: "Team deleted"
+    else
+      redirect_to settings_team_path(@team), inertia: { errors: { name: [ "does not match the team name" ] } }
+    end
+  end
+
+  def leave
+    authorize! @team, to: :leave?
+
+    @team.memberships.find_by!(user: Current.user).destroy!
+
+    redirect_to settings_teams_path, notice: "You left #{@team.name}"
+  end
+
+  private
+
+  def set_team
+    @team = Current.user.teams.find(params[:id])
+  end
+
+  # What the current user can do with the team, so the page can hide the rest
+  def team_permissions
+    %i[update destroy invite update_member remove_member].index_with { |rule| allowed_to?(:"#{rule}?", @team) }
+  end
+end

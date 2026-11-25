@@ -14,13 +14,36 @@ Rails.application.routes.draw do
     resource :password_reset,     only: [ :new, :edit, :create, :update ]
   end
 
+<% if use_teams %>
+  resources :invitations, only: [ :destroy ], param: :code do
+    post :accept, on: :member
+  end
+
+<% end %>
   get :dashboard, to: "dashboard#index"
+<% if use_teams %>
+
+  # Pages that belong to a team carry it in the URL
+  scope ":team_id", as: :team do
+    get :dashboard, to: "dashboard#show"
+  end
+<% end %>
 
   namespace :settings do
     resource :profile, only: [ :show, :update ]
     resource :password, only: [ :show, :update ]
     resource :email, only: [ :show, :update ]
     resources :sessions, only: [ :index ]
+<% if use_teams %>
+    resources :teams, only: [ :index, :create, :show, :update, :destroy ] do
+      delete :leave, on: :member
+
+      scope module: :teams do
+        resources :members, only: [ :update, :destroy ]
+        resources :invitations, only: [ :create, :destroy ], param: :code
+      end
+    end
+<% end %>
     inertia :appearance
   end
 

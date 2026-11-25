@@ -10,6 +10,12 @@ class InertiaController < ApplicationController
   inertia_share auth: {
         user: -> { Current.user.as_json(only: %i[id name email verified created_at updated_at]) },
         session: -> { Current.session.as_json(only: %i[id]) }
+<% if use_teams %>
+      },
+      current_team: -> { Current.user&.current_team.as_json(only: %i[id name personal], methods: :to_param) },
+      teams: -> { (Current.user&.teams_with_roles || []).as_json(only: %i[id name personal role], methods: :to_param) }
+<% else %>
       }
+<% end %>
 <% end %>
 end
