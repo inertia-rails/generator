@@ -1,0 +1,41 @@
+body:has(.inertia-home) {
+  margin: 0;
+}
+
+.inertia-home {
+  display: grid;
+  grid-template-rows: 1fr auto 1fr;
+  place-items: center;
+  min-height: 100svh;
+  background: radial-gradient(
+    ellipse 110% 80% at 72% -28%,
+    white 99.8%,
+    #eaf0fb 100%
+  );
+  color: #202c46;
+  font:
+    1.125rem/1.35 system-ui,
+    sans-serif;
+  text-align: center;
+}
+
+.inertia-home a {
+  grid-row: 2;
+  width: clamp(86px, 20vw, 280px);
+  aspect-ratio: 1;
+  background: #2563eb
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cpath fill='white' d='M137.331 117.6H52.4l82.069 82.069L52.4 281.737h84.931L219.4 199.67Zm127.9 0H180.3l82.069 82.069-82.069 82.068h84.931L347.3 199.67Z'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  border-radius: 50%;
+  box-shadow: 0 8px 18px #1e3a8a24;
+}
+
+.inertia-home footer {
+  grid-row: 3;
+  align-self: end;
+  padding: 1.5rem 1rem;
+}
+
+.inertia-home p {
+  margin: 0;
+}

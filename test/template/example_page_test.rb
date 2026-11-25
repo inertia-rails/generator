@@ -25,7 +25,8 @@ class ExamplePageReactTest < GeneratorTestCase
 
   def test_creates_page_component
     run_generator do
-      assert_file "app/javascript/pages/home/index.tsx"
+      assert_file_contains "app/javascript/pages/home/index.tsx", "./home.css"
+      assert_file "app/javascript/pages/home/home.css"
     end
   end
 
@@ -51,7 +52,8 @@ class ExamplePageVueTest < GeneratorTestCase
 
   def test_creates_vue_page_component
     run_generator do
-      assert_file "app/javascript/pages/home/index.vue"
+      assert_file_contains "app/javascript/pages/home/index.vue", "./home.css"
+      assert_file "app/javascript/pages/home/home.css"
     end
   end
 end
@@ -71,7 +73,8 @@ class ExamplePageSvelteTest < GeneratorTestCase
 
   def test_creates_svelte_page_component
     run_generator do
-      assert_file "app/javascript/pages/home/index.svelte"
+      assert_file_contains "app/javascript/pages/home/index.svelte", "./home.css"
+      assert_file "app/javascript/pages/home/home.css"
     end
   end
 end
@@ -90,6 +93,7 @@ class ExamplePageSkippedWithStarterKitTest < GeneratorTestCase
 
   def test_skips_when_starter_kit
     run_generator do
+      refute_file "app/javascript/pages/home/home.css"
       refute_file "app/controllers/home_controller.rb"
       refute_file "app/javascript/pages/home/index.tsx"
     end

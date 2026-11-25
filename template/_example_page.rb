@@ -11,6 +11,8 @@ unless use_starter_kit
     route 'root "home#index"'
   end
 
+  file "#{js_destination_path}/pages/home/home.css", <%= code("shared/example/home.css") %>
+
   case framework
   when "react"
     file "#{js_destination_path}/pages/home/index.#{component_ext}", <%= code("react/home.tsx") %>
